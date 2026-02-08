@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node src/index.js examples/main.priyo",
     "format:check": "prettier . --check",
-    "format:fix": "prettier . --write"
+    "format:fix": "prettier . --write",
+    "release": "cliff-jumper"
   },
   "keywords": [
     "priyoscript",
