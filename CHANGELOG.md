@@ -19,4 +19,3 @@ All notable changes to this project will be documented in this file.
 ## Non Code changes
 
 - Add release script ([0f8f055](https://github.com/nsgpriyanshu/PriyoScript/commit/0f8f0553360b01e9519416027d9b444c6b483095))
-
