@@ -2,11 +2,18 @@
   "name": "priyoscript",
   "version": "1.0.0",
   "description": "An emotional, interpreted programming language.",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format:check": "prettier . --check",
+    "format:fix": "prettier . --write"
   },
-  "keywords": [],
+  "keywords": [
+    "priyoscript",
+    "complier",
+    "emotions",
+    "nodejs"
+  ],
   "author": "nsgpriyanshu",
   "license": "Apache-2.0",
   "repository": {
@@ -17,5 +24,14 @@
     "url": "https://github.com/nsgpriyanshu/priyoscript/issues"
   },
   "homepage": "https://nsgpriyanshu.github.io/priyoscript",
-  "type": "commonjs"
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@favware/cliff-jumper": "^6.0.0",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0",
+    "prettier": "3.8.1"
+  },
+  "dependencies": {
+    "nstypocolors": "^2.2.0"
+  }
 }
