@@ -1,7 +1,0 @@
-monalisa {
-    prakritiMood(a > b) {
-        priyo.tell("A is bigger")
-    } else {
-        priyo.tell("B is bigger")
-    }
-}

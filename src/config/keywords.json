@@ -4,6 +4,14 @@
   "input": "priyo.listen",
   "add": "priyo.add",
   "sub": "priyo.sub",
-  "if": "prakritiMood",
-  "loop": "prakritiLisaa"
+  "mul": "priyo.mul",
+  "div": "priyo.div",
+  "mod": "priyo.mod",
+  "if": "prakritiIf",
+  "elif": "prakritiElif",
+  "else": "prakritiElse",
+  "loop": "prakritiLoop",
+  "break": "prakritiStop",
+  "continue": "prakritiContinue",
+  "return": "priyo.return"
 }

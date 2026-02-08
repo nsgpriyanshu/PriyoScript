@@ -1,32 +1,34 @@
-const fs = require('fs')
-const parser = require('./core/parser')
-const interpreter = require('./core/interpreter')
-const logger = require('./utils/logger')
+const path = require('path');
+const fs = require('fs');
+const logger = require(path.join(__dirname, './utils/logger'));
+const parser = require(path.join(__dirname, './core/parser'));
+const interpreter = require(path.join(__dirname, './core/interpreter'));
 
 function runPriyoScript(filePath) {
   try {
-    const source = fs.readFileSync(filePath, 'utf-8')
-    const parsedProgram = parser.parse(source)
-    interpreter.execute(parsedProgram)
+    const absolutePath = path.resolve(process.cwd(), filePath);
+    if (!fs.existsSync(absolutePath)) {
+      logger.error('Priyo couldn’t find the file');
+      process.exit(1);
+    }
+
+    const source = fs.readFileSync(absolutePath, 'utf-8');
+    const program = parser.parse(source);
+    interpreter.execute(program);
+
   } catch (err) {
-    logger.error(err.message)
-    process.exit(1)
+    logger.error(err.message);
+    process.exit(1);
   }
 }
 
-/**
- * If this file is executed directly:
- *   node src/index.js examples/main.priyo
- */
 if (require.main === module) {
-  const filePath = process.argv[2]
-
+  const filePath = process.argv[2];
   if (!filePath) {
-    logger.error('Priyo feels lonely — no .priyo file provided')
-    process.exit(1)
+    logger.error('Priyo feels lonely — no .priyo file provided');
+    process.exit(1);
   }
-
-  runPriyoScript(filePath)
+  runPriyoScript(filePath);
 }
 
-module.exports = runPriyoScript
+module.exports = runPriyoScript;
