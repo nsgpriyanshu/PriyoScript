@@ -1,7 +1,7 @@
 {
   "name": "priyoscript",
   "version": "1.0.0",
-  "description": "An emotional, interpreted programming language built with Node.js.",
+  "description": "An emotional, interpreted programming language.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
