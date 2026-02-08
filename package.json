@@ -1,0 +1,21 @@
+{
+  "name": "priyoscript",
+  "version": "1.0.0",
+  "description": "An emotional, interpreted programming language built with Node.js.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "nsgpriyanshu",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nsgpriyanshu/priyoscript"
+  },
+  "bugs": {
+    "url": "https://github.com/nsgpriyanshu/priyoscript/issues"
+  },
+  "homepage": "https://nsgpriyanshu.github.io/priyoscript",
+  "type": "commonjs"
+}
