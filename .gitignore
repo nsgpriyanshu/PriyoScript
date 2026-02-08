@@ -1,5 +1,30 @@
-# Node.js
+# dependencies
 node_modules/
 
-# Environment variables
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# editor configs
+.vscode/
+.idea/
+
+# environment variables
 .env
+.env.*
+
+# coverage / reports
+coverage/
+
+# build outputs (future-proofing)
+dist/
+build/
+
+# temporary files
+*.tmp
+*.swp

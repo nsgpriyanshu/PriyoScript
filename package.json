@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "An emotional, interpreted programming language.",
   "type": "commonjs",
-  "main": "index.js",
+  "bin": {
+    "monalisa": "./bin/monalisa"
+  },
+  "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js examples/main.priyo",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write"
   },

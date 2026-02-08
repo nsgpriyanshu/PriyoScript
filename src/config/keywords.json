@@ -1,0 +1,9 @@
+{
+  "entry": "monalisa",
+  "print": "priyo.tell",
+  "input": "priyo.listen",
+  "add": "priyo.add",
+  "sub": "priyo.sub",
+  "if": "prakritiMood",
+  "loop": "prakritiLisaa"
+}
