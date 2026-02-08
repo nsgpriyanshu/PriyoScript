@@ -30,6 +30,7 @@
   },
   "homepage": "https://nsgpriyanshu.github.io/priyoscript",
   "devDependencies": {
+    "@commitlint/config-angular": "^20.4.1",
     "@eslint/js": "^10.0.1",
     "@favware/cliff-jumper": "^6.0.0",
     "eslint": "^10.0.0",

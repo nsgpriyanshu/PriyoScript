@@ -14,6 +14,13 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 - Node.js  
 - JavaScript
 
+## Example Code
+```js
+monalisa {
+  priyo.tell("Hello Priyanshu!")
+}
+```
+
 ## Developer
 
 <div>
