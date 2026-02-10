@@ -13,11 +13,7 @@ module.exports = {
   error(msg) {
     logError(`Error: ${msg}`)
   },
-  output(msg, color = 'build') {
-    if (color === 'build') {
-      logBuild(msg)
-    } else {
-      process.stdout.write(String(msg) + '\n')
-    }
+  build(msg) {
+    logBuild(msg)
   },
 }

@@ -1,33 +1,40 @@
-const path = require('path')
 const fs = require('fs')
-const logger = require(path.join(__dirname, './utils/logger'))
-const parser = require(path.join(__dirname, './core/parser'))
-const interpreter = require(path.join(__dirname, './core/interpreter'))
+const path = require('path')
+const { Lexer } = require('../src/lexer/lexer')
+const { Parser } = require('../src/parser/parser')
+const logger = require('../src/utils/logger')
 
-function runPriyoScript(filePath) {
-  try {
-    const absolutePath = path.resolve(process.cwd(), filePath)
-    if (!fs.existsSync(absolutePath)) {
-      logger.error('Priyo couldn’t find the file')
-      process.exit(1)
-    }
+// ---- CLI ARG HANDLING ----
+const filePath = process.argv[2]
 
-    const source = fs.readFileSync(absolutePath, 'utf-8')
-    const program = parser.parse(source)
-    interpreter.execute(program)
-  } catch (err) {
-    logger.error(err.message)
-    process.exit(1)
-  }
+if (!filePath) {
+  logger.error('No input file provided.')
+  logger.info('Usage: node src/index.js <file.priyo>')
+  process.exit(1)
 }
 
-if (require.main === module) {
-  const filePath = process.argv[2]
-  if (!filePath) {
-    logger.error('Priyo feels lonely — no .priyo file provided')
-    process.exit(1)
-  }
-  runPriyoScript(filePath)
+const absolutePath = path.resolve(process.cwd(), filePath)
+
+if (!fs.existsSync(absolutePath)) {
+  logger.error(`File not found: ${absolutePath}`)
+  process.exit(1)
 }
 
-module.exports = runPriyoScript
+// ---- READ SOURCE ----
+const source = fs.readFileSync(absolutePath, 'utf8')
+logger.info(`Running ${filePath}`)
+
+// ---- LEXING ----
+const lexer = new Lexer(source)
+const parser = new Parser(lexer)
+
+// ---- PARSE ----
+const program = parser.parseProgram()
+
+if (parser.errors.length > 0) {
+  logger.error('Parsing failed:')
+  parser.errors.forEach(err => logger.error(err))
+  process.exit(1)
+}
+
+logger.success('Parsing completed successfully')

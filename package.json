@@ -8,7 +8,7 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js examples/main.priyo",
+    "start": "node src/index.js examples/hello.priyo",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
     "release": "cliff-jumper"

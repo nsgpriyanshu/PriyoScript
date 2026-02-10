@@ -3,18 +3,22 @@
 An emotional, interpreted programming language built with Node.js.
 
 ## Introduction
-PriyoScript is a simple, interpreted programming language created for fun and as a personal project inspired by a friend.  
 
-It combines elements of Python, JavaScript, C, and Java in its syntax and code structure.  
+PriyoScript is a simple, interpreted programming language created for fun and as a personal project inspired by a friend.
+
+It combines elements of Python, JavaScript, C, and Java in its syntax and code structure.
 
 ## Motivation
-PriyoScript was inspired during a Data Analysis and Algorithm lab session. While struggling with C code, my friend suggested creating a programming language with personalized keywords. I decided to bring that idea to life using my knowledge and coding experience.  
+
+PriyoScript was inspired during a Data Analysis and Algorithm lab session. While struggling with C code, my friend suggested creating a programming language with personalized keywords. I decided to bring that idea to life using my knowledge and coding experience.
 
 ## Technology Used
-- Node.js  
+
+- Node.js
 - JavaScript
 
 ## Example Code
+
 ```js
 monalisa {
   priyo.tell("Hello Priyanshu!")
