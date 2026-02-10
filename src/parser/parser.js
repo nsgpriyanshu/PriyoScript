@@ -1,3 +1,4 @@
+const { Lexer } = require('../lexer/lexer')
 const { TokenType } = require('../lexer/token')
 const { Program, EntryBlock, ExpressionStatement } = require('./ast')
 
@@ -7,10 +8,8 @@ class Parser {
 
     this.curToken = null
     this.peekToken = null
-
     this.errors = []
 
-    // Read two tokens to initialize
     this.nextToken()
     this.nextToken()
   }
@@ -40,45 +39,32 @@ class Parser {
 
   parseProgram() {
     const entry = this.parseEntryBlock()
-
     if (!entry) return null
-
     return new Program(entry)
   }
 
   // monalisa { ... }
   parseEntryBlock() {
-  if (this.curToken.type !== TokenType.ENTRY) {
-    this.error('Program must start with "monalisa"')
-    return null
+    if (this.curToken.type !== TokenType.ENTRY) {
+      this.error('Program must start with "monalisa"')
+      return null
+    }
+
+    this.nextToken()
+
+    if (!this.expect(TokenType.LBRACE)) return null
+
+    const body = []
+
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      const stmt = this.parseStatement()
+      if (stmt) body.push(stmt)
+    }
+
+    if (!this.expect(TokenType.RBRACE)) return null
+
+    return new EntryBlock(body)
   }
-
-  this.nextToken()
-
-  if (!this.expect(TokenType.LBRACE)) {
-    this.error('Expected "{" after monalisa')
-    return null
-  }
-
-  const body = []
-
-  while (
-    this.curToken.type !== TokenType.RBRACE &&
-    this.curToken.type !== TokenType.EOF
-  ) {
-    const stmt = this.parseStatement()
-    if (stmt) body.push(stmt)
-    // ❌ DO NOT call nextToken() here
-  }
-
-  if (!this.expect(TokenType.RBRACE)) {
-    this.error('Expected "}" to close monalisa block')
-    return null
-  }
-
-  return new EntryBlock(body)
-}
-
 
   parseStatement() {
     if (this.curToken.type === TokenType.PRINT) {
@@ -86,28 +72,41 @@ class Parser {
     }
 
     this.error(`Unexpected token ${this.curToken.type}`)
+    this.nextToken()
     return null
   }
 
   parsePrintCall() {
-  const token = this.curToken // priyoTell
+    const token = this.curToken // priyoTell
+    this.nextToken()
 
-  this.nextToken()
-  if (!this.expect(TokenType.LPAREN)) return null
+    if (!this.expect(TokenType.LPAREN)) return null
 
-  // current token is now STRING
-  const value = this.curToken.literal
-  if (!this.expect(TokenType.STRING)) return null
+    const value = this.curToken.literal
+    if (!this.expect(TokenType.STRING)) return null
 
-  if (!this.expect(TokenType.RPAREN)) return null
+    if (!this.expect(TokenType.RPAREN)) return null
 
-  return new ExpressionStatement({
-    type: 'CallExpression',
-    callee: token.literal,
-    arguments: [
-      { type: 'StringLiteral', value }
-    ],
-  })
+    return new ExpressionStatement({
+      type: 'CallExpression',
+      callee: token.literal,
+      arguments: [{ type: 'StringLiteral', value }],
+    })
+  }
 }
+
+/* 🔥 THIS IS THE MISSING PIECE */
+function parse(source) {
+  const lexer = new Lexer(source)
+  const parser = new Parser(lexer)
+  const program = parser.parseProgram()
+
+  if (parser.errors.length > 0) {
+    parser.errors.forEach(e => console.error(e))
+    process.exit(1)
+  }
+
+  return program
 }
-module.exports = { Parser }
+
+module.exports = { Parser, parse }

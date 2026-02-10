@@ -4,7 +4,7 @@
   "description": "An emotional, interpreted programming language.",
   "type": "commonjs",
   "bin": {
-    "monalisa": "./bin/monalisa"
+    "monalisa": "./bin/monalisa.js"
   },
   "main": "src/index.js",
   "scripts": {
