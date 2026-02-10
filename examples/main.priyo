@@ -1,16 +1,3 @@
 monalisa{
-    priyo.tell("Enter your name: ")
-    name = priyo.listen()
-    priyo.tell("Hello " + name + "!")
-    a = 5
-    b = 10
-    prakritiIf(a > b){
-        priyo.tell("A is bigger")
-    }
-    prakritiElif(a < b){
-        priyo.tell("B is bigger")
-    }
-    prakritiElse{
-        priyo.tell("A equals B")
-    }
+    priyoTell("HI")
 }
