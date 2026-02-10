@@ -11,11 +11,10 @@ class EntryBlock {
     this.body = body
   }
 }
-
 class ExpressionStatement {
-  constructor(token) {
+  constructor(expression) {
     this.type = 'ExpressionStatement'
-    this.token = token
+    this.expression = expression
   }
 }
 
