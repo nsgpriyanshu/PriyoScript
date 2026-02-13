@@ -39,6 +39,12 @@ class VM {
           break
         }
 
+        case OpCode.SET_VARIABLE: {
+          const value = this.stack.pop()
+          this.environment.set(instr.operand, value)
+          break
+        }
+
         case OpCode.CALL_BUILTIN: {
           const { name, argc } = instr.operand
           const fn = this.builtins[name]

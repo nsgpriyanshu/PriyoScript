@@ -26,6 +26,10 @@ class Compiler {
         this.compileVariableDeclaration(stmt)
         return
 
+      case 'AssignmentStatement':
+        this.compileAssignmentStatement(stmt)
+        return
+
       case 'ExpressionStatement':
         this.compileExpression(stmt.expression)
         this.emit(OpCode.POP)
@@ -42,6 +46,11 @@ class Compiler {
       name: stmt.identifier.name,
       kind: stmt.kind,
     })
+  }
+
+  compileAssignmentStatement(stmt) {
+    this.compileExpression(stmt.value)
+    this.emit(OpCode.SET_VARIABLE, stmt.identifier.name)
   }
 
   compileExpression(expr) {

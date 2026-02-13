@@ -5,6 +5,7 @@ const {
   EntryBlock,
   ExpressionStatement,
   VariableDeclaration,
+  AssignmentStatement,
   Identifier,
   StringLiteral,
   NumberLiteral,
@@ -93,6 +94,12 @@ class Parser {
       return this.parseVariableDeclaration()
     }
 
+    // Assignment statement:
+    // variableName = expression
+    if (this.curToken.type === TokenType.IDENTIFIER && this.peekToken.type === TokenType.ASSIGN) {
+      return this.parseAssignmentStatement()
+    }
+
     return this.parseExpressionStatement()
   }
 
@@ -132,6 +139,21 @@ class Parser {
     }
 
     return new VariableDeclaration(kind, identifier, initializer)
+  }
+
+  parseAssignmentStatement() {
+    const identifier = new Identifier(this.curToken.literal)
+    this.nextToken()
+
+    if (!this.consumeCurrent(TokenType.ASSIGN)) return null
+
+    const value = this.parseExpression()
+    if (!value) {
+      this.error('Assignment value is required')
+      return null
+    }
+
+    return new AssignmentStatement(identifier, value)
   }
 
   parseExpressionStatement() {

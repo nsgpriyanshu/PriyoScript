@@ -27,6 +27,14 @@ class VariableDeclaration {
   }
 }
 
+class AssignmentStatement {
+  constructor(identifier, value) {
+    this.type = 'AssignmentStatement'
+    this.identifier = identifier
+    this.value = value
+  }
+}
+
 class Identifier {
   constructor(name) {
     this.type = 'Identifier'
@@ -75,6 +83,7 @@ module.exports = {
   EntryBlock,
   ExpressionStatement,
   VariableDeclaration,
+  AssignmentStatement,
   Identifier,
   StringLiteral,
   NumberLiteral,
