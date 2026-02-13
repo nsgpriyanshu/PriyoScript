@@ -3,7 +3,7 @@ const path = require('path')
 const { parse } = require('../parser/parser')
 const { Compiler } = require('../compiler/compiler')
 const { VM } = require('../vm/vm')
-const { success } = require('../utils/logger')
+const { build } = require('../utils/logger')
 
 async function runSource(source, options = {}) {
   const { printBytecode = false } = options
@@ -13,7 +13,7 @@ async function runSource(source, options = {}) {
   const bytecode = compiler.compile(ast)
 
   if (printBytecode) {
-    success('Compilation successful')
+    build('Compilation Successful')
     console.log(bytecode)
   }
 

@@ -11,7 +11,7 @@ module.exports = {
     logWarn(msg)
   },
   error(msg) {
-    logError(`Error: ${msg}`)
+    logError(`(Error) - ${msg}`)
   },
   build(msg) {
     logBuild(msg)

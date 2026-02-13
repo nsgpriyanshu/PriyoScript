@@ -12,7 +12,7 @@ class Environment {
         existing.value = value
         return
       }
-      throw new Error(`Variable "${name}" is already declared`)
+      throw new Error(`Hey: Variable "${name}" is already declared`)
     }
 
     this.bindings.set(name, { value, kind })
@@ -21,7 +21,7 @@ class Environment {
   get(name) {
     const binding = this.bindings.get(name)
     if (!binding) {
-      throw new Error(`Undefined variable "${name}"`)
+      throw new Error(`Hmmm: Undefined variable "${name}"`)
     }
     return binding.value
   }
@@ -29,10 +29,10 @@ class Environment {
   set(name, value) {
     const binding = this.bindings.get(name)
     if (!binding) {
-      throw new Error(`Undefined variable "${name}"`)
+      throw new Error(`Ohh Ohh: Undefined variable "${name}"`)
     }
     if (binding.kind === 'const') {
-      throw new Error(`Cannot reassign constant "${name}"`)
+      throw new Error(`How disrespectfull: Cannot reassign constant "${name}"`)
     }
     binding.value = value
   }
