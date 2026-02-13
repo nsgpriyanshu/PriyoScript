@@ -1,16 +1,16 @@
-const fs = require('fs')
-const { parse } = require('./parser/parser')
-const { Compiler } = require('./compiler/compiler')
-const { VM } = require('./vm/vm')
+const { runFile } = require('./core/run')
 
-const source = fs.readFileSync(process.argv[2], 'utf8')
+async function main() {
+  const filename = process.argv[2]
 
-const ast = parse(source)
-const compiler = new Compiler()
-const bytecode = compiler.compile(ast)
+  if (!filename) {
+    throw new Error('Usage: node src/index.js <file.priyo>')
+  }
 
-console.log('Compilation successful')
-console.log(bytecode)
+  await runFile(filename, { printBytecode: true })
+}
 
-const vm = new VM(bytecode)
-vm.run()
+main().catch(err => {
+  console.error(err.message)
+  process.exit(1)
+})

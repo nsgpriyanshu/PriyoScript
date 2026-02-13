@@ -14,6 +14,13 @@ class Lexer {
     this.readChar()
   }
 
+  peekChar() {
+    if (this.readPosition >= this.input.length) {
+      return '\0'
+    }
+    return this.input[this.readPosition]
+  }
+
   readChar() {
     if (this.readPosition >= this.input.length) {
       this.ch = '\0'
@@ -38,9 +45,15 @@ class Lexer {
     }
   }
 
+  skipLineComment() {
+    while (this.ch !== '\n' && this.ch !== '\0') {
+      this.readChar()
+    }
+  }
+
   readIdentifier() {
     const start = this.position
-    while (/[a-zA-Z_]/.test(this.ch)) {
+    while (/[a-zA-Z0-9_]/.test(this.ch)) {
       this.readChar()
     }
     return this.input.slice(start, this.position)
@@ -68,7 +81,14 @@ class Lexer {
   }
 
   nextToken() {
-    this.skipWhitespace()
+    while (true) {
+      this.skipWhitespace()
+      if (this.ch === '/' && this.peekChar() === '/') {
+        this.skipLineComment()
+        continue
+      }
+      break
+    }
 
     const token = {
       type: TokenType.ILLEGAL,
@@ -117,6 +137,14 @@ class Lexer {
       case '}':
         token.type = TokenType.RBRACE
         token.literal = '}'
+        break
+      case ',':
+        token.type = TokenType.COMMA
+        token.literal = ','
+        break
+      case ';':
+        token.type = TokenType.SEMICOLON
+        token.literal = ';'
         break
       case '"':
         token.type = TokenType.STRING

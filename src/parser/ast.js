@@ -18,8 +18,67 @@ class ExpressionStatement {
   }
 }
 
+class VariableDeclaration {
+  constructor(kind, identifier, initializer) {
+    this.type = 'VariableDeclaration'
+    this.kind = kind
+    this.identifier = identifier
+    this.initializer = initializer
+  }
+}
+
+class Identifier {
+  constructor(name) {
+    this.type = 'Identifier'
+    this.name = name
+  }
+}
+
+class StringLiteral {
+  constructor(value) {
+    this.type = 'StringLiteral'
+    this.value = value
+  }
+}
+
+class NumberLiteral {
+  constructor(value) {
+    this.type = 'NumberLiteral'
+    this.value = value
+  }
+}
+
+class BooleanLiteral {
+  constructor(value) {
+    this.type = 'BooleanLiteral'
+    this.value = value
+  }
+}
+
+class NullLiteral {
+  constructor() {
+    this.type = 'NullLiteral'
+    this.value = null
+  }
+}
+
+class CallExpression {
+  constructor(callee, args) {
+    this.type = 'CallExpression'
+    this.callee = callee
+    this.arguments = args
+  }
+}
+
 module.exports = {
   Program,
   EntryBlock,
   ExpressionStatement,
+  VariableDeclaration,
+  Identifier,
+  StringLiteral,
+  NumberLiteral,
+  BooleanLiteral,
+  NullLiteral,
+  CallExpression,
 }

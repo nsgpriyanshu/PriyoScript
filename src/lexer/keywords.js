@@ -1,66 +1,88 @@
 const { TokenType } = require('./token')
+const keywordConfig = require('../config/keywords.json')
 
-const KEYWORDS = {
-  // Entry
-  monalisa: TokenType.ENTRY,
+const CONCEPT_TO_TOKEN = {
+  entry: TokenType.ENTRY,
 
-  // IO
-  priyoTell: TokenType.PRINT,
-  priyoListen: TokenType.INPUT,
+  print: TokenType.PRINT,
+  input: TokenType.INPUT,
 
-  // Math
-  priyoAdd: TokenType.PLUS,
-  priyoSub: TokenType.MINUS,
-  priyoMul: TokenType.STAR,
-  priyoDiv: TokenType.SLASH,
-  priyoMod: TokenType.PERCENT,
+  add: TokenType.PLUS,
+  sub: TokenType.MINUS,
+  mul: TokenType.STAR,
+  div: TokenType.SLASH,
+  mod: TokenType.PERCENT,
 
-  // Literals
-  priyoTrue: TokenType.TRUE,
-  priyoFalse: TokenType.FALSE,
-  priyoEmpty: TokenType.NULL,
+  true: TokenType.TRUE,
+  false: TokenType.FALSE,
+  null: TokenType.NULL,
+  this: TokenType.THIS,
+  super: TokenType.SUPER,
 
-  // Variables
-  priyoKeep: TokenType.VAR,
-  priyoChange: TokenType.LET,
-  priyoPromise: TokenType.CONST,
+  var: TokenType.VAR,
+  let: TokenType.LET,
+  const: TokenType.CONST,
 
-  // Object / meta
-  priyoSelf: TokenType.THIS,
-  priyoParent: TokenType.SUPER,
-  priyoCreate: TokenType.NEW,
-  priyoForget: TokenType.DELETE,
-  priyoWhatIs: TokenType.TYPEOF,
+  new: TokenType.NEW,
+  delete: TokenType.DELETE,
+  typeof: TokenType.TYPEOF,
+  instanceof: TokenType.INSTANCEOF,
+  void: TokenType.VOID,
+  return: TokenType.RETURN,
 
-  // Control flow
-  prakritiIf: TokenType.IF,
-  prakritiElseIf: TokenType.ELIF,
-  prakritiElse: TokenType.ELSE,
+  if: TokenType.IF,
+  elif: TokenType.ELIF,
+  else: TokenType.ELSE,
 
-  prakritiRepeat: TokenType.LOOP,
-  prakritiCount: TokenType.FOR,
-  prakritiAsLongAs: TokenType.WHILE,
-  prakritiDo: TokenType.DO,
+  switch: TokenType.SWITCH,
+  case: TokenType.CASE,
+  default: TokenType.DEFAULT,
 
-  prakritiStop: TokenType.BREAK,
-  prakritiGoOn: TokenType.CONTINUE,
+  loop: TokenType.LOOP,
+  for: TokenType.FOR,
+  while: TokenType.WHILE,
+  do: TokenType.DO,
 
-  prakritiTry: TokenType.TRY,
-  prakritiCatch: TokenType.CATCH,
-  prakritiAtEnd: TokenType.FINALLY,
-  prakritiThrow: TokenType.THROW,
+  break: TokenType.BREAK,
+  continue: TokenType.CONTINUE,
 
-  // Functions & classes
-  lisaaTask: TokenType.FUNCTION,
-  lisaaFamily: TokenType.CLASS,
-  lisaaInherit: TokenType.EXTENDS,
-  lisaaStable: TokenType.STATIC,
+  try: TokenType.TRY,
+  catch: TokenType.CATCH,
+  finally: TokenType.FINALLY,
+  throw: TokenType.THROW,
+  debugger: TokenType.DEBUGGER,
 
-  // Modules
-  lisaaBring: TokenType.IMPORT,
-  lisaaShare: TokenType.EXPORT,
-  lisaaBox: TokenType.PACKAGE,
+  function: TokenType.FUNCTION,
+  class: TokenType.CLASS,
+  extends: TokenType.EXTENDS,
+  static: TokenType.STATIC,
+
+  import: TokenType.IMPORT,
+  export: TokenType.EXPORT,
+  package: TokenType.PACKAGE,
+
+  async: TokenType.ASYNC,
+  await: TokenType.AWAIT,
+  yield: TokenType.YIELD,
+
+  in: TokenType.IN,
+  with: TokenType.WITH,
+
+  implements: TokenType.IMPLEMENTS,
+  interface: TokenType.INTERFACE,
+  private: TokenType.PRIVATE,
+  protected: TokenType.PROTECTED,
+  public: TokenType.PUBLIC,
+  enum: TokenType.ENUM,
 }
+
+const KEYWORDS = Object.entries(keywordConfig).reduce((acc, [concept, lexeme]) => {
+  const tokenType = CONCEPT_TO_TOKEN[concept]
+  if (tokenType) {
+    acc[lexeme] = tokenType
+  }
+  return acc
+}, {})
 
 module.exports = {
   KEYWORDS,

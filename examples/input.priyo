@@ -1,0 +1,6 @@
+monalisa {
+  priyoPromise name = priyoListen("Enter your name: ")
+  priyoTell(name)
+  priyoPromise bestFriend = priyoListen("Who is your best friend? ")
+  priyoTell(bestFriend)
+}

@@ -1,0 +1,10 @@
+monalisa {
+  priyoKeep name = "Priyanshu"
+  priyoChange mood = "Good"
+  priyoPromise title = "PriyoScript"
+
+  priyoTell("Hello")
+  priyoTell(name)
+  priyoTell(mood)
+  priyoTell(title)
+}

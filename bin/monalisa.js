@@ -2,9 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const { parse } = require('../src/parser/parser')
-const { Compiler } = require('../src/compiler/compiler')
-const { VM } = require('../src/vm/vm')
+const { runFile } = require('../src/core/run')
 const { error, warn } = require('../src/utils/logger')
 
 const filename = process.argv[2]
@@ -21,16 +19,13 @@ if (!fs.existsSync(fullPath)) {
   process.exit(1)
 }
 
-const source = fs.readFileSync(fullPath, 'utf8')
-
-try {
-  const ast = parse(source)
-  const compiler = new Compiler()
-  const bytecode = compiler.compile(ast)
-
-  const vm = new VM(bytecode)
-  vm.run()
-} catch (err) {
-  console.error(err.message)
-  process.exit(1)
+async function main() {
+  try {
+    await runFile(fullPath)
+  } catch (err) {
+    error(err.message)
+    process.exit(1)
+  }
 }
+
+main()

@@ -21,7 +21,11 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 
 ```js
 monalisa {
-  priyo.tell("Hello Priyanshu!")
+  priyoKeep name = "Priyanshu"
+  priyoPromise reply = priyoListen("Say something: ")
+  priyoTell("Hello")
+  priyoTell(name)
+  priyoTell(reply)
 }
 ```
 

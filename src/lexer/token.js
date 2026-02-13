@@ -37,6 +37,9 @@ const TokenType = {
   IF: 'IF',
   ELIF: 'ELIF',
   ELSE: 'ELSE',
+  SWITCH: 'SWITCH',
+  CASE: 'CASE',
+  DEFAULT: 'DEFAULT',
   FOR: 'FOR',
   WHILE: 'WHILE',
   DO: 'DO',
@@ -44,12 +47,26 @@ const TokenType = {
   BREAK: 'BREAK',
   CONTINUE: 'CONTINUE',
   RETURN: 'RETURN',
+  TRY: 'TRY',
+  CATCH: 'CATCH',
+  FINALLY: 'FINALLY',
+  THROW: 'THROW',
+  DEBUGGER: 'DEBUGGER',
+  ASYNC: 'ASYNC',
+  AWAIT: 'AWAIT',
+  YIELD: 'YIELD',
 
   // Functions / classes
   FUNCTION: 'FUNCTION',
   CLASS: 'CLASS',
   EXTENDS: 'EXTENDS',
   STATIC: 'STATIC',
+  IMPLEMENTS: 'IMPLEMENTS',
+  INTERFACE: 'INTERFACE',
+  PRIVATE: 'PRIVATE',
+  PROTECTED: 'PROTECTED',
+  PUBLIC: 'PUBLIC',
+  ENUM: 'ENUM',
 
   // Meta
   THIS: 'THIS',
@@ -57,6 +74,15 @@ const TokenType = {
   NEW: 'NEW',
   DELETE: 'DELETE',
   TYPEOF: 'TYPEOF',
+  INSTANCEOF: 'INSTANCEOF',
+  VOID: 'VOID',
+  IN: 'IN',
+  WITH: 'WITH',
+
+  // Modules
+  IMPORT: 'IMPORT',
+  EXPORT: 'EXPORT',
+  PACKAGE: 'PACKAGE',
 
   // Delimiters
   COMMA: 'COMMA',

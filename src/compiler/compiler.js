@@ -1,4 +1,5 @@
 const { OpCode } = require('./opcodes')
+const { error } = require('../utils/logger')
 
 class Compiler {
   constructor() {
@@ -7,9 +8,8 @@ class Compiler {
 
   compile(program) {
     const entry = program.entry
-
     if (!entry || entry.type !== 'EntryBlock') {
-      throw new Error('Invalid AST: missing entry block')
+      throw new error('Invalid AST: missing entry block')
     }
 
     for (const stmt of entry.body) {
@@ -21,19 +21,49 @@ class Compiler {
   }
 
   compileStatement(stmt) {
-    if (stmt.type === 'ExpressionStatement') {
-      this.compileExpression(stmt.expression)
-      return
-    }
+    switch (stmt.type) {
+      case 'VariableDeclaration':
+        this.compileVariableDeclaration(stmt)
+        return
 
-    throw new Error(`Unknown statement type: ${stmt.type}`)
+      case 'ExpressionStatement':
+        this.compileExpression(stmt.expression)
+        this.emit(OpCode.POP)
+        return
+
+      default:
+        throw new error(`Unknown statement type: ${stmt.type}`)
+    }
   }
 
-  // 🔥 THIS WAS MISSING
+  compileVariableDeclaration(stmt) {
+    this.compileExpression(stmt.initializer)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: stmt.identifier.name,
+      kind: stmt.kind,
+    })
+  }
+
   compileExpression(expr) {
     switch (expr.type) {
       case 'StringLiteral':
         this.emit(OpCode.PUSH_STRING, expr.value)
+        break
+
+      case 'NumberLiteral':
+        this.emit(OpCode.PUSH_NUMBER, expr.value)
+        break
+
+      case 'BooleanLiteral':
+        this.emit(OpCode.PUSH_BOOLEAN, expr.value)
+        break
+
+      case 'NullLiteral':
+        this.emit(OpCode.PUSH_NULL)
+        break
+
+      case 'Identifier':
+        this.emit(OpCode.LOAD_VARIABLE, expr.name)
         break
 
       case 'CallExpression':
@@ -41,7 +71,7 @@ class Compiler {
         break
 
       default:
-        throw new Error(`Unknown expression type: ${expr.type}`)
+        throw new error(`Unknown expression type: ${expr.type}`)
     }
   }
 
@@ -51,7 +81,7 @@ class Compiler {
     }
 
     this.emit(OpCode.CALL_BUILTIN, {
-      name: expr.callee,
+      name: expr.callee.name,
       argc: expr.arguments.length,
     })
   }
