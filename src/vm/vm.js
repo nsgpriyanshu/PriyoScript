@@ -141,6 +141,19 @@ class VM {
           break
         }
 
+        case OpCode.JUMP_IF_FALSE: {
+          const condition = this.stack.pop()
+          if (!this.isTruthy(condition)) {
+            this.ip = instr.operand
+            continue
+          }
+          break
+        }
+
+        case OpCode.JUMP:
+          this.ip = instr.operand
+          continue
+
         case OpCode.CALL_BUILTIN: {
           const { name, argc } = instr.operand
           const fn = this.builtins[name]
@@ -174,6 +187,10 @@ class VM {
     if (typeof left !== 'number' || typeof right !== 'number') {
       throw new Error(`${operation} expects numeric operands`)
     }
+  }
+
+  isTruthy(value) {
+    return !!value
   }
 }
 

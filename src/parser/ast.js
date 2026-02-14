@@ -35,6 +35,21 @@ class AssignmentStatement {
   }
 }
 
+class BlockStatement {
+  constructor(statements) {
+    this.type = 'BlockStatement'
+    this.statements = statements
+  }
+}
+
+class IfStatement {
+  constructor(branches, alternate) {
+    this.type = 'IfStatement'
+    this.branches = branches
+    this.alternate = alternate
+  }
+}
+
 class BinaryExpression {
   constructor(left, operator, right) {
     this.type = 'BinaryExpression'
@@ -93,6 +108,8 @@ module.exports = {
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
+  BlockStatement,
+  IfStatement,
   BinaryExpression,
   Identifier,
   StringLiteral,

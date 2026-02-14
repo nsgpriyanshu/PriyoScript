@@ -6,6 +6,8 @@ const {
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
+  BlockStatement,
+  IfStatement,
   BinaryExpression,
   Identifier,
   StringLiteral,
@@ -87,6 +89,10 @@ class Parser {
   }
 
   parseStatement() {
+    if (this.curToken.type === TokenType.IF) {
+      return this.parseIfStatement()
+    }
+
     if (
       this.curToken.type === TokenType.VAR ||
       this.curToken.type === TokenType.LET ||
@@ -140,6 +146,78 @@ class Parser {
     }
 
     return new VariableDeclaration(kind, identifier, initializer)
+  }
+
+  // Conditional logic:
+  // prakritiIf (condition) { ... }
+  // prakritiElseIf (condition) { ... }
+  // prakritiElse { ... }
+  parseIfStatement() {
+    const branches = []
+
+    ifBranch: while (true) {
+      if (
+        this.curToken.type !== TokenType.IF &&
+        this.curToken.type !== TokenType.ELIF
+      ) {
+        break ifBranch
+      }
+
+      this.nextToken()
+      if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after if/elif keyword')) {
+        return null
+      }
+
+      const condition = this.parseExpression()
+      if (!condition) {
+        this.error('Expected condition expression in if/elif')
+        return null
+      }
+
+      if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after condition')) {
+        return null
+      }
+
+      const body = this.parseBlockStatement()
+      if (!body) {
+        return null
+      }
+
+      branches.push({ condition, body })
+
+      if (this.curToken.type !== TokenType.ELIF) {
+        break
+      }
+    }
+
+    let alternate = null
+    if (this.curToken.type === TokenType.ELSE) {
+      this.nextToken()
+      alternate = this.parseBlockStatement()
+      if (!alternate) return null
+    }
+
+    return new IfStatement(branches, alternate)
+  }
+
+  parseBlockStatement() {
+    if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" to start block')) {
+      return null
+    }
+
+    const statements = []
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      const stmt = this.parseStatement()
+      if (stmt) {
+        statements.push(stmt)
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" to close block')) {
+      return null
+    }
+
+    return new BlockStatement(statements)
   }
 
   parseAssignmentStatement() {

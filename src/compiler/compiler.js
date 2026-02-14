@@ -30,6 +30,10 @@ class Compiler {
         this.compileAssignmentStatement(stmt)
         return
 
+      case 'IfStatement':
+        this.compileIfStatement(stmt)
+        return
+
       case 'ExpressionStatement':
         this.compileExpression(stmt.expression)
         this.emit(OpCode.POP)
@@ -51,6 +55,35 @@ class Compiler {
   compileAssignmentStatement(stmt) {
     this.compileExpression(stmt.value)
     this.emit(OpCode.SET_VARIABLE, stmt.identifier.name)
+  }
+
+  compileBlockStatement(block) {
+    for (const stmt of block.statements) {
+      this.compileStatement(stmt)
+    }
+  }
+
+  compileIfStatement(stmt) {
+    const endJumps = []
+
+    for (const branch of stmt.branches) {
+      this.compileExpression(branch.condition)
+      const jumpIfFalseIndex = this.emit(OpCode.JUMP_IF_FALSE, -1)
+
+      this.compileBlockStatement(branch.body)
+      endJumps.push(this.emit(OpCode.JUMP, -1))
+
+      this.patchJump(jumpIfFalseIndex, this.instructions.length)
+    }
+
+    if (stmt.alternate) {
+      this.compileBlockStatement(stmt.alternate)
+    }
+
+    const endAddress = this.instructions.length
+    for (const jumpIndex of endJumps) {
+      this.patchJump(jumpIndex, endAddress)
+    }
   }
 
   compileExpression(expr) {
@@ -127,6 +160,11 @@ class Compiler {
 
   emit(op, operand = null) {
     this.instructions.push({ op, operand })
+    return this.instructions.length - 1
+  }
+
+  patchJump(index, target) {
+    this.instructions[index].operand = target
   }
 }
 

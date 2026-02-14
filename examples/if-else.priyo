@@ -1,0 +1,13 @@
+monalisa {
+  priyoChange score = 72
+
+  prakritiIf (score >= 90) {
+    priyoTell("Grade: A")
+  } prakritiElseIf (score >= 75) {
+    priyoTell("Grade: B")
+  } prakritiElseIf (score >= 60) {
+    priyoTell("Grade: C")
+  } prakritiElse {
+    priyoTell("Grade: D")
+  }
+}
