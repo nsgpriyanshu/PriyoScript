@@ -1,0 +1,14 @@
+monalisa {
+  priyoChange score = 84
+  priyoChange attendance = 92
+
+  priyoTell(score >= 80 && attendance >= 90)
+  priyoTell(score < 50 || attendance >= 90)
+  priyoTell(!(score < 80))
+
+  prakritiIf (score >= 80 && attendance >= 90) {
+    priyoTell("Eligible for honors")
+  } prakritiElse {
+    priyoTell("Not eligible")
+  }
+}

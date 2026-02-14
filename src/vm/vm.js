@@ -141,6 +141,26 @@ class VM {
           break
         }
 
+        case OpCode.AND: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.stack.push(this.isTruthy(left) && this.isTruthy(right))
+          break
+        }
+
+        case OpCode.OR: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.stack.push(this.isTruthy(left) || this.isTruthy(right))
+          break
+        }
+
+        case OpCode.NOT: {
+          const value = this.stack.pop()
+          this.stack.push(!this.isTruthy(value))
+          break
+        }
+
         case OpCode.JUMP_IF_FALSE: {
           const condition = this.stack.pop()
           if (!this.isTruthy(condition)) {

@@ -116,6 +116,10 @@ class Compiler {
         this.compileBinaryExpression(expr)
         break
 
+      case 'UnaryExpression':
+        this.compileUnaryExpression(expr)
+        break
+
       default:
         throw new Error(`Unknown expression type: ${expr.type}`)
     }
@@ -148,11 +152,28 @@ class Compiler {
       [TokenType.LTE]: OpCode.LTE,
       [TokenType.GT]: OpCode.GT,
       [TokenType.GTE]: OpCode.GTE,
+      [TokenType.AND]: OpCode.AND,
+      [TokenType.OR]: OpCode.OR,
     }
 
     const opcode = opcodeByOperator[expr.operator]
     if (opcode == null) {
       throw new Error(`Unsupported binary operator: ${expr.operator}`)
+    }
+
+    this.emit(opcode)
+  }
+
+  compileUnaryExpression(expr) {
+    this.compileExpression(expr.argument)
+
+    const opcodeByOperator = {
+      [TokenType.BANG]: OpCode.NOT,
+    }
+
+    const opcode = opcodeByOperator[expr.operator]
+    if (opcode == null) {
+      throw new Error(`Unsupported unary operator: ${expr.operator}`)
     }
 
     this.emit(opcode)

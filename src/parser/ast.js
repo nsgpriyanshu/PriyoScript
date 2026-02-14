@@ -59,6 +59,14 @@ class BinaryExpression {
   }
 }
 
+class UnaryExpression {
+  constructor(operator, argument) {
+    this.type = 'UnaryExpression'
+    this.operator = operator
+    this.argument = argument
+  }
+}
+
 class Identifier {
   constructor(name) {
     this.type = 'Identifier'
@@ -111,6 +119,7 @@ module.exports = {
   BlockStatement,
   IfStatement,
   BinaryExpression,
+  UnaryExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,

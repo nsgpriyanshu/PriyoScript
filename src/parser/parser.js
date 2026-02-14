@@ -9,6 +9,7 @@ const {
   BlockStatement,
   IfStatement,
   BinaryExpression,
+  UnaryExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
@@ -156,10 +157,7 @@ class Parser {
     const branches = []
 
     ifBranch: while (true) {
-      if (
-        this.curToken.type !== TokenType.IF &&
-        this.curToken.type !== TokenType.ELIF
-      ) {
+      if (this.curToken.type !== TokenType.IF && this.curToken.type !== TokenType.ELIF) {
         break ifBranch
       }
 
@@ -250,7 +248,7 @@ class Parser {
   // 1 + 2 * 3 -> 1 + (2 * 3)
   // 1 + 2 > 2 -> (1 + 2) > 2
   parseExpression(minPrecedence = 0) {
-    let left = this.parsePrimary()
+    let left = this.parseUnary()
     if (!left) return null
 
     while (true) {
@@ -270,6 +268,21 @@ class Parser {
     }
 
     return left
+  }
+
+  parseUnary() {
+    if (this.curToken.type === TokenType.BANG) {
+      const operator = this.curToken.type
+      this.nextToken()
+      const argument = this.parseUnary()
+      if (!argument) {
+        this.error('Expected expression after unary operator')
+        return null
+      }
+      return new UnaryExpression(operator, argument)
+    }
+
+    return this.parsePrimary()
   }
 
   parsePrimary() {
@@ -338,14 +351,18 @@ class Parser {
       case TokenType.LTE:
       case TokenType.GT:
       case TokenType.GTE:
+        return 2
+      case TokenType.AND:
+        return 1
+      case TokenType.OR:
         return 0
       case TokenType.PLUS:
       case TokenType.MINUS:
-        return 1
+        return 3
       case TokenType.STAR:
       case TokenType.SLASH:
       case TokenType.PERCENT:
-        return 2
+        return 4
       default:
         return -1
     }

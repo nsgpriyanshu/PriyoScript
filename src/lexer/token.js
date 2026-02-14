@@ -27,6 +27,9 @@ const TokenType = {
 
   // Operators
   ASSIGN: 'ASSIGN',
+  BANG: 'BANG',
+  AND: 'AND',
+  OR: 'OR',
   EQ: 'EQ',
   NOT_EQ: 'NOT_EQ',
   LT: 'LT',

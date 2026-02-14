@@ -114,8 +114,28 @@ class Lexer {
           token.type = TokenType.NOT_EQ
           token.literal = '!='
         } else {
-          token.type = TokenType.ILLEGAL
+          token.type = TokenType.BANG
           token.literal = '!'
+        }
+        break
+      case '&':
+        if (this.peekChar() === '&') {
+          this.readChar()
+          token.type = TokenType.AND
+          token.literal = '&&'
+        } else {
+          token.type = TokenType.ILLEGAL
+          token.literal = '&'
+        }
+        break
+      case '|':
+        if (this.peekChar() === '|') {
+          this.readChar()
+          token.type = TokenType.OR
+          token.literal = '||'
+        } else {
+          token.type = TokenType.ILLEGAL
+          token.literal = '|'
         }
         break
       case '<':

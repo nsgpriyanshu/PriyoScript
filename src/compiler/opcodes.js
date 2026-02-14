@@ -17,11 +17,14 @@ const OpCode = {
   LTE: 15,
   GT: 16,
   GTE: 17,
-  JUMP_IF_FALSE: 18,
-  JUMP: 19,
-  CALL_BUILTIN: 20,
-  POP: 21,
-  HALT: 22,
+  AND: 18,
+  OR: 19,
+  NOT: 20,
+  JUMP_IF_FALSE: 21,
+  JUMP: 22,
+  CALL_BUILTIN: 23,
+  POP: 24,
+  HALT: 25,
 }
 
 module.exports = { OpCode }
