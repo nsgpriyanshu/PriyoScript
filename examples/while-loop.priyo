@@ -1,0 +1,8 @@
+monalisa {
+  priyoChange count = 0
+
+  prakritiAsLongAs (count < 3) {
+    priyoTell("while: " + count)
+    count = count + 1
+  }
+}

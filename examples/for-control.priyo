@@ -1,0 +1,13 @@
+monalisa {
+  prakritiCount (priyoChange i = 0; i < 8; i = i + 1) {
+    prakritiIf (i == 1) {
+      prakritiGoOn
+    }
+
+    prakritiIf (i == 5) {
+      prakritiStop
+    }
+
+    priyoTell("for-value: " + i)
+  }
+}

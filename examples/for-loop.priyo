@@ -1,0 +1,5 @@
+monalisa {
+  prakritiCount (priyoChange i = 0; i < 3; i = i + 1) {
+    priyoTell("for: " + i)
+  }
+}

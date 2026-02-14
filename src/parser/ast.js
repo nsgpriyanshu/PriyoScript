@@ -50,6 +50,36 @@ class IfStatement {
   }
 }
 
+class WhileStatement {
+  constructor(condition, body) {
+    this.type = 'WhileStatement'
+    this.condition = condition
+    this.body = body
+  }
+}
+
+class ForStatement {
+  constructor(initializer, condition, update, body) {
+    this.type = 'ForStatement'
+    this.initializer = initializer
+    this.condition = condition
+    this.update = update
+    this.body = body
+  }
+}
+
+class BreakStatement {
+  constructor() {
+    this.type = 'BreakStatement'
+  }
+}
+
+class ContinueStatement {
+  constructor() {
+    this.type = 'ContinueStatement'
+  }
+}
+
 class BinaryExpression {
   constructor(left, operator, right) {
     this.type = 'BinaryExpression'
@@ -118,6 +148,10 @@ module.exports = {
   AssignmentStatement,
   BlockStatement,
   IfStatement,
+  WhileStatement,
+  ForStatement,
+  BreakStatement,
+  ContinueStatement,
   BinaryExpression,
   UnaryExpression,
   Identifier,

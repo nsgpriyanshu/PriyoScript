@@ -8,6 +8,10 @@ const {
   AssignmentStatement,
   BlockStatement,
   IfStatement,
+  WhileStatement,
+  ForStatement,
+  BreakStatement,
+  ContinueStatement,
   BinaryExpression,
   UnaryExpression,
   Identifier,
@@ -24,6 +28,7 @@ class Parser {
     this.curToken = null
     this.peekToken = null
     this.errors = []
+    this.loopDepth = 0
 
     this.nextToken()
     this.nextToken()
@@ -90,6 +95,22 @@ class Parser {
   }
 
   parseStatement() {
+    if (this.curToken.type === TokenType.BREAK) {
+      return this.parseBreakStatement()
+    }
+
+    if (this.curToken.type === TokenType.CONTINUE) {
+      return this.parseContinueStatement()
+    }
+
+    if (this.curToken.type === TokenType.WHILE) {
+      return this.parseWhileStatement()
+    }
+
+    if (this.curToken.type === TokenType.FOR) {
+      return this.parseForStatement()
+    }
+
     if (this.curToken.type === TokenType.IF) {
       return this.parseIfStatement()
     }
@@ -196,6 +217,122 @@ class Parser {
     }
 
     return new IfStatement(branches, alternate)
+  }
+
+  parseWhileStatement() {
+    this.nextToken()
+    if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after while keyword')) {
+      return null
+    }
+
+    const condition = this.parseExpression()
+    if (!condition) {
+      this.error('Expected condition expression in while loop')
+      return null
+    }
+
+    if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after while condition')) {
+      return null
+    }
+
+    this.loopDepth++
+    const body = this.parseBlockStatement()
+    this.loopDepth--
+    if (!body) return null
+
+    return new WhileStatement(condition, body)
+  }
+
+  parseForStatement() {
+    this.nextToken()
+    if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after for keyword')) {
+      return null
+    }
+
+    const initializer = this.parseForInitializer()
+    if (!this.consumeCurrent(TokenType.SEMICOLON, 'Expected ";" after for initializer')) {
+      return null
+    }
+
+    let condition = null
+    if (this.curToken.type !== TokenType.SEMICOLON) {
+      condition = this.parseExpression()
+      if (!condition) {
+        this.error('Expected condition expression in for loop')
+        return null
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.SEMICOLON, 'Expected ";" after for condition')) {
+      return null
+    }
+
+    const update = this.parseForUpdate()
+
+    if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after for clauses')) {
+      return null
+    }
+
+    this.loopDepth++
+    const body = this.parseBlockStatement()
+    this.loopDepth--
+    if (!body) return null
+
+    return new ForStatement(initializer, condition, update, body)
+  }
+
+  parseBreakStatement() {
+    if (this.loopDepth === 0) {
+      this.error('prakritiStop can only be used inside loops')
+      this.nextToken()
+      return null
+    }
+
+    this.nextToken()
+    return new BreakStatement()
+  }
+
+  parseContinueStatement() {
+    if (this.loopDepth === 0) {
+      this.error('prakritiGoOn can only be used inside loops')
+      this.nextToken()
+      return null
+    }
+
+    this.nextToken()
+    return new ContinueStatement()
+  }
+
+  parseForInitializer() {
+    if (this.curToken.type === TokenType.SEMICOLON) {
+      return null
+    }
+
+    if (
+      this.curToken.type === TokenType.VAR ||
+      this.curToken.type === TokenType.LET ||
+      this.curToken.type === TokenType.CONST
+    ) {
+      return this.parseVariableDeclaration()
+    }
+
+    if (this.curToken.type === TokenType.IDENTIFIER && this.peekToken.type === TokenType.ASSIGN) {
+      return this.parseAssignmentStatement()
+    }
+
+    return this.parseExpressionStatement()
+  }
+
+  parseForUpdate() {
+    if (this.curToken.type === TokenType.RPAREN) {
+      return null
+    }
+
+    if (this.curToken.type === TokenType.IDENTIFIER && this.peekToken.type === TokenType.ASSIGN) {
+      return this.parseAssignmentStatement()
+    }
+
+    return this.parseExpressionStatement()
   }
 
   parseBlockStatement() {

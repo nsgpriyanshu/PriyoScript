@@ -171,8 +171,25 @@ class VM {
         }
 
         case OpCode.JUMP:
+          if (typeof instr.operand === 'object' && instr.operand !== null) {
+            this.unwindScopes(instr.operand.unwind || 0)
+            this.ip = instr.operand.target
+            continue
+          }
+
           this.ip = instr.operand
           continue
+
+        case OpCode.ENTER_SCOPE:
+          this.environment = new Environment(this.environment)
+          break
+
+        case OpCode.EXIT_SCOPE:
+          if (!this.environment.parent) {
+            throw new Error('Cannot exit global scope')
+          }
+          this.environment = this.environment.parent
+          break
 
         case OpCode.CALL_BUILTIN: {
           const { name, argc } = instr.operand
@@ -211,6 +228,15 @@ class VM {
 
   isTruthy(value) {
     return !!value
+  }
+
+  unwindScopes(count) {
+    for (let i = 0; i < count; i++) {
+      if (!this.environment.parent) {
+        throw new Error('Scope underflow during jump unwind')
+      }
+      this.environment = this.environment.parent
+    }
   }
 }
 

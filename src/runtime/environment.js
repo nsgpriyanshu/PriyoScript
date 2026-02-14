@@ -1,12 +1,18 @@
 class Environment {
-  constructor() {
+  constructor(parent = null) {
+    this.parent = parent
     this.bindings = new Map()
   }
 
   define(name, value, kind) {
+    // Keep var in the root scope; keep let/const in current block scope.
+    const targetScope = kind === 'var' ? this.getRootScope() : this
+    targetScope.defineLocal(name, value, kind)
+  }
+
+  defineLocal(name, value, kind) {
     const existing = this.bindings.get(name)
 
-    // JS-like var redeclaration support; let/const stay strict.
     if (existing) {
       if (kind === 'var' && existing.kind === 'var') {
         existing.value = value
@@ -19,22 +25,43 @@ class Environment {
   }
 
   get(name) {
-    const binding = this.bindings.get(name)
-    if (!binding) {
+    const ownerScope = this.findBindingScope(name)
+    if (!ownerScope) {
       throw new Error(`Hmmm: Undefined variable "${name}"`)
     }
-    return binding.value
+    return ownerScope.bindings.get(name).value
   }
 
   set(name, value) {
-    const binding = this.bindings.get(name)
-    if (!binding) {
+    const ownerScope = this.findBindingScope(name)
+    if (!ownerScope) {
       throw new Error(`Ohh Ohh: Undefined variable "${name}"`)
     }
+
+    const binding = ownerScope.bindings.get(name)
     if (binding.kind === 'const') {
       throw new Error(`How disrespectfull: Cannot reassign constant "${name}"`)
     }
     binding.value = value
+  }
+
+  getRootScope() {
+    let scope = this
+    while (scope.parent) {
+      scope = scope.parent
+    }
+    return scope
+  }
+
+  findBindingScope(name) {
+    let scope = this
+    while (scope) {
+      if (scope.bindings.has(name)) {
+        return scope
+      }
+      scope = scope.parent
+    }
+    return null
   }
 }
 

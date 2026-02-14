@@ -1,0 +1,8 @@
+monalisa {
+  prakritiIf (priyoTrue) {
+    priyoChange temp = "inside"
+    priyoTell(temp)
+  }
+
+  priyoTell(temp)
+}

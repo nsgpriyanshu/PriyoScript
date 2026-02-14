@@ -1,0 +1,10 @@
+monalisa {
+  priyoChange label = "outer"
+
+  prakritiIf (priyoTrue) {
+    priyoChange label = "inner"
+    priyoTell(label)
+  }
+
+  priyoTell(label)
+}

@@ -1,0 +1,17 @@
+monalisa {
+  priyoChange i = 0
+
+  prakritiAsLongAs (i < 6) {
+    i = i + 1
+
+    prakritiIf (i == 2) {
+      prakritiGoOn
+    }
+
+    prakritiIf (i == 5) {
+      prakritiStop
+    }
+
+    priyoTell("while-value: " + i)
+  }
+}
