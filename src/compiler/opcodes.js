@@ -24,9 +24,11 @@ const OpCode = {
   JUMP: 22,
   ENTER_SCOPE: 23,
   EXIT_SCOPE: 24,
-  CALL_BUILTIN: 25,
-  POP: 26,
-  HALT: 27,
+  DEFINE_FUNCTION: 25,
+  CALL_NAMED: 26,
+  RETURN: 27,
+  POP: 28,
+  HALT: 29,
 }
 
 module.exports = { OpCode }

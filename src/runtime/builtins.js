@@ -12,6 +12,34 @@ function createBuiltins(io = {}) {
       return null
     },
 
+    priyoListenSentence: async (prompt = '') => {
+      const rl = readline.createInterface({ input, output })
+      try {
+        const message = prompt == null ? '' : String(prompt)
+        return await rl.question(message)
+      } finally {
+        rl.close()
+      }
+    },
+
+    priyoListenNumber: async (prompt = '') => {
+      const rl = readline.createInterface({ input, output })
+      try {
+        const message = prompt == null ? '' : String(prompt)
+        const raw = await rl.question(message)
+        const value = Number(raw.trim())
+
+        if (Number.isNaN(value)) {
+          throw new Error(`Invalid number input: "${raw}"`)
+        }
+
+        return value
+      } finally {
+        rl.close()
+      }
+    },
+
+    // Backward-compatible alias.
     priyoListen: async (prompt = '') => {
       const rl = readline.createInterface({ input, output })
       try {

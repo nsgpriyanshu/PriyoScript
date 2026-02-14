@@ -1,0 +1,18 @@
+monalisa {
+  lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+
+  lisaaTask grade(score) {
+    prakritiIf (score >= 90) {
+      priyoGiveBack "A"
+    } prakritiElseIf (score >= 75) {
+      priyoGiveBack "B"
+    } prakritiElse {
+      priyoGiveBack "C"
+    }
+  }
+
+  priyoTell(add(5, 7))
+  priyoTell("Grade: " + grade(82))
+}

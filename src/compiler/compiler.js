@@ -52,6 +52,14 @@ class Compiler {
         this.compileContinueStatement()
         return
 
+      case 'FunctionDeclaration':
+        this.compileFunctionDeclaration(stmt)
+        return
+
+      case 'ReturnStatement':
+        this.compileReturnStatement(stmt)
+        return
+
       case 'ExpressionStatement':
         this.compileExpression(stmt.expression)
         this.emit(OpCode.POP)
@@ -193,6 +201,28 @@ class Compiler {
     loopContext.continueJumps.push({ jumpIndex, scopeDepthAtEmit: this.scopeDepth })
   }
 
+  compileFunctionDeclaration(stmt) {
+    const functionCompiler = new Compiler()
+    functionCompiler.compileBlockStatement(stmt.body)
+    functionCompiler.emit(OpCode.PUSH_NULL)
+    functionCompiler.emit(OpCode.RETURN)
+
+    this.emit(OpCode.DEFINE_FUNCTION, {
+      name: stmt.name.name,
+      params: stmt.params.map(param => param.name),
+      instructions: functionCompiler.instructions,
+    })
+  }
+
+  compileReturnStatement(stmt) {
+    if (stmt.argument) {
+      this.compileExpression(stmt.argument)
+    } else {
+      this.emit(OpCode.PUSH_NULL)
+    }
+    this.emit(OpCode.RETURN)
+  }
+
   compileExpression(expr) {
     switch (expr.type) {
       case 'StringLiteral':
@@ -237,7 +267,7 @@ class Compiler {
       this.compileExpression(arg)
     }
 
-    this.emit(OpCode.CALL_BUILTIN, {
+    this.emit(OpCode.CALL_NAMED, {
       name: expr.callee.name,
       argc: expr.arguments.length,
     })

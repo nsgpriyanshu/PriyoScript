@@ -8,7 +8,7 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js  examples/main.priyo && node src/index.js examples/input.priyo && node src/index.js examples/declare.priyo && node src/index.js examples/assignment.priyo && node src/index.js examples/const-reassign.priyo",
+    "start": "node src/index.js examples/arithmetic.priyo && node src/index.js examples/assignment.priyo && node src/index.js examples/comparison.priyo && node src/index.js examples/const-reassign.priyo && node src/index.js examples/declare.priyo && node src/index.js examples/for-control.priyo && node src/index.js examples/for-loop.priyo && node src/index.js examples/function-closure.priyo && node src/index.js examples/functions.priyo && node src/index.js examples/if-else.priyo && node src/index.js examples/input.priyo && node src/index.js examples/invalid-break.priyo && node src/index.js examples/invalid-return.priyo && node src/index.js examples/logical.priyo && node src/index.js examples/loop-control.priyo && node src/index.js examples/main.priyo && node src/index.js examples/recursion.priyo && node src/index.js examples/scope-leak-error.priyo && node src/index.js examples/scope-shadow.priyo && node src/index.js examples/var-function-scope.priyo && node src/index.js examples/while-loop.priyo",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
     "release": "cliff-jumper"

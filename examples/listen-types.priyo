@@ -1,0 +1,7 @@
+monalisa {
+  priyoKeep name = priyoListenSentence("Name: ")
+  priyoKeep age = priyoListenNumber("Age: ")
+
+  priyoTell("Hello, " + name)
+  priyoTell(age + 1)
+}

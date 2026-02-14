@@ -12,6 +12,8 @@ const {
   ForStatement,
   BreakStatement,
   ContinueStatement,
+  FunctionDeclaration,
+  ReturnStatement,
   BinaryExpression,
   UnaryExpression,
   Identifier,
@@ -29,6 +31,7 @@ class Parser {
     this.peekToken = null
     this.errors = []
     this.loopDepth = 0
+    this.functionDepth = 0
 
     this.nextToken()
     this.nextToken()
@@ -95,6 +98,14 @@ class Parser {
   }
 
   parseStatement() {
+    if (this.curToken.type === TokenType.RETURN) {
+      return this.parseReturnStatement()
+    }
+
+    if (this.curToken.type === TokenType.FUNCTION) {
+      return this.parseFunctionDeclaration()
+    }
+
     if (this.curToken.type === TokenType.BREAK) {
       return this.parseBreakStatement()
     }
@@ -301,6 +312,79 @@ class Parser {
 
     this.nextToken()
     return new ContinueStatement()
+  }
+
+  parseFunctionDeclaration() {
+    this.nextToken()
+    if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected function name after lisaaTask')) {
+      this.nextToken()
+      return null
+    }
+
+    const name = new Identifier(this.curToken.literal)
+    this.nextToken()
+
+    if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after function name')) {
+      return null
+    }
+
+    const params = []
+    while (this.curToken.type !== TokenType.RPAREN && this.curToken.type !== TokenType.EOF) {
+      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected parameter name')) {
+        this.nextToken()
+        return null
+      }
+
+      params.push(new Identifier(this.curToken.literal))
+      this.nextToken()
+
+      if (this.curToken.type === TokenType.COMMA) {
+        this.nextToken()
+        continue
+      }
+
+      if (this.curToken.type !== TokenType.RPAREN) {
+        this.error('Expected "," or ")" in function parameters')
+        return null
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after function parameters')) {
+      return null
+    }
+
+    this.functionDepth++
+    const body = this.parseBlockStatement()
+    this.functionDepth--
+    if (!body) return null
+
+    return new FunctionDeclaration(name, params, body)
+  }
+
+  parseReturnStatement() {
+    if (this.functionDepth === 0) {
+      this.error('priyoGiveBack can only be used inside functions')
+      this.nextToken()
+      return null
+    }
+
+    this.nextToken()
+
+    if (
+      this.curToken.type === TokenType.RBRACE ||
+      this.curToken.type === TokenType.EOF ||
+      this.curToken.type === TokenType.SEMICOLON
+    ) {
+      return new ReturnStatement(null)
+    }
+
+    const argument = this.parseExpression()
+    if (!argument) {
+      this.error('Expected return expression')
+      return null
+    }
+
+    return new ReturnStatement(argument)
   }
 
   parseForInitializer() {

@@ -5,219 +5,271 @@ const { createBuiltins } = require('../runtime/builtins')
 class VM {
   constructor(instructions, options = {}) {
     this.instructions = instructions
-    this.ip = 0
-    this.stack = []
-    this.environment = options.environment || new Environment()
+    this.environment = options.environment || new Environment(null, { isFunctionScope: true })
     this.builtins = options.builtins || createBuiltins(options.io)
   }
 
   async run() {
-    while (this.ip < this.instructions.length) {
-      const instr = this.instructions[this.ip]
+    await this.executeFrame(this.instructions, this.environment, false)
+  }
 
-      switch (instr.op) {
-        case OpCode.PUSH_STRING:
-        case OpCode.PUSH_NUMBER:
-        case OpCode.PUSH_BOOLEAN:
-          this.stack.push(instr.operand)
-          break
+  async executeFrame(instructions, frameEnvironment, isFunctionFrame) {
+    const previousEnvironment = this.environment
+    this.environment = frameEnvironment
 
-        case OpCode.PUSH_NULL:
-          this.stack.push(null)
-          break
+    const stack = []
+    let ip = 0
 
-        case OpCode.DEFINE_VARIABLE: {
-          const value = this.stack.pop()
-          const { name, kind } = instr.operand
-          this.environment.define(name, value, kind)
-          break
-        }
+    try {
+      while (ip < instructions.length) {
+        const instr = instructions[ip]
 
-        case OpCode.LOAD_VARIABLE: {
-          const value = this.environment.get(instr.operand)
-          this.stack.push(value)
-          break
-        }
+        switch (instr.op) {
+          case OpCode.PUSH_STRING:
+          case OpCode.PUSH_NUMBER:
+          case OpCode.PUSH_BOOLEAN:
+            stack.push(instr.operand)
+            break
 
-        case OpCode.SET_VARIABLE: {
-          const value = this.stack.pop()
-          this.environment.set(instr.operand, value)
-          break
-        }
+          case OpCode.PUSH_NULL:
+            stack.push(null)
+            break
 
-        case OpCode.ADD: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          if (typeof left === 'string' || typeof right === 'string') {
-            this.stack.push(String(left) + String(right))
+          case OpCode.DEFINE_VARIABLE: {
+            const value = stack.pop()
+            const { name, kind } = instr.operand
+            this.environment.define(name, value, kind)
             break
           }
-          this.ensureNumbers(left, right, 'ADD')
-          this.stack.push(left + right)
-          break
-        }
 
-        case OpCode.SUB: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'SUB')
-          this.stack.push(left - right)
-          break
-        }
-
-        case OpCode.MUL: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'MUL')
-          this.stack.push(left * right)
-          break
-        }
-
-        case OpCode.DIV: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'DIV')
-          if (right === 0) {
-            throw new Error('Division by zero')
+          case OpCode.LOAD_VARIABLE: {
+            const value = this.environment.get(instr.operand)
+            stack.push(value)
+            break
           }
-          this.stack.push(left / right)
-          break
-        }
 
-        case OpCode.MOD: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'MOD')
-          if (right === 0) {
-            throw new Error('Modulo by zero')
+          case OpCode.SET_VARIABLE: {
+            const value = stack.pop()
+            this.environment.set(instr.operand, value)
+            break
           }
-          this.stack.push(left % right)
-          break
-        }
 
-        case OpCode.EQ: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.stack.push(left === right)
-          break
-        }
+          case OpCode.ADD: {
+            const right = stack.pop()
+            const left = stack.pop()
+            if (typeof left === 'string' || typeof right === 'string') {
+              stack.push(String(left) + String(right))
+              break
+            }
+            this.ensureNumbers(left, right, 'ADD')
+            stack.push(left + right)
+            break
+          }
 
-        case OpCode.NOT_EQ: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.stack.push(left !== right)
-          break
-        }
+          case OpCode.SUB: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'SUB')
+            stack.push(left - right)
+            break
+          }
 
-        case OpCode.LT: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'LT')
-          this.stack.push(left < right)
-          break
-        }
+          case OpCode.MUL: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'MUL')
+            stack.push(left * right)
+            break
+          }
 
-        case OpCode.LTE: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'LTE')
-          this.stack.push(left <= right)
-          break
-        }
+          case OpCode.DIV: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'DIV')
+            if (right === 0) {
+              throw new Error('Division by zero')
+            }
+            stack.push(left / right)
+            break
+          }
 
-        case OpCode.GT: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'GT')
-          this.stack.push(left > right)
-          break
-        }
+          case OpCode.MOD: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'MOD')
+            if (right === 0) {
+              throw new Error('Modulo by zero')
+            }
+            stack.push(left % right)
+            break
+          }
 
-        case OpCode.GTE: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.ensureNumbers(left, right, 'GTE')
-          this.stack.push(left >= right)
-          break
-        }
+          case OpCode.EQ: {
+            const right = stack.pop()
+            const left = stack.pop()
+            stack.push(left === right)
+            break
+          }
 
-        case OpCode.AND: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.stack.push(this.isTruthy(left) && this.isTruthy(right))
-          break
-        }
+          case OpCode.NOT_EQ: {
+            const right = stack.pop()
+            const left = stack.pop()
+            stack.push(left !== right)
+            break
+          }
 
-        case OpCode.OR: {
-          const right = this.stack.pop()
-          const left = this.stack.pop()
-          this.stack.push(this.isTruthy(left) || this.isTruthy(right))
-          break
-        }
+          case OpCode.LT: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'LT')
+            stack.push(left < right)
+            break
+          }
 
-        case OpCode.NOT: {
-          const value = this.stack.pop()
-          this.stack.push(!this.isTruthy(value))
-          break
-        }
+          case OpCode.LTE: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'LTE')
+            stack.push(left <= right)
+            break
+          }
 
-        case OpCode.JUMP_IF_FALSE: {
-          const condition = this.stack.pop()
-          if (!this.isTruthy(condition)) {
-            this.ip = instr.operand
+          case OpCode.GT: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'GT')
+            stack.push(left > right)
+            break
+          }
+
+          case OpCode.GTE: {
+            const right = stack.pop()
+            const left = stack.pop()
+            this.ensureNumbers(left, right, 'GTE')
+            stack.push(left >= right)
+            break
+          }
+
+          case OpCode.AND: {
+            const right = stack.pop()
+            const left = stack.pop()
+            stack.push(this.isTruthy(left) && this.isTruthy(right))
+            break
+          }
+
+          case OpCode.OR: {
+            const right = stack.pop()
+            const left = stack.pop()
+            stack.push(this.isTruthy(left) || this.isTruthy(right))
+            break
+          }
+
+          case OpCode.NOT: {
+            const value = stack.pop()
+            stack.push(!this.isTruthy(value))
+            break
+          }
+
+          case OpCode.JUMP_IF_FALSE: {
+            const condition = stack.pop()
+            if (!this.isTruthy(condition)) {
+              ip = instr.operand
+              continue
+            }
+            break
+          }
+
+          case OpCode.JUMP:
+            if (typeof instr.operand === 'object' && instr.operand !== null) {
+              this.unwindScopes(instr.operand.unwind || 0)
+              ip = instr.operand.target
+              continue
+            }
+
+            ip = instr.operand
             continue
+
+          case OpCode.ENTER_SCOPE:
+            this.environment = new Environment(this.environment, { isFunctionScope: false })
+            break
+
+          case OpCode.EXIT_SCOPE:
+            if (!this.environment.parent) {
+              throw new Error('Cannot exit global scope')
+            }
+            this.environment = this.environment.parent
+            break
+
+          case OpCode.DEFINE_FUNCTION: {
+            const fnObj = {
+              type: 'user_function',
+              params: instr.operand.params,
+              instructions: instr.operand.instructions,
+              closure: this.environment,
+            }
+            this.environment.define(instr.operand.name, fnObj, 'const')
+            break
           }
-          break
+
+          case OpCode.CALL_NAMED: {
+            const { name, argc } = instr.operand
+            const args = argc === 0 ? [] : stack.splice(-argc)
+            const result = await this.callNamed(name, args)
+            stack.push(result == null ? null : result)
+            break
+          }
+
+          case OpCode.RETURN: {
+            if (!isFunctionFrame) {
+              throw new Error('Return statement cannot execute outside function')
+            }
+            const returnValue = stack.pop()
+            return { returned: true, value: returnValue == null ? null : returnValue }
+          }
+
+          case OpCode.POP:
+            stack.pop()
+            break
+
+          case OpCode.HALT:
+            return { returned: false, value: null }
+
+          default:
+            throw new Error(`Unknown opcode: ${instr.op}`)
         }
 
-        case OpCode.JUMP:
-          if (typeof instr.operand === 'object' && instr.operand !== null) {
-            this.unwindScopes(instr.operand.unwind || 0)
-            this.ip = instr.operand.target
-            continue
-          }
-
-          this.ip = instr.operand
-          continue
-
-        case OpCode.ENTER_SCOPE:
-          this.environment = new Environment(this.environment)
-          break
-
-        case OpCode.EXIT_SCOPE:
-          if (!this.environment.parent) {
-            throw new Error('Cannot exit global scope')
-          }
-          this.environment = this.environment.parent
-          break
-
-        case OpCode.CALL_BUILTIN: {
-          const { name, argc } = instr.operand
-          const fn = this.builtins[name]
-
-          if (!fn) {
-            throw new Error(`Unknown builtin function: ${name}`)
-          }
-
-          const args = this.stack.splice(-argc)
-          const result = await fn(...args)
-          this.stack.push(result == null ? null : result)
-          break
-        }
-
-        case OpCode.POP:
-          this.stack.pop()
-          break
-
-        case OpCode.HALT:
-          return
-
-        default:
-          throw new Error(`Unknown opcode: ${instr.op}`)
+        ip++
       }
 
-      this.ip++
+      return { returned: false, value: null }
+    } finally {
+      this.environment = previousEnvironment
     }
+  }
+
+  async callNamed(name, args) {
+    if (this.builtins[name]) {
+      return await this.builtins[name](...args)
+    }
+
+    const callee = this.environment.get(name)
+    if (!callee || callee.type !== 'user_function') {
+      throw new Error(`Unknown callable: ${name}`)
+    }
+
+    if (args.length !== callee.params.length) {
+      throw new Error(
+        `Function "${name}" expects ${callee.params.length} args but got ${args.length}`,
+      )
+    }
+
+    const callEnv = new Environment(callee.closure, { isFunctionScope: true })
+    for (let i = 0; i < callee.params.length; i++) {
+      callEnv.define(callee.params[i], args[i], 'let')
+    }
+
+    const result = await this.executeFrame(callee.instructions, callEnv, true)
+    return result.value
   }
 
   ensureNumbers(left, right, operation) {

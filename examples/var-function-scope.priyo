@@ -1,0 +1,10 @@
+monalisa {
+  lisaaTask demo() {
+    priyoKeep counter = 10
+    priyoTell("inside: " + counter)
+    priyoGiveBack counter
+  }
+
+  priyoTell("returned: " + demo())
+  priyoTell(counter)
+}

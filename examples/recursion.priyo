@@ -1,0 +1,12 @@
+monalisa {
+  lisaaTask factorial(n) {
+    prakritiIf (n <= 1) {
+      priyoGiveBack 1
+    } prakritiElse {
+      priyoGiveBack n * factorial(n - 1)
+    }
+  }
+
+  priyoKeep n = priyoListenNumber("Enter a number to get factorial of it: ")
+  priyoTell(factorial(n))
+}

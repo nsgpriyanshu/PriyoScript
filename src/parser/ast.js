@@ -80,6 +80,22 @@ class ContinueStatement {
   }
 }
 
+class FunctionDeclaration {
+  constructor(name, params, body) {
+    this.type = 'FunctionDeclaration'
+    this.name = name
+    this.params = params
+    this.body = body
+  }
+}
+
+class ReturnStatement {
+  constructor(argument = null) {
+    this.type = 'ReturnStatement'
+    this.argument = argument
+  }
+}
+
 class BinaryExpression {
   constructor(left, operator, right) {
     this.type = 'BinaryExpression'
@@ -152,6 +168,8 @@ module.exports = {
   ForStatement,
   BreakStatement,
   ContinueStatement,
+  FunctionDeclaration,
+  ReturnStatement,
   BinaryExpression,
   UnaryExpression,
   Identifier,

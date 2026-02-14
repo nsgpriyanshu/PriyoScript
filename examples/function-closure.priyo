@@ -1,0 +1,9 @@
+monalisa {
+  priyoChange base = 10
+
+  lisaaTask addBase(x) {
+    priyoGiveBack x + base
+  }
+
+  priyoTell(addBase(5))
+}

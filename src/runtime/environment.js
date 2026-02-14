@@ -1,12 +1,13 @@
 class Environment {
-  constructor(parent = null) {
+  constructor(parent = null, options = {}) {
     this.parent = parent
+    this.isFunctionScope = Boolean(options.isFunctionScope)
     this.bindings = new Map()
   }
 
   define(name, value, kind) {
-    // Keep var in the root scope; keep let/const in current block scope.
-    const targetScope = kind === 'var' ? this.getRootScope() : this
+    // var is function-scoped; let/const are block-scoped.
+    const targetScope = kind === 'var' ? this.getNearestFunctionScope() : this
     targetScope.defineLocal(name, value, kind)
   }
 
@@ -45,12 +46,15 @@ class Environment {
     binding.value = value
   }
 
-  getRootScope() {
+  getNearestFunctionScope() {
     let scope = this
-    while (scope.parent) {
+    while (scope) {
+      if (scope.isFunctionScope) {
+        return scope
+      }
       scope = scope.parent
     }
-    return scope
+    return this
   }
 
   findBindingScope(name) {
