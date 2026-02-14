@@ -1,5 +1,5 @@
 const { OpCode } = require('./opcodes')
-const { error } = require('../utils/logger')
+const { TokenType } = require('../lexer/token')
 
 class Compiler {
   constructor() {
@@ -9,7 +9,7 @@ class Compiler {
   compile(program) {
     const entry = program.entry
     if (!entry || entry.type !== 'EntryBlock') {
-      throw new error('Invalid AST: missing entry block')
+      throw new Error('Invalid AST: missing entry block')
     }
 
     for (const stmt of entry.body) {
@@ -36,7 +36,7 @@ class Compiler {
         return
 
       default:
-        throw new error(`Unknown statement type: ${stmt.type}`)
+        throw new Error(`Unknown statement type: ${stmt.type}`)
     }
   }
 
@@ -79,8 +79,12 @@ class Compiler {
         this.compileCallExpression(expr)
         break
 
+      case 'BinaryExpression':
+        this.compileBinaryExpression(expr)
+        break
+
       default:
-        throw new error(`Unknown expression type: ${expr.type}`)
+        throw new Error(`Unknown expression type: ${expr.type}`)
     }
   }
 
@@ -93,6 +97,26 @@ class Compiler {
       name: expr.callee.name,
       argc: expr.arguments.length,
     })
+  }
+
+  compileBinaryExpression(expr) {
+    this.compileExpression(expr.left)
+    this.compileExpression(expr.right)
+
+    const opcodeByOperator = {
+      [TokenType.PLUS]: OpCode.ADD,
+      [TokenType.MINUS]: OpCode.SUB,
+      [TokenType.STAR]: OpCode.MUL,
+      [TokenType.SLASH]: OpCode.DIV,
+      [TokenType.PERCENT]: OpCode.MOD,
+    }
+
+    const opcode = opcodeByOperator[expr.operator]
+    if (opcode == null) {
+      throw new Error(`Unsupported binary operator: ${expr.operator}`)
+    }
+
+    this.emit(opcode)
   }
 
   emit(op, operand = null) {

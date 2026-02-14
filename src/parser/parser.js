@@ -6,6 +6,7 @@ const {
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
+  BinaryExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
@@ -166,7 +167,33 @@ class Parser {
     return new ExpressionStatement(expression)
   }
 
-  parseExpression() {
+  // Precedence-climbing expression parser.
+  // Supports left-associative arithmetic:
+  // 1 + 2 * 3 -> 1 + (2 * 3)
+  parseExpression(minPrecedence = 0) {
+    let left = this.parsePrimary()
+    if (!left) return null
+
+    while (true) {
+      const precedence = this.getBinaryPrecedence(this.curToken.type)
+      if (precedence < minPrecedence) break
+
+      const operator = this.curToken.type
+      this.nextToken()
+
+      const right = this.parseExpression(precedence + 1)
+      if (!right) {
+        this.error('Right-hand side expression is required')
+        return null
+      }
+
+      left = new BinaryExpression(left, operator, right)
+    }
+
+    return left
+  }
+
+  parsePrimary() {
     switch (this.curToken.type) {
       case TokenType.STRING: {
         const node = new StringLiteral(this.curToken.literal)
@@ -192,6 +219,19 @@ class Parser {
         this.nextToken()
         return new NullLiteral()
 
+      case TokenType.LPAREN: {
+        this.nextToken()
+        const expression = this.parseExpression()
+        if (!expression) {
+          this.error('Expected expression after "("')
+          return null
+        }
+        if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after grouped expression')) {
+          return null
+        }
+        return expression
+      }
+
       case TokenType.PRINT:
       case TokenType.INPUT:
       case TokenType.IDENTIFIER: {
@@ -208,6 +248,20 @@ class Parser {
 
       default:
         return null
+    }
+  }
+
+  getBinaryPrecedence(tokenType) {
+    switch (tokenType) {
+      case TokenType.PLUS:
+      case TokenType.MINUS:
+        return 1
+      case TokenType.STAR:
+      case TokenType.SLASH:
+      case TokenType.PERCENT:
+        return 2
+      default:
+        return -1
     }
   }
 

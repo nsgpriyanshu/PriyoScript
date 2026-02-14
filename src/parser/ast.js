@@ -35,6 +35,15 @@ class AssignmentStatement {
   }
 }
 
+class BinaryExpression {
+  constructor(left, operator, right) {
+    this.type = 'BinaryExpression'
+    this.left = left
+    this.operator = operator
+    this.right = right
+  }
+}
+
 class Identifier {
   constructor(name) {
     this.type = 'Identifier'
@@ -84,6 +93,7 @@ module.exports = {
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
+  BinaryExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,

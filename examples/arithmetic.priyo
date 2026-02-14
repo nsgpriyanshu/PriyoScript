@@ -1,0 +1,7 @@
+monalisa {
+  priyoChange score = 2 + 3 * 4
+  priyoChange grouped = (2 + 3) * 4
+  priyoTell(score)
+  priyoTell(grouped)
+  priyoTell("Points: " + score)
+}
