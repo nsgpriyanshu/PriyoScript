@@ -17,6 +17,14 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 - Node.js
 - JavaScript
 
+## Language Reference
+
+For the current implemented syntax, see [`syntax.md`](syntax.md).
+
+## VS Code Syntax Highlighting
+
+VS Code syntax support for `.priyo` is available in [`editor/vscode-priyoscript`](editor/vscode-priyoscript).
+
 ## Example Code
 
 ```js

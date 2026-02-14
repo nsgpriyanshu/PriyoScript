@@ -3,6 +3,8 @@
 
   "print": "priyoTell",
   "input": "priyoListen",
+  "input-string": "priyoListenSentence",
+  "input-integer": "priyoListenNumber",
 
   "add": "priyoAdd",
   "sub": "priyoSub",
