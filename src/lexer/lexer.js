@@ -99,8 +99,44 @@ class Lexer {
 
     switch (this.ch) {
       case '=':
-        token.type = TokenType.ASSIGN
-        token.literal = '='
+        if (this.peekChar() === '=') {
+          this.readChar()
+          token.type = TokenType.EQ
+          token.literal = '=='
+        } else {
+          token.type = TokenType.ASSIGN
+          token.literal = '='
+        }
+        break
+      case '!':
+        if (this.peekChar() === '=') {
+          this.readChar()
+          token.type = TokenType.NOT_EQ
+          token.literal = '!='
+        } else {
+          token.type = TokenType.ILLEGAL
+          token.literal = '!'
+        }
+        break
+      case '<':
+        if (this.peekChar() === '=') {
+          this.readChar()
+          token.type = TokenType.LTE
+          token.literal = '<='
+        } else {
+          token.type = TokenType.LT
+          token.literal = '<'
+        }
+        break
+      case '>':
+        if (this.peekChar() === '=') {
+          this.readChar()
+          token.type = TokenType.GTE
+          token.literal = '>='
+        } else {
+          token.type = TokenType.GT
+          token.literal = '>'
+        }
         break
       case '+':
         token.type = TokenType.PLUS

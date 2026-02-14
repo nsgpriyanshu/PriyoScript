@@ -109,6 +109,12 @@ class Compiler {
       [TokenType.STAR]: OpCode.MUL,
       [TokenType.SLASH]: OpCode.DIV,
       [TokenType.PERCENT]: OpCode.MOD,
+      [TokenType.EQ]: OpCode.EQ,
+      [TokenType.NOT_EQ]: OpCode.NOT_EQ,
+      [TokenType.LT]: OpCode.LT,
+      [TokenType.LTE]: OpCode.LTE,
+      [TokenType.GT]: OpCode.GT,
+      [TokenType.GTE]: OpCode.GTE,
     }
 
     const opcode = opcodeByOperator[expr.operator]

@@ -95,6 +95,52 @@ class VM {
           break
         }
 
+        case OpCode.EQ: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.stack.push(left === right)
+          break
+        }
+
+        case OpCode.NOT_EQ: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.stack.push(left !== right)
+          break
+        }
+
+        case OpCode.LT: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.ensureNumbers(left, right, 'LT')
+          this.stack.push(left < right)
+          break
+        }
+
+        case OpCode.LTE: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.ensureNumbers(left, right, 'LTE')
+          this.stack.push(left <= right)
+          break
+        }
+
+        case OpCode.GT: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.ensureNumbers(left, right, 'GT')
+          this.stack.push(left > right)
+          break
+        }
+
+        case OpCode.GTE: {
+          const right = this.stack.pop()
+          const left = this.stack.pop()
+          this.ensureNumbers(left, right, 'GTE')
+          this.stack.push(left >= right)
+          break
+        }
+
         case OpCode.CALL_BUILTIN: {
           const { name, argc } = instr.operand
           const fn = this.builtins[name]

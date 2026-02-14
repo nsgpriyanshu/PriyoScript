@@ -168,8 +168,9 @@ class Parser {
   }
 
   // Precedence-climbing expression parser.
-  // Supports left-associative arithmetic:
+  // Supports left-associative arithmetic and comparisons:
   // 1 + 2 * 3 -> 1 + (2 * 3)
+  // 1 + 2 > 2 -> (1 + 2) > 2
   parseExpression(minPrecedence = 0) {
     let left = this.parsePrimary()
     if (!left) return null
@@ -253,6 +254,13 @@ class Parser {
 
   getBinaryPrecedence(tokenType) {
     switch (tokenType) {
+      case TokenType.EQ:
+      case TokenType.NOT_EQ:
+      case TokenType.LT:
+      case TokenType.LTE:
+      case TokenType.GT:
+      case TokenType.GTE:
+        return 0
       case TokenType.PLUS:
       case TokenType.MINUS:
         return 1

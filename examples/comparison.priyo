@@ -1,0 +1,10 @@
+monalisa {
+  priyoChange score = 10
+  priyoChange threshold = 8
+
+  priyoTell(score > threshold)
+  priyoTell(score >= 10)
+  priyoTell(score == 10)
+  priyoTell(score != threshold)
+  priyoTell(2 + 3 * 4 == 14)
+}

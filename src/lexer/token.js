@@ -27,6 +27,12 @@ const TokenType = {
 
   // Operators
   ASSIGN: 'ASSIGN',
+  EQ: 'EQ',
+  NOT_EQ: 'NOT_EQ',
+  LT: 'LT',
+  LTE: 'LTE',
+  GT: 'GT',
+  GTE: 'GTE',
   PLUS: 'PLUS',
   MINUS: 'MINUS',
   STAR: 'STAR',

@@ -11,9 +11,15 @@ const OpCode = {
   MUL: 9,
   DIV: 10,
   MOD: 11,
-  CALL_BUILTIN: 12,
-  POP: 13,
-  HALT: 14,
+  EQ: 12,
+  NOT_EQ: 13,
+  LT: 14,
+  LTE: 15,
+  GT: 16,
+  GTE: 17,
+  CALL_BUILTIN: 18,
+  POP: 19,
+  HALT: 20,
 }
 
 module.exports = { OpCode }
