@@ -1,0 +1,20 @@
+monalisa {
+  lisaaFamily StudentProfile {
+    lisaaTask init(studentName, semester) {
+      priyoSelf.studentName = studentName
+      priyoSelf.semester = semester
+    }
+
+    lisaaTask greet() {
+      priyoTell("Hi, I am " + priyoSelf.studentName)
+    }
+
+    lisaaTask nextSemester() {
+      priyoGiveBack priyoSelf.semester + 1
+    }
+  }
+
+  priyoKeep student = priyoCreate StudentProfile("Priyanshu", 5)
+  student.greet()
+  priyoTell(student.nextSemester())
+}

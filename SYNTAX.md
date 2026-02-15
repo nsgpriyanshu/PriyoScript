@@ -171,10 +171,76 @@ priyoGiveBack value
 - `priyoKeep` is function-scoped.
 - Functions use lexical scope (closures are supported).
 
-## 12. Current Limitations
+## 12. Classes
+
+Class declaration:
+
+```priyo
+lisaaFamily StudentProfile {
+  lisaaTask init(studentName, semester) {
+    priyoSelf.studentName = studentName
+    priyoSelf.semester = semester
+  }
+
+  lisaaTask greet() {
+    priyoTell("Hi " + priyoSelf.studentName)
+  }
+}
+```
+
+Create instance:
+
+```priyo
+priyoKeep student = priyoCreate StudentProfile("Priyanshu", 5)
+```
+
+Call method:
+
+```priyo
+p.greet()
+```
+
+Read/write fields:
+
+```priyo
+priyoTell(student.studentName)
+student.semester = student.semester + 1
+```
+
+Notes:
+
+- `init(...)` is the constructor method name (optional).
+- `priyoSelf` is available inside class methods.
+- Methods are declared with `lisaaTask` inside `lisaaFamily`.
+- Inheritance is supported with `lisaaInherit`.
+- Parent method call is supported with `priyoParent.method(...)`.
+- Parent property access is supported with `priyoParent.property`.
+
+Inheritance example:
+
+```priyo
+lisaaFamily InstagramCreator lisaaInherit YouTubeChannel {
+  lisaaTask init(name) {
+    priyoParent.init(name)
+  }
+}
+```
+
+Static methods and fields:
+
+```priyo
+lisaaFamily CollegePortal {
+  lisaaStable lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+}
+
+CollegePortal.tag = "CGPA"
+priyoTell(CollegePortal.add(4, 6))
+priyoTell(CollegePortal.tag)
+```
+
+## 13. Current Limitations
 
 - No module/import execution yet.
-- No class execution semantics yet.
 - `switch/case`, `try/catch`, and many reserved keywords are mapped but not fully implemented in parser/compiler/VM.
-
-## We are developing the above features (12) and more. Stay tuned for updates!

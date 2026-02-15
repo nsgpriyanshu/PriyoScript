@@ -96,6 +96,25 @@ class ReturnStatement {
   }
 }
 
+class ClassDeclaration {
+  constructor(name, methods, superClass = null) {
+    this.type = 'ClassDeclaration'
+    this.name = name
+    this.methods = methods
+    this.superClass = superClass
+  }
+}
+
+class MethodDeclaration {
+  constructor(name, params, body, isStatic = false) {
+    this.type = 'MethodDeclaration'
+    this.name = name
+    this.params = params
+    this.body = body
+    this.isStatic = isStatic
+  }
+}
+
 class BinaryExpression {
   constructor(left, operator, right) {
     this.type = 'BinaryExpression'
@@ -110,6 +129,26 @@ class UnaryExpression {
     this.type = 'UnaryExpression'
     this.operator = operator
     this.argument = argument
+  }
+}
+
+class ThisExpression {
+  constructor() {
+    this.type = 'ThisExpression'
+  }
+}
+
+class SuperExpression {
+  constructor() {
+    this.type = 'SuperExpression'
+  }
+}
+
+class MemberExpression {
+  constructor(object, property) {
+    this.type = 'MemberExpression'
+    this.object = object
+    this.property = property
   }
 }
 
@@ -156,6 +195,14 @@ class CallExpression {
   }
 }
 
+class NewExpression {
+  constructor(callee, args) {
+    this.type = 'NewExpression'
+    this.callee = callee
+    this.arguments = args
+  }
+}
+
 module.exports = {
   Program,
   EntryBlock,
@@ -170,12 +217,18 @@ module.exports = {
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  ClassDeclaration,
+  MethodDeclaration,
   BinaryExpression,
   UnaryExpression,
+  ThisExpression,
+  SuperExpression,
+  MemberExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,
   NullLiteral,
   CallExpression,
+  NewExpression,
 }

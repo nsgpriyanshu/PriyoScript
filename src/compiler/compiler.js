@@ -56,6 +56,10 @@ class Compiler {
         this.compileFunctionDeclaration(stmt)
         return
 
+      case 'ClassDeclaration':
+        this.compileClassDeclaration(stmt)
+        return
+
       case 'ReturnStatement':
         this.compileReturnStatement(stmt)
         return
@@ -79,8 +83,20 @@ class Compiler {
   }
 
   compileAssignmentStatement(stmt) {
-    this.compileExpression(stmt.value)
-    this.emit(OpCode.SET_VARIABLE, stmt.identifier.name)
+    if (stmt.identifier.type === 'Identifier') {
+      this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_VARIABLE, stmt.identifier.name)
+      return
+    }
+
+    if (stmt.identifier.type === 'MemberExpression') {
+      this.compileExpression(stmt.identifier.object)
+      this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_PROPERTY, stmt.identifier.property.name)
+      return
+    }
+
+    throw new Error(`Invalid assignment target: ${stmt.identifier.type}`)
   }
 
   compileBlockStatement(block) {
@@ -181,7 +197,6 @@ class Compiler {
     if (!loopContext) {
       throw new Error('prakritiStop used outside loop')
     }
-
     const jumpIndex = this.emit(OpCode.JUMP, -1)
     loopContext.breakJumps.push({ jumpIndex, scopeDepthAtEmit: this.scopeDepth })
   }
@@ -202,16 +217,44 @@ class Compiler {
   }
 
   compileFunctionDeclaration(stmt) {
-    const functionCompiler = new Compiler()
-    functionCompiler.compileBlockStatement(stmt.body)
-    functionCompiler.emit(OpCode.PUSH_NULL)
-    functionCompiler.emit(OpCode.RETURN)
-
     this.emit(OpCode.DEFINE_FUNCTION, {
       name: stmt.name.name,
       params: stmt.params.map(param => param.name),
-      instructions: functionCompiler.instructions,
+      instructions: this.compileCallableBody(stmt.body),
     })
+  }
+
+  compileClassDeclaration(stmt) {
+    const instanceMethods = stmt.methods
+      .filter(method => !method.isStatic)
+      .map(method => ({
+        name: method.name.name,
+        params: method.params.map(param => param.name),
+        instructions: this.compileCallableBody(method.body),
+      }))
+
+    const staticMethods = stmt.methods
+      .filter(method => method.isStatic)
+      .map(method => ({
+        name: method.name.name,
+        params: method.params.map(param => param.name),
+        instructions: this.compileCallableBody(method.body),
+      }))
+
+    this.emit(OpCode.DEFINE_CLASS, {
+      name: stmt.name.name,
+      superClassName: stmt.superClass ? stmt.superClass.name : null,
+      methods: instanceMethods,
+      staticMethods,
+    })
+  }
+
+  compileCallableBody(bodyBlock) {
+    const callableCompiler = new Compiler()
+    callableCompiler.compileBlockStatement(bodyBlock)
+    callableCompiler.emit(OpCode.PUSH_NULL)
+    callableCompiler.emit(OpCode.RETURN)
+    return callableCompiler.instructions
   }
 
   compileReturnStatement(stmt) {
@@ -245,8 +288,25 @@ class Compiler {
         this.emit(OpCode.LOAD_VARIABLE, expr.name)
         break
 
+      case 'ThisExpression':
+        this.emit(OpCode.LOAD_VARIABLE, 'priyoSelf')
+        break
+
+      case 'SuperExpression':
+        this.emit(OpCode.LOAD_VARIABLE, '__priyoSuperMarker')
+        break
+
+      case 'MemberExpression':
+        this.compileExpression(expr.object)
+        this.emit(OpCode.GET_PROPERTY, expr.property.name)
+        break
+
       case 'CallExpression':
         this.compileCallExpression(expr)
+        break
+
+      case 'NewExpression':
+        this.compileNewExpression(expr)
         break
 
       case 'BinaryExpression':
@@ -263,11 +323,53 @@ class Compiler {
   }
 
   compileCallExpression(expr) {
+    if (expr.callee.type === 'Identifier') {
+      for (const arg of expr.arguments) {
+        this.compileExpression(arg)
+      }
+      this.emit(OpCode.CALL_NAMED, {
+        name: expr.callee.name,
+        argc: expr.arguments.length,
+      })
+      return
+    }
+
+    if (expr.callee.type === 'MemberExpression') {
+      if (expr.callee.object.type === 'SuperExpression') {
+        for (const arg of expr.arguments) {
+          this.compileExpression(arg)
+        }
+        this.emit(OpCode.CALL_SUPER_METHOD, {
+          name: expr.callee.property.name,
+          argc: expr.arguments.length,
+        })
+        return
+      }
+
+      this.compileExpression(expr.callee.object)
+      for (const arg of expr.arguments) {
+        this.compileExpression(arg)
+      }
+      this.emit(OpCode.CALL_METHOD, {
+        name: expr.callee.property.name,
+        argc: expr.arguments.length,
+      })
+      return
+    }
+
+    throw new Error(`Unsupported call target: ${expr.callee.type}`)
+  }
+
+  compileNewExpression(expr) {
+    if (expr.callee.type !== 'Identifier') {
+      throw new Error('Class constructor must be an identifier')
+    }
+
     for (const arg of expr.arguments) {
       this.compileExpression(arg)
     }
 
-    this.emit(OpCode.CALL_NAMED, {
+    this.emit(OpCode.CREATE_INSTANCE, {
       name: expr.callee.name,
       argc: expr.arguments.length,
     })
@@ -297,22 +399,18 @@ class Compiler {
     if (opcode == null) {
       throw new Error(`Unsupported binary operator: ${expr.operator}`)
     }
-
     this.emit(opcode)
   }
 
   compileUnaryExpression(expr) {
     this.compileExpression(expr.argument)
-
     const opcodeByOperator = {
       [TokenType.BANG]: OpCode.NOT,
     }
-
     const opcode = opcodeByOperator[expr.operator]
     if (opcode == null) {
       throw new Error(`Unsupported unary operator: ${expr.operator}`)
     }
-
     this.emit(opcode)
   }
 
@@ -364,7 +462,6 @@ class Compiler {
     if (unwind < 0) {
       throw new Error('Invalid scope unwind during jump compilation')
     }
-
     this.emit(OpCode.JUMP, { target, unwind })
   }
 
@@ -373,7 +470,6 @@ class Compiler {
     if (unwind < 0) {
       throw new Error('Invalid patched scope unwind during jump compilation')
     }
-
     this.instructions[jumpIndex].operand = { target, unwind }
   }
 }

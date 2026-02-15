@@ -202,6 +202,10 @@ class Lexer {
         token.type = TokenType.SEMICOLON
         token.literal = ';'
         break
+      case '.':
+        token.type = TokenType.DOT
+        token.literal = '.'
+        break
       case '"':
         token.type = TokenType.STRING
         token.literal = this.readString()

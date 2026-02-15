@@ -1,0 +1,10 @@
+monalisa {
+  lisaaFamily CollegeNotebook {
+    lisaaTask init(subjectName) {
+      priyoSelf.subjectName = subjectName
+    }
+  }
+
+  priyoKeep notebook = priyoCreate CollegeNotebook("Data Structures")
+  priyoTell(notebook.subjectName)
+}

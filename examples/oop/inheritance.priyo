@@ -1,0 +1,27 @@
+monalisa {
+  lisaaFamily YouTubeChannel {
+    lisaaTask init(channelName) {
+      priyoSelf.channelName = channelName
+    }
+
+    lisaaTask speak() {
+      priyoTell("New video uploaded")
+    }
+  }
+
+  lisaaFamily InstagramCreator lisaaInherit YouTubeChannel {
+    lisaaTask init(channelName, instaHandle) {
+      priyoParent.init(channelName)
+      priyoSelf.instaHandle = instaHandle
+    }
+
+    lisaaTask speak() {
+      priyoParent.speak()
+      priyoTell(priyoSelf.channelName + " posted a reel from " + priyoSelf.instaHandle)
+    }
+  }
+
+  priyoKeep creator = priyoCreate InstagramCreator("CampusVibes", "@campusvibes")
+  creator.speak()
+  priyoTell(creator.instaHandle)
+}

@@ -1,0 +1,15 @@
+monalisa {
+  lisaaFamily CollegePortal {
+    lisaaStable lisaaTask add(a, b) {
+      priyoGiveBack a + b
+    }
+
+    lisaaStable lisaaTask withTag(n) {
+      priyoGiveBack priyoSelf.tag + ": " + n
+    }
+  }
+
+  CollegePortal.tag = "CGPA"
+  priyoTell(CollegePortal.add(4, 6))
+  priyoTell(CollegePortal.withTag(10))
+}

@@ -1,0 +1,18 @@
+monalisa {
+  lisaaFamily AttendanceTracker {
+    lisaaTask init(startCount) {
+      priyoSelf.presentCount = startCount
+    }
+
+    lisaaTask markPresent() {
+      priyoSelf.presentCount = priyoSelf.presentCount + 1
+      priyoGiveBack priyoSelf.presentCount
+    }
+  }
+
+  priyoKeep attendance = priyoCreate AttendanceTracker(0)
+
+  prakritiCount (priyoChange i = 0; i < 3; i = i + 1) {
+    priyoTell(attendance.markPresent())
+  }
+}

@@ -96,6 +96,7 @@ const TokenType = {
   // Delimiters
   COMMA: 'COMMA',
   SEMICOLON: 'SEMICOLON',
+  DOT: 'DOT',
 
   // Brackets
   LPAREN: 'LPAREN',
