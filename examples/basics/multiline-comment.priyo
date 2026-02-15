@@ -1,0 +1,7 @@
+monalisa {
+  /*
+    This is a multi-line comment.
+    It should be ignored by the lexer.
+  */
+  priyoTell("Multi-line comments are working.")
+}

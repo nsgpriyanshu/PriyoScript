@@ -51,6 +51,23 @@ class Lexer {
     }
   }
 
+  skipBlockComment() {
+    // Current cursor is on '/' and next char is '*'
+    this.readChar() // move to '*'
+    this.readChar() // move to first char inside comment
+
+    while (this.ch !== '\0') {
+      if (this.ch === '*' && this.peekChar() === '/') {
+        this.readChar() // consume '*'
+        this.readChar() // consume '/'
+        return true
+      }
+      this.readChar()
+    }
+
+    return false
+  }
+
   readIdentifier() {
     const start = this.position
     while (/[a-zA-Z0-9_]/.test(this.ch)) {
@@ -85,6 +102,23 @@ class Lexer {
       this.skipWhitespace()
       if (this.ch === '/' && this.peekChar() === '/') {
         this.skipLineComment()
+        continue
+      }
+      if (this.ch === '/' && this.peekChar() === '*') {
+        const startLine = this.line
+        const startColumn = this.column
+        const isClosed = this.skipBlockComment()
+
+        if (!isClosed) {
+          return {
+            type: TokenType.ILLEGAL,
+            literal: '/*',
+            line: startLine,
+            column: startColumn,
+            message: 'Block comment was started with /* but never closed with */.',
+          }
+        }
+
         continue
       }
       break

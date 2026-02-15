@@ -20,6 +20,15 @@ Single-line comments are supported:
 // this is a comment
 ```
 
+Multi-line comments are also supported:
+
+```priyo
+/*
+  this is a
+  multi-line comment
+*/
+```
+
 ## 3. Variables
 
 ```priyo

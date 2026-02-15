@@ -1,0 +1,5 @@
+monalisa {
+  /*
+    This comment is never closed.
+  priyoTell("This should fail")
+}

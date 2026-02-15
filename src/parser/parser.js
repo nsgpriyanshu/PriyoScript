@@ -465,7 +465,12 @@ class Parser {
   parseExpressionStatement() {
     const expression = this.parseExpression()
     if (!expression) {
-      this.error(`Unexpected token ${this.curToken.type}`)
+      if (this.curToken && this.curToken.message) {
+        this.error(this.curToken.message)
+      } else {
+        const shown = this.curToken && this.curToken.literal ? this.curToken.literal : this.curToken.type
+        this.error(`Could not understand this part: "${shown}"`)
+      }
       this.nextToken()
       return null
     }
