@@ -77,7 +77,7 @@ function humanizeError(rawMessage) {
   }
 
   return {
-    message: 'Could not run this PriyoScript file due to a language/runtime error.',
+    message: 'Hmm - Could not run this PriyoScript file due to a language/runtime error.',
     tip: 'Read the detail line below and check that statement first.',
     detail: primaryLine,
   }

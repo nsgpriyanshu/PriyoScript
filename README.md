@@ -17,25 +17,37 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 - Node.js
 - JavaScript
 
+## Features
+
+- Custom, human-readable PriyoScript keywords (`monalisa`, `priyoKeep`, `lisaaTask`, etc.)
+- Entry-driven program structure with `monalisa { ... }`
+- Variables and scope:
+  - `priyoKeep` (function scope)
+  - `priyoChange` (block scope)
+  - `priyoPromise` (block scope, immutable binding)
+- Expressions:
+  - arithmetic, comparison, logical, grouping
+  - function/method calls and property access
+- Control flow:
+  - `prakritiIf`, `prakritiElseIf`, `prakritiElse`
+  - `prakritiAsLongAs` (while), `prakritiCount` (for)
+  - `prakritiStop` (break), `prakritiGoOn` (continue)
+- Functions:
+  - declarations, return values, closures, recursion
+- OOP:
+  - classes, inheritance, static members, `priyoSelf`, `priyoParent`
+- I/O builtins:
+  - `priyoTell(...)`
+  - typed input with `priyoListenSentence(...)` and `priyoListenNumber(...)`
+- Color output helpers:
+  - `priyoTell.Build(...)`, `priyoTell.Success(...)`, `priyoTell.Info(...)`, `priyoTell.Warn(...)`, `priyoTell.Error(...)`
+- Comments:
+  - single-line `// ...`
+  - multi-line `/* ... */`
+
 ## Language Reference
 
-For the current implemented syntax, see [`syntax.md`](syntax.md).
-
-## VS Code Syntax Highlighting
-
-VS Code syntax support for `.priyo` is available in [`editor/vscode-priyoscript`](editor/vscode-priyoscript).
-
-## Example Code
-
-```js
-monalisa {
-  priyoKeep name = "Priyanshu"
-  priyoPromise reply = priyoListen("Say something: ")
-  priyoTell("Hello")
-  priyoTell(name)
-  priyoTell(reply)
-}
-```
+For the current implemented syntax, see [`SYNTAX.md`](SYNTAX.md).
 
 ## Developer
 

@@ -1,0 +1,8 @@
+monalisa {
+  priyoTell("Normal console line")
+  priyoTell.Build("Build colored line")
+  priyoTell.Success("Success colored line")
+  priyoTell.Info("Info colored line")
+  priyoTell.Warn("Warn colored line")
+  priyoTell.Error("Error colored line")
+}

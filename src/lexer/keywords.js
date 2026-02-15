@@ -1,5 +1,6 @@
 const { TokenType } = require('./token')
 const keywordConfig = require('../config/keywords.json')
+const activeKeywordConfig = keywordConfig.implemented || keywordConfig
 
 const CONCEPT_TO_TOKEN = {
   entry: TokenType.ENTRY,
@@ -76,7 +77,7 @@ const CONCEPT_TO_TOKEN = {
   enum: TokenType.ENUM,
 }
 
-const KEYWORDS = Object.entries(keywordConfig).reduce((acc, [concept, lexeme]) => {
+const KEYWORDS = Object.entries(activeKeywordConfig).reduce((acc, [concept, lexeme]) => {
   const tokenType = CONCEPT_TO_TOKEN[concept]
   if (tokenType) {
     acc[lexeme] = tokenType

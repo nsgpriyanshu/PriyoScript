@@ -7,6 +7,7 @@ class VM {
     this.instructions = instructions
     this.environment = options.environment || new Environment(null, { isFunctionScope: true })
     this.builtins = options.builtins || createBuiltins(options.io)
+    this.registerBuiltinGlobals()
   }
 
   async run() {
@@ -283,10 +284,7 @@ class VM {
             const { name, argc } = instr.operand
             const args = argc === 0 ? [] : stack.splice(-argc)
             const receiver = stack.pop()
-            const result =
-              receiver && receiver.type === 'class'
-                ? await this.callStaticMethod(receiver, name, args)
-                : await this.callMethod(receiver, name, args)
+            const result = await this.callMember(receiver, name, args)
             stack.push(result == null ? null : result)
             break
           }
@@ -378,6 +376,29 @@ class VM {
 
     const result = await this.executeFrame(callee.instructions, callEnv, true)
     return result.value
+  }
+
+  async callMember(receiver, methodName, args) {
+    if (receiver && receiver.type === 'class') {
+      return this.callStaticMethod(receiver, methodName, args)
+    }
+
+    if (receiver && receiver.type === 'instance') {
+      return this.callMethod(receiver, methodName, args)
+    }
+
+    if (
+      receiver &&
+      (receiver.__priyoHostObject || typeof receiver === 'function' || typeof receiver === 'object')
+    ) {
+      const fn = receiver[methodName]
+      if (typeof fn !== 'function') {
+        throw new Error(`Method "${methodName}" not found on this object`)
+      }
+      return await fn(...args)
+    }
+
+    throw new Error(`Method call requires an instance/class/object for "${methodName}"`)
   }
 
   async callMethod(receiver, methodName, args, startClass = null) {
@@ -585,6 +606,13 @@ class VM {
       throw new Error(`Parent property "${propertyName}" not found`)
     }
 
+    if (object.__priyoHostObject || typeof object === 'function' || typeof object === 'object') {
+      if (propertyName in object) {
+        return object[propertyName]
+      }
+      throw new Error(`Property "${propertyName}" not found on this object`)
+    }
+
     throw new Error(`Property access is not supported on value type: ${typeof object}`)
   }
 
@@ -612,7 +640,22 @@ class VM {
       return
     }
 
+    if (object.__priyoHostObject || typeof object === 'function' || typeof object === 'object') {
+      object[propertyName] = value
+      return
+    }
+
     throw new Error(`Property assignment is not supported on value type: ${typeof object}`)
+  }
+
+  registerBuiltinGlobals() {
+    for (const [name, fn] of Object.entries(this.builtins)) {
+      try {
+        this.environment.define(name, fn, 'const')
+      } catch {
+        // Ignore redeclare collisions in reused environments.
+      }
+    }
   }
 }
 

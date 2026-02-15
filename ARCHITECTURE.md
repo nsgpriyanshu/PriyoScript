@@ -41,7 +41,7 @@ src/
     environment.js          # Lexical scopes and variable semantics
     builtins.js             # Builtin functions
   config/
-    keywords.json           # Priyo keyword vocabulary
+    keywords.json           # Priyo keyword vocabulary (implemented + planned)
   index.js                  # Dev runner entry
 bin/
   monalisa.js               # CLI entry
@@ -60,6 +60,7 @@ examples/
 
 - Entry block: `monalisa { ... }`
 - Single-line comments: `// ...`
+- Multi-line comments: `/* ... */`
 - Literals: number, string, boolean, null
 
 ### 4.2 Variables and scope
@@ -110,7 +111,13 @@ examples/
 
 ### 4.7 Builtins
 
-- Output: `priyoTell(...)`
+- Output:
+  - `priyoTell(...)`
+  - `priyoTell.Build(...)`
+  - `priyoTell.Success(...)`
+  - `priyoTell.Info(...)`
+  - `priyoTell.Warn(...)`
+  - `priyoTell.Error(...)`
 - Input:
   - `priyoListenSentence(...)`
   - `priyoListenNumber(...)`
@@ -134,6 +141,7 @@ examples/
 The following tokens/keywords exist partially or are reserved but not fully implemented:
 
 - Modules/import/export/package execution
+- Arrays/list literals and array methods
 - `switch/case/default`
 - `try/catch/finally/throw`
 - `async/await/yield`
@@ -142,8 +150,9 @@ The following tokens/keywords exist partially or are reserved but not fully impl
 
 ## 7. Near-Term Development Targets
 
-1. Add module loading + import/export runtime.
-2. Add structured error classes by stage (lexer/parser/compiler/vm).
-3. Add automated tests by pipeline layer (lexer/parser/compiler/vm integration).
-4. Expand OOP semantics (constructor chaining conventions, richer static/parent checks).
-5. Implement advanced control flow and exception handling.
+1. Add first-class array support (literal syntax, indexing, mutation helpers).
+2. Add package/module system (import/export/package runtime support).
+3. Add structured error classes by stage (lexer/parser/compiler/vm).
+4. Add automated tests by pipeline layer (lexer/parser/compiler/vm integration).
+5. Expand OOP semantics (constructor chaining conventions, richer static/parent checks).
+6. Implement advanced control flow and exception handling.
