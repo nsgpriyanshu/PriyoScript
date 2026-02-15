@@ -2,6 +2,8 @@
 
 An emotional, interpreted programming language built with Node.js.
 
+![Version](https://img.shields.io/github/package-json/v/nsgpriyanshu/PriyoScript?color=ff2056)
+
 ## Introduction
 
 PriyoScript is a simple, interpreted programming language created for fun and as a personal project inspired by a friend.

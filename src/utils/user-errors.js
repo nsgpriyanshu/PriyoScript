@@ -21,7 +21,7 @@ function humanizeError(rawMessage) {
     },
     {
       test: /can only be used inside functions/i,
-      userMessage: 'So Disrespectfull - Return is only valid inside a function.',
+      userMessage: 'So Disrespectfull - priyoGiveBack (Return) is only valid inside a lisaaTask (function).',
       tip: 'Use `priyoGiveBack` inside `lisaaTask ... { }`.',
     },
     {

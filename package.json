@@ -9,6 +9,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js examples/basics/main.priyo",
+    "run:examples": "node scripts/run-all.js",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
     "release": "cliff-jumper"
