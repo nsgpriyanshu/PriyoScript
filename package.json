@@ -23,12 +23,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nsgpriyanshu/priyoscript"
+    "url": "https://github.com/nsgpriyanshu/PriyoScript"
   },
   "bugs": {
-    "url": "https://github.com/nsgpriyanshu/priyoscript/issues"
+    "url": "https://github.com/nsgpriyanshu/PriyoScript/issues"
   },
-  "homepage": "https://nsgpriyanshu.github.io/priyoscript",
+  "homepage": "https://nsgpriyanshu.github.io/PriyoScript",
   "devDependencies": {
     "@commitlint/config-angular": "^20.4.1",
     "@eslint/js": "^10.0.1",

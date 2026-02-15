@@ -29,7 +29,7 @@ async function main() {
     const formatted = humanizeError(err.message)
     error(formatted.message)
     if (formatted.tip) {
-      info(`Tip: ${formatted.tip}`)
+      info(`FYI (Tip): ${formatted.tip}`)
     }
     if (formatted.detail) {
       info(`Details: ${formatted.detail}`)

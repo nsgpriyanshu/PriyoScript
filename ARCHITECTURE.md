@@ -153,7 +153,7 @@ The following tokens/keywords exist partially or are reserved but not fully impl
 - `interface`, `enum`, access modifiers
 - full `priyoParent` constructor chaining conventions beyond current method/property dispatch
 
-## 7. Near-Term Development Targets
+## 7. Near-Term Development Targets ( Under Development )
 
 1. Add first-class array support (literal syntax, indexing, mutation helpers).
 2. Add package/module system (import/export/package runtime support).

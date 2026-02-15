@@ -10,7 +10,7 @@ It combines elements of Python, JavaScript, C, and Java in its syntax and code s
 
 ## Motivation
 
-PriyoScript was inspired during a Data Analysis and Algorithm lab session. While struggling with C code, my friend suggested creating a programming language with personalized keywords. I decided to bring that idea to life using my knowledge and coding experience.
+PriyoScript was inspired during a Data Analysis and Algorithm lab session. While struggling with C code, my friend suggested creating a programming language with personalized keywords. I decided to bring that idea to life using my knowledge and coding experience. I want to make it an innovative, stand out language.
 
 ## Technology Used
 
@@ -19,7 +19,14 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 
 ## Features
 
-- Custom, human-readable PriyoScript keywords (`monalisa`, `priyoKeep`, `lisaaTask`, etc.)
+1. Easily readable syntax with a focus on simplicity and expressiveness.
+2. Support for variables, functions, control flow, and OOP concepts.
+3. Built-in I/O functions for user interaction.
+4. Colorful console output for better user experience.
+5. Comprehensive error handling with descriptive messages.
+6. Easily extendable architecture for adding new features and built-in functions.
+
+<!-- - Custom, human-readable PriyoScript keywords (`monalisa`, `priyoKeep`, `lisaaTask`, etc.)
 - Entry-driven program structure with `monalisa { ... }`
 - Variables and scope:
   - `priyoKeep` (function scope)
@@ -44,7 +51,46 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
   - `priyoTell.Build(...)`, `priyoTell.Success(...)`, `priyoTell.Info(...)`, `priyoTell.Warn(...)`, `priyoTell.Error(...)`
 - Comments:
   - single-line `// ...`
-  - multi-line `/* ... */`
+  - multi-line `/* ... */` -->
+
+[!IMPORTANT] PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. Its still lacks many features and has some quirks, but I plan to expand and improve it over time. However, the core syntax and design principles are already in place, and I am excited to share it with others as it evolves.
+
+## Inspiration
+
+PriyoScript is inspired by multiple mainstream languages but intentionally avoids some of their complexities and pitfalls.
+
+### Feature Comparison
+
+I took small small pieces from each language, but I also intentionally avoided some features to keep the language simple and clean. Here's a comparison of key features and design decisions:
+
+| Feature / Concept              | Python     | C        | JavaScript           | Java     | PriyoScript Decision            |
+| ------------------------------ | ---------- | -------- | -------------------- | -------- | ------------------------------- |
+| Simple Readable Syntax         | ✔️         | ❌       | ✔️                   | ❌       | ✔️ Adopted (Clean & Structured) |
+| Dynamic Typing                 | ✔️         | ❌       | ✔️                   | ❌       | ✔️ Adopted                      |
+| Static Typing                  | ❌         | ✔️       | ❌                   | ✔️       | ❌ Avoided (for simplicity)     |
+| Manual Memory Management       | ❌         | ✔️       | ❌                   | ❌       | ❌ Avoided                      |
+| Strict OOP Structure           | ⚠️ Partial | ❌       | ⚠️ Prototype-based   | ✔️       | ✔️ Adopted (Class-based only)   |
+| Prototype-Based OOP            | ❌         | ❌       | ✔️                   | ❌       | ❌ Intentionally Avoided        |
+| Deterministic Execution        | ✔️         | ✔️       | ❌ (coercion quirks) | ✔️       | ✔️ Adopted                      |
+| Implicit Type Coercion         | ❌         | ❌       | ✔️                   | ❌       | ❌ Intentionally Avoided        |
+| Block Scope                    | ✔️         | ✔️       | ✔️ (let/const)       | ✔️       | ✔️ Adopted                      |
+| Function Closures              | ✔️         | ❌       | ✔️                   | ✔️       | ✔️ Adopted                      |
+| Structured Error Handling      | ✔️         | ⚠️ Basic | ✔️                   | ✔️       | ✔️ Implemented                  |
+| Built-in Rich Standard Library | ✔️         | ❌       | ✔️                   | ✔️       | ⚠️ Minimal (planned expansion)  |
+| Low-level Pointer Access       | ❌         | ✔️       | ❌                   | ❌       | ❌ Intentionally Avoided        |
+| Bytecode VM Architecture       | ✔️         | ❌       | ✔️ (V8 engine)       | ✔️ (JVM) | ✔️ Adopted                      |
+| Concurrency Model              | ✔️         | ✔️       | ✔️                   | ✔️       | ❌ Not yet implemented          |
+| Strict Compile-time Checks     | ❌         | ✔️       | ❌                   | ✔️       | ❌ Currently Dynamic Only       |
+| Verbose Syntax                 | ❌         | ⚠️       | ❌                   | ✔️       | ⚠️ Moderately Structured        |
+
+### Design Philosophy
+
+| Language       | What PriyoScript Took                          | What PriyoScript Avoided                    |
+| -------------- | ---------------------------------------------- | ------------------------------------------- |
+| **Python**     | Readability, dynamic typing, simple I/O        | Indentation-based blocks                    |
+| **C**          | Clear operator behavior, predictable execution | Pointers, manual memory, undefined behavior |
+| **JavaScript** | Flexible functions, dynamic runtime            | Type coercion quirks, prototype model       |
+| **Java**       | Strong class-based OOP, structured design      | Heavy verbosity, strict type declarations   |
 
 ## Language Reference
 
