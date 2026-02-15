@@ -1,0 +1,21 @@
+monalisa {
+  lisaaFamily Human {
+    lisaaTask init(name) {
+      priyoSelf.name = name
+    }
+  }
+
+  lisaaFamily CollegeInfluencer lisaaInherit Human {
+    lisaaTask init(name, platform) {
+      priyoParent(name)
+      priyoSelf.platform = platform
+    }
+
+    lisaaTask intro() {
+      priyoTell(priyoSelf.name + " creates content on " + priyoSelf.platform)
+    }
+  }
+
+  priyoKeep creator = priyoCreate CollegeInfluencer("Riya", "YouTube")
+  creator.intro()
+}

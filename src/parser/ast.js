@@ -97,10 +97,11 @@ class ReturnStatement {
 }
 
 class ClassDeclaration {
-  constructor(name, methods, superClass = null) {
+  constructor(name, methods, fields = [], superClass = null) {
     this.type = 'ClassDeclaration'
     this.name = name
     this.methods = methods
+    this.fields = fields
     this.superClass = superClass
   }
 }
@@ -111,6 +112,16 @@ class MethodDeclaration {
     this.name = name
     this.params = params
     this.body = body
+    this.isStatic = isStatic
+  }
+}
+
+class ClassFieldDeclaration {
+  constructor(name, kind, initializer, isStatic = false) {
+    this.type = 'ClassFieldDeclaration'
+    this.name = name
+    this.kind = kind
+    this.initializer = initializer
     this.isStatic = isStatic
   }
 }
@@ -219,6 +230,7 @@ module.exports = {
   ReturnStatement,
   ClassDeclaration,
   MethodDeclaration,
+  ClassFieldDeclaration,
   BinaryExpression,
   UnaryExpression,
   ThisExpression,

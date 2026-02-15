@@ -1,0 +1,21 @@
+monalisa {
+  lisaaFamily CollegeMember {
+    lisaaTask init(name) {
+      priyoSelf.memberName = name
+    }
+  }
+
+  lisaaFamily ClubLead lisaaInherit CollegeMember {
+    lisaaTask rename(newName) {
+      priyoParent.memberName = newName
+    }
+
+    lisaaTask reveal() {
+      priyoTell(priyoSelf.memberName)
+    }
+  }
+
+  priyoKeep lead = priyoCreate ClubLead("Ari")
+  lead.rename("Ananya")
+  lead.reveal()
+}

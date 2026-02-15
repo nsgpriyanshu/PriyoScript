@@ -1,0 +1,19 @@
+monalisa {
+  lisaaFamily CollegeStudent {
+    priyoKeep campus = "NSEC"
+    priyoPromise role = "Student"
+    lisaaStable priyoKeep portal = "Main Portal"
+
+    lisaaTask init(studentName) {
+      priyoSelf.studentName = studentName
+    }
+
+    lisaaTask intro() {
+      priyoTell(priyoSelf.studentName + " - " + priyoSelf.role + " - " + priyoSelf.campus)
+    }
+  }
+
+  priyoKeep student = priyoCreate CollegeStudent("Priyanshu")
+  student.intro()
+  priyoTell(CollegeStudent.portal)
+}

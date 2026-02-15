@@ -241,11 +241,29 @@ class Compiler {
         instructions: this.compileCallableBody(method.body),
       }))
 
+    const instanceFields = (stmt.fields || [])
+      .filter(field => !field.isStatic)
+      .map(field => ({
+        name: field.name.name,
+        kind: field.kind,
+        instructions: this.compileInitializerThunk(field.initializer),
+      }))
+
+    const staticFields = (stmt.fields || [])
+      .filter(field => field.isStatic)
+      .map(field => ({
+        name: field.name.name,
+        kind: field.kind,
+        instructions: this.compileInitializerThunk(field.initializer),
+      }))
+
     this.emit(OpCode.DEFINE_CLASS, {
       name: stmt.name.name,
       superClassName: stmt.superClass ? stmt.superClass.name : null,
       methods: instanceMethods,
       staticMethods,
+      instanceFields,
+      staticFields,
     })
   }
 
@@ -255,6 +273,13 @@ class Compiler {
     callableCompiler.emit(OpCode.PUSH_NULL)
     callableCompiler.emit(OpCode.RETURN)
     return callableCompiler.instructions
+  }
+
+  compileInitializerThunk(initializerExpression) {
+    const initializerCompiler = new Compiler()
+    initializerCompiler.compileExpression(initializerExpression)
+    initializerCompiler.emit(OpCode.RETURN)
+    return initializerCompiler.instructions
   }
 
   compileReturnStatement(stmt) {
@@ -329,6 +354,17 @@ class Compiler {
       }
       this.emit(OpCode.CALL_NAMED, {
         name: expr.callee.name,
+        argc: expr.arguments.length,
+      })
+      return
+    }
+
+    if (expr.callee.type === 'SuperExpression') {
+      for (const arg of expr.arguments) {
+        this.compileExpression(arg)
+      }
+      this.emit(OpCode.CALL_SUPER_METHOD, {
+        name: 'init',
         argc: expr.arguments.length,
       })
       return

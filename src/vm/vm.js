@@ -224,6 +224,9 @@ class VM {
               methods,
               staticMethods,
               staticFields: new Map(),
+              staticFieldKinds: new Map(),
+              instanceFieldInitializers: instr.operand.instanceFields || [],
+              definitionEnv: this.environment,
               superClass,
             }
 
@@ -231,6 +234,7 @@ class VM {
               method.ownerClass = classObj
             }
             this.environment.define(instr.operand.name, classObj, 'const')
+            await this.applyStaticFieldInitializers(classObj, instr.operand.staticFields || [])
             break
           }
 
@@ -246,7 +250,10 @@ class VM {
               type: 'instance',
               classRef: classObj,
               fields: new Map(),
+              constFields: new Set(),
             }
+
+            await this.applyInstanceFieldInitializers(instance)
 
             if (this.findMethod(classObj, 'init')) {
               await this.callMethod(instance, 'init', args)
@@ -516,6 +523,71 @@ class VM {
     return null
   }
 
+  collectClassChain(classObj) {
+    const chain = []
+    let cursor = classObj
+    while (cursor) {
+      chain.push(cursor)
+      cursor = cursor.superClass
+    }
+    return chain.reverse()
+  }
+
+  async evaluateInitializer(instructions, ownerClass, receiver, isStatic) {
+    const callEnv = new Environment(ownerClass.definitionEnv || this.environment, {
+      isFunctionScope: true,
+    })
+    callEnv.define('priyoSelf', receiver, 'const')
+    callEnv.define('__priyoCurrentClass', ownerClass, 'const')
+    callEnv.define(
+      '__priyoSuperMarker',
+      {
+        type: 'super_ref',
+        receiver,
+        startClass: ownerClass.superClass,
+        isStatic,
+      },
+      'const',
+    )
+    const result = await this.executeFrame(instructions, callEnv, true)
+    return result.value
+  }
+
+  async applyStaticFieldInitializers(classObj, staticFieldDefs) {
+    for (const field of staticFieldDefs) {
+      const value = await this.evaluateInitializer(field.instructions, classObj, classObj, true)
+      classObj.staticFields.set(field.name, value)
+      classObj.staticFieldKinds.set(field.name, field.kind)
+    }
+  }
+
+  async applyInstanceFieldInitializers(instance) {
+    const classChain = this.collectClassChain(instance.classRef)
+    for (const classObj of classChain) {
+      for (const field of classObj.instanceFieldInitializers || []) {
+        const value = await this.evaluateInitializer(field.instructions, classObj, instance, false)
+        instance.fields.set(field.name, value)
+        if (field.kind === 'const') {
+          instance.constFields.add(field.name)
+        } else {
+          instance.constFields.delete(field.name)
+        }
+      }
+    }
+  }
+
+  findStaticFieldOwner(classObj, propertyName) {
+    // Static fields can be inherited; walk up the class chain.
+    let cursor = classObj
+    while (cursor) {
+      if (cursor.staticFields && cursor.staticFields.has(propertyName)) {
+        return cursor
+      }
+      cursor = cursor.superClass
+    }
+    return null
+  }
+
   createMethodMap(methodList) {
     const methods = new Map()
     for (const method of methodList) {
@@ -553,8 +625,9 @@ class VM {
     }
 
     if (object.type === 'class') {
-      if (object.staticFields.has(propertyName)) {
-        return object.staticFields.get(propertyName)
+      const staticFieldOwner = this.findStaticFieldOwner(object, propertyName)
+      if (staticFieldOwner) {
+        return staticFieldOwner.staticFields.get(propertyName)
       }
 
       if (this.findStaticMethod(object, propertyName)) {
@@ -583,8 +656,10 @@ class VM {
           }
         }
 
-        if (object.receiver.staticFields.has(propertyName)) {
-          return object.receiver.staticFields.get(propertyName)
+        // priyoParent.someStatic should resolve from parent side, not child side.
+        const superFieldOwner = this.findStaticFieldOwner(object.startClass, propertyName)
+        if (superFieldOwner) {
+          return superFieldOwner.staticFields.get(propertyName)
         }
 
         throw new Error(`Parent static property "${propertyName}" not found`)
@@ -622,19 +697,49 @@ class VM {
     }
 
     if (object.type === 'instance') {
+      if (
+        object.constFields &&
+        object.constFields.has(propertyName) &&
+        object.fields.has(propertyName)
+      ) {
+        throw new Error(`Cannot reassign constant field "${propertyName}"`)
+      }
       object.fields.set(propertyName, value)
       return
     }
 
     if (object.type === 'class') {
+      if (
+        object.staticFieldKinds.get(propertyName) === 'const' &&
+        object.staticFields.has(propertyName)
+      ) {
+        throw new Error(`Cannot reassign constant static field "${propertyName}"`)
+      }
       object.staticFields.set(propertyName, value)
       return
     }
 
     if (object.type === 'super_ref') {
       if (object.isStatic) {
-        object.receiver.staticFields.set(propertyName, value)
+        if (!object.startClass) {
+          throw new Error('priyoParent has no parent class')
+        }
+        if (
+          object.startClass.staticFieldKinds.get(propertyName) === 'const' &&
+          object.startClass.staticFields.has(propertyName)
+        ) {
+          throw new Error(`Cannot reassign constant static field "${propertyName}"`)
+        }
+        // Writes through priyoParent in static context target the parent class storage.
+        object.startClass.staticFields.set(propertyName, value)
         return
+      }
+      if (
+        object.receiver.constFields &&
+        object.receiver.constFields.has(propertyName) &&
+        object.receiver.fields.has(propertyName)
+      ) {
+        throw new Error(`Cannot reassign constant field "${propertyName}"`)
       }
       object.receiver.fields.set(propertyName, value)
       return

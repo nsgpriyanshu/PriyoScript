@@ -103,11 +103,16 @@ examples/
 - Instance methods with `priyoSelf`
 - Inheritance: `lisaaInherit`
 - Parent calls:
+  - parent constructor shorthand: `priyoParent(...)`
   - parent method: `priyoParent.method(...)`
   - parent property access: `priyoParent.field`
+  - parent property write: `priyoParent.field = ...`
 - Static members:
   - static method declaration: `lisaaStable lisaaTask ...`
   - static field read/write via class object
+- Class fields:
+  - instance fields declared directly inside class body
+  - static fields declared with `lisaaStable`
 
 ### 4.7 Builtins
 

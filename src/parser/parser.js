@@ -16,6 +16,7 @@ const {
   ReturnStatement,
   ClassDeclaration,
   MethodDeclaration,
+  ClassFieldDeclaration,
   BinaryExpression,
   UnaryExpression,
   ThisExpression,
@@ -38,6 +39,7 @@ class Parser {
     this.errors = []
     this.loopDepth = 0
     this.functionDepth = 0
+    this.classMethodDepth = 0
 
     this.nextToken()
     this.nextToken()
@@ -142,29 +144,77 @@ class Parser {
         return null
       }
       superClass = new Identifier(this.curToken.literal)
+      if (superClass.name === name.name) {
+        this.error('A class cannot inherit from itself')
+        return null
+      }
       this.nextToken()
     }
 
     if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" after class name')) return null
 
     const methods = []
+    const fields = []
+    const instanceMemberNames = new Set()
+    const staticMemberNames = new Set()
     while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
-      const method = this.parseMethodDeclaration()
-      if (!method) return null
-      methods.push(method)
+      const member = this.parseClassMember()
+      if (!member) return null
+
+      if (member.type === 'MethodDeclaration') {
+        const seenNames = member.isStatic ? staticMemberNames : instanceMemberNames
+        if (seenNames.has(member.name.name)) {
+          this.error(
+            `Duplicate ${member.isStatic ? 'static ' : ''}member "${member.name.name}" in class "${name.name}"`,
+          )
+          return null
+        }
+        seenNames.add(member.name.name)
+        methods.push(member)
+      } else if (member.type === 'ClassFieldDeclaration') {
+        const seenNames = member.isStatic ? staticMemberNames : instanceMemberNames
+        if (seenNames.has(member.name.name)) {
+          this.error(
+            `Duplicate ${member.isStatic ? 'static ' : ''}member "${member.name.name}" in class "${name.name}"`,
+          )
+          return null
+        }
+        seenNames.add(member.name.name)
+        fields.push(member)
+      } else {
+        this.error('Unknown class member')
+        return null
+      }
     }
 
     if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" to close class')) return null
-    return new ClassDeclaration(name, methods, superClass)
+    return new ClassDeclaration(name, methods, fields, superClass)
   }
 
-  parseMethodDeclaration() {
+  parseClassMember() {
     let isStatic = false
     if (this.curToken.type === TokenType.STATIC) {
       isStatic = true
       this.nextToken()
     }
 
+    if (this.curToken.type === TokenType.FUNCTION) {
+      return this.parseMethodDeclaration(isStatic)
+    }
+
+    if (
+      this.curToken.type === TokenType.VAR ||
+      this.curToken.type === TokenType.LET ||
+      this.curToken.type === TokenType.CONST
+    ) {
+      return this.parseClassFieldDeclaration(isStatic)
+    }
+
+    this.error('Class member must be a method or field declaration')
+    return null
+  }
+
+  parseMethodDeclaration(isStatic = false) {
     if (!this.consumeCurrent(TokenType.FUNCTION, 'Expected lisaaTask for class method')) return null
 
     if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected method name')) {
@@ -180,11 +230,46 @@ class Parser {
     if (!params) return null
 
     this.functionDepth++
+    // Track class-method context so priyoSelf/priyoParent are validated.
+    this.classMethodDepth++
     const body = this.parseBlockStatement()
+    this.classMethodDepth--
     this.functionDepth--
     if (!body) return null
 
     return new MethodDeclaration(name, params, body, isStatic)
+  }
+
+  parseClassFieldDeclaration(isStatic = false) {
+    const kindByToken = {
+      [TokenType.VAR]: 'var',
+      [TokenType.LET]: 'let',
+      [TokenType.CONST]: 'const',
+    }
+
+    const kind = kindByToken[this.curToken.type]
+    this.nextToken()
+
+    if (
+      !this.expectCurrent(TokenType.IDENTIFIER, 'Expected field name after declaration keyword')
+    ) {
+      this.nextToken()
+      return null
+    }
+    const name = new Identifier(this.curToken.literal)
+    this.nextToken()
+
+    let initializer = new NullLiteral()
+    if (this.curToken.type === TokenType.ASSIGN) {
+      this.nextToken()
+      initializer = this.parseExpression()
+      if (!initializer) return null
+    } else if (kind === 'const') {
+      this.error('Constant field declaration requires an initializer')
+      return null
+    }
+
+    return new ClassFieldDeclaration(name, kind, initializer, isStatic)
   }
 
   parseFunctionDeclaration() {
@@ -290,13 +375,25 @@ class Parser {
       target = new Identifier(this.curToken.literal)
       this.nextToken()
     } else if (this.curToken.type === TokenType.THIS) {
+      if (this.classMethodDepth === 0) {
+        this.error('priyoSelf can only be used inside class methods')
+        return null
+      }
       target = new ThisExpression()
+      this.nextToken()
+    } else if (this.curToken.type === TokenType.SUPER) {
+      if (this.classMethodDepth === 0) {
+        this.error('priyoParent can only be used inside class methods')
+        return null
+      }
+      target = new SuperExpression()
       this.nextToken()
     } else {
       this.error('Invalid assignment target')
       return null
     }
 
+    // Allow nested member targets like priyoSelf.profile.name = ...
     while (this.curToken.type === TokenType.DOT) {
       this.nextToken()
       if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected property name after "."')) return null
@@ -463,14 +560,17 @@ class Parser {
   }
 
   parseExpressionStatement() {
+    const errorCountBefore = this.errors.length
     const expression = this.parseExpression()
     if (!expression) {
-      if (this.curToken && this.curToken.message) {
-        this.error(this.curToken.message)
-      } else {
-        const shown =
-          this.curToken && this.curToken.literal ? this.curToken.literal : this.curToken.type
-        this.error(`Could not understand this part: "${shown}"`)
+      if (this.errors.length === errorCountBefore) {
+        if (this.curToken && this.curToken.message) {
+          this.error(this.curToken.message)
+        } else {
+          const shown =
+            this.curToken && this.curToken.literal ? this.curToken.literal : this.curToken.type
+          this.error(`Could not understand this part: "${shown}"`)
+        }
       }
       this.nextToken()
       return null
@@ -593,10 +693,18 @@ class Parser {
         return new NullLiteral()
 
       case TokenType.THIS:
+        if (this.classMethodDepth === 0) {
+          this.error('priyoSelf can only be used inside class methods')
+          return null
+        }
         this.nextToken()
         return new ThisExpression()
 
       case TokenType.SUPER:
+        if (this.classMethodDepth === 0) {
+          this.error('priyoParent can only be used inside class methods')
+          return null
+        }
         this.nextToken()
         return new SuperExpression()
 
@@ -629,9 +737,12 @@ class Parser {
   parseArgumentList() {
     const args = []
     while (this.curToken.type !== TokenType.RPAREN && this.curToken.type !== TokenType.EOF) {
+      const errorCountBefore = this.errors.length
       const arg = this.parseExpression()
       if (!arg) {
-        this.error('Invalid function argument')
+        if (this.errors.length === errorCountBefore) {
+          this.error('Invalid function argument')
+        }
         return null
       }
       args.push(arg)
@@ -677,10 +788,15 @@ class Parser {
   }
 
   isAssignmentStatementStart() {
-    if (this.curToken.type !== TokenType.IDENTIFIER && this.curToken.type !== TokenType.THIS) {
+    if (
+      this.curToken.type !== TokenType.IDENTIFIER &&
+      this.curToken.type !== TokenType.THIS &&
+      this.curToken.type !== TokenType.SUPER
+    ) {
       return false
     }
 
+    // Lightweight lookahead to decide if this starts an assignment target.
     const lexerSnapshot = {
       position: this.lexer.position,
       readPosition: this.lexer.readPosition,

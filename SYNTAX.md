@@ -222,15 +222,17 @@ Notes:
 - `priyoSelf` is available inside class methods.
 - Methods are declared with `lisaaTask` inside `lisaaFamily`.
 - Inheritance is supported with `lisaaInherit`.
+- Parent constructor shorthand is supported with `priyoParent(...)` inside child `init(...)`.
 - Parent method call is supported with `priyoParent.method(...)`.
 - Parent property access is supported with `priyoParent.property`.
+- Parent property write is supported with `priyoParent.property = value`.
 
 Inheritance example:
 
 ```priyo
 lisaaFamily InstagramCreator lisaaInherit YouTubeChannel {
   lisaaTask init(name) {
-    priyoParent.init(name)
+    priyoParent(name)
   }
 }
 ```
@@ -247,6 +249,15 @@ lisaaFamily CollegePortal {
 CollegePortal.tag = "CGPA"
 priyoTell(CollegePortal.add(4, 6))
 priyoTell(CollegePortal.tag)
+```
+
+Class field declarations:
+
+```priyo
+lisaaFamily CollegeStudent {
+  priyoKeep campus = "NSEC"                 // instance field
+  lisaaStable priyoKeep portal = "Main"     // static field
+}
 ```
 
 ## 13. Current Limitations

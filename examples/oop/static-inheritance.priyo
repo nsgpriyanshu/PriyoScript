@@ -1,0 +1,23 @@
+monalisa {
+  lisaaFamily CollegePortal {
+    lisaaStable lisaaTask getLabel() {
+      priyoGiveBack priyoSelf.label
+    }
+  }
+
+  lisaaFamily DepartmentPortal lisaaInherit CollegePortal {
+    lisaaStable lisaaTask getParentLabel() {
+      priyoGiveBack priyoParent.label
+    }
+
+    lisaaStable lisaaTask updateParentLabel(next) {
+      priyoParent.label = next
+    }
+  }
+
+  CollegePortal.label = "Admissions"
+  priyoTell(DepartmentPortal.getLabel())
+  priyoTell(DepartmentPortal.getParentLabel())
+  DepartmentPortal.updateParentLabel("Scholarships")
+  priyoTell(CollegePortal.label)
+}

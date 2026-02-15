@@ -35,7 +35,8 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 - Functions:
   - declarations, return values, closures, recursion
 - OOP:
-  - classes, inheritance, static members, `priyoSelf`, `priyoParent`
+  - classes, inheritance, static members, class fields, `priyoSelf`, `priyoParent`
+  - parent constructor shorthand: `priyoParent(...)`
 - I/O builtins:
   - `priyoTell(...)`
   - typed input with `priyoListenSentence(...)` and `priyoListenNumber(...)`
