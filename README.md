@@ -55,7 +55,8 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
   - single-line `// ...`
   - multi-line `/* ... */` -->
 
-[!IMPORTANT] PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. Its still lacks many features and has some quirks, but I plan to expand and improve it over time. However, the core syntax and design principles are already in place, and I am excited to share it with others as it evolves.
+> [!IMPORTANT] 
+> PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. Its still lacks many features and has some quirks, but I plan to expand and improve it over time. However, the core syntax and design principles are already in place, and I am excited to share it with others as it evolves.
 
 ## Inspiration
 
@@ -67,23 +68,23 @@ I took small small pieces from each language, but I also intentionally avoided s
 
 | Feature / Concept              | Python     | C        | JavaScript           | Java     | PriyoScript Decision            |
 | ------------------------------ | ---------- | -------- | -------------------- | -------- | ------------------------------- |
-| Simple Readable Syntax         | ✔️         | ❌       | ✔️                   | ❌       | ✔️ Adopted (Clean & Structured) |
-| Dynamic Typing                 | ✔️         | ❌       | ✔️                   | ❌       | ✔️ Adopted                      |
-| Static Typing                  | ❌         | ✔️       | ❌                   | ✔️       | ❌ Avoided (for simplicity)     |
-| Manual Memory Management       | ❌         | ✔️       | ❌                   | ❌       | ❌ Avoided                      |
-| Strict OOP Structure           | ⚠️ Partial | ❌       | ⚠️ Prototype-based   | ✔️       | ✔️ Adopted (Class-based only)   |
-| Prototype-Based OOP            | ❌         | ❌       | ✔️                   | ❌       | ❌ Intentionally Avoided        |
-| Deterministic Execution        | ✔️         | ✔️       | ❌ (coercion quirks) | ✔️       | ✔️ Adopted                      |
-| Implicit Type Coercion         | ❌         | ❌       | ✔️                   | ❌       | ❌ Intentionally Avoided        |
-| Block Scope                    | ✔️         | ✔️       | ✔️ (let/const)       | ✔️       | ✔️ Adopted                      |
-| Function Closures              | ✔️         | ❌       | ✔️                   | ✔️       | ✔️ Adopted                      |
-| Structured Error Handling      | ✔️         | ⚠️ Basic | ✔️                   | ✔️       | ✔️ Implemented                  |
-| Built-in Rich Standard Library | ✔️         | ❌       | ✔️                   | ✔️       | ⚠️ Minimal (planned expansion)  |
-| Low-level Pointer Access       | ❌         | ✔️       | ❌                   | ❌       | ❌ Intentionally Avoided        |
-| Bytecode VM Architecture       | ✔️         | ❌       | ✔️ (V8 engine)       | ✔️ (JVM) | ✔️ Adopted                      |
-| Concurrency Model              | ✔️         | ✔️       | ✔️                   | ✔️       | ❌ Not yet implemented          |
-| Strict Compile-time Checks     | ❌         | ✔️       | ❌                   | ✔️       | ❌ Currently Dynamic Only       |
-| Verbose Syntax                 | ❌         | ⚠️       | ❌                   | ✔️       | ⚠️ Moderately Structured        |
+| Simple Readable Syntax         | ✅         | ❌       | ✅                   | ❌       | ✅ Adopted (Clean & Structured) |
+| Dynamic Typing                 | ✅         | ❌       | ✅                   | ❌       | ✅ Adopted                      |
+| Static Typing                  | ❌         | ✅       | ❌                   | ✅       | ❌ Avoided (for simplicity)     |
+| Manual Memory Management       | ❌         | ✅       | ❌                   | ❌       | ❌ Avoided                      |
+| Strict OOP Structure           | ⚠️ Partial | ❌       | ⚠️ Prototype-based   | ✅       | ✅ Adopted (Class-based only)   |
+| Prototype-Based OOP            | ❌         | ❌       | ✅                   | ❌       | ❌ Intentionally Avoided        |
+| Deterministic Execution        | ✅         | ✅       | ❌ (coercion quirks) | ✅       | ✅ Adopted                      |
+| Implicit Type Coercion         | ❌         | ❌       | ✅                   | ❌       | ❌ Intentionally Avoided        |
+| Block Scope                    | ✅         | ✅       | ✅ (let/const)       | ✅       | ✅ Adopted                      |
+| Function Closures              | ✅         | ❌       | ✅                   | ✅       | ✅ Adopted                      |
+| Structured Error Handling      | ✅         | ⚠️ Basic | ✅                   | ✅       | ✅ Implemented                  |
+| Built-in Rich Standard Library | ✅         | ❌       | ✅                   | ✅       | ⚠️ Minimal (planned expansion)  |
+| Low-level Pointer Access       | ❌         | ✅       | ❌                   | ❌       | ❌ Intentionally Avoided        |
+| Bytecode VM Architecture       | ✅         | ❌       | ✅ (V8 engine)       | ✅ (JVM) | ✅ Adopted                      |
+| Concurrency Model              | ✅         | ✅       | ✅                   | ✅       | ❌ Not yet implemented          |
+| Strict Compile-time Checks     | ❌         | ✅       | ❌                   | ✅       | ❌ Currently Dynamic Only       |
+| Verbose Syntax                 | ❌         | ⚠️       | ❌                   | ✅       | ⚠️ Moderately Structured        |
 
 ### Design Philosophy
 
