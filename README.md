@@ -31,6 +31,37 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.
 
+## Installation
+
+### Global CLI install (recommended)
+
+After publishing to npm:
+
+```bash
+npm install -g priyoscript
+```
+
+Run:
+
+```bash
+monalisa -v
+monalisa -h
+monalisa your-file.priyo
+```
+
+### Install directly from GitHub
+
+```bash
+npm install -g github:nsgpriyanshu/PriyoScript
+```
+
+### Local development install
+
+```bash
+npm install
+npm start
+```
+
 ## Inspiration
 
 PriyoScript is inspired by multiple mainstream languages but intentionally avoids some of their complexity.

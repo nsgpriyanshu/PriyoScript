@@ -3,9 +3,22 @@
   "version": "1.5.0",
   "description": "An emotional, interpreted programming language.",
   "type": "commonjs",
+  "preferGlobal": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bin": {
     "monalisa": "./bin/monalisa.js"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "packages/",
+    "SYNTAX.md",
+    "ARCHITECTURE.md",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js examples/basics/main.priyo",

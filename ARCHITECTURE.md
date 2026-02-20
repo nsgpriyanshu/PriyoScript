@@ -214,3 +214,5 @@ Planned development sequence:
    - stronger constructor-chain validation and stricter member checks.
 6. Add async and advanced runtime capabilities:
    - staged support for `async/await` and future concurrency primitives.
+7. Add native distribution channels:
+   - standalone binaries/installers for Windows/macOS/Linux (beyond npm global install).
