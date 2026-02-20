@@ -113,6 +113,14 @@ class ReturnStatement {
   }
 }
 
+class ImportStatement {
+  constructor(source, localName = null) {
+    this.type = 'ImportStatement'
+    this.source = source
+    this.localName = localName || source
+  }
+}
+
 class TryStatement {
   constructor(block, handler = null, finalizer = null) {
     this.type = 'TryStatement'
@@ -271,6 +279,7 @@ module.exports = {
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  ImportStatement,
   TryStatement,
   CatchClause,
   ThrowStatement,

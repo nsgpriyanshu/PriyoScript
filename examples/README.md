@@ -7,6 +7,7 @@ Examples are grouped by language area:
 - `control-flow/`: conditionals, switch/case, loops, break/continue, try/catch/finally/throw
 - `functions/`: function declarations, closures, recursion
 - `oop/`: classes, inheritance, static members
+- `packages/`: built-in package manager and package usage
 - `scopes/`: block/function scope behavior and scope errors
 
 Run any file with:

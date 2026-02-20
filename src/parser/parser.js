@@ -17,6 +17,7 @@ const {
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  ImportStatement,
   TryStatement,
   CatchClause,
   ThrowStatement,
@@ -108,6 +109,7 @@ class Parser {
 
   parseStatement() {
     if (this.curToken.type === TokenType.CLASS) return this.parseClassDeclaration()
+    if (this.curToken.type === TokenType.IMPORT) return this.parseImportStatement()
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
     if (this.curToken.type === TokenType.THROW) return this.parseThrowStatement()
     if (this.curToken.type === TokenType.TRY) return this.parseTryStatement()
@@ -302,6 +304,24 @@ class Parser {
     if (!body) return null
 
     return new FunctionDeclaration(name, params, body)
+  }
+
+  parseImportStatement() {
+    this.nextToken()
+
+    if (
+      this.curToken.type !== TokenType.IDENTIFIER &&
+      this.curToken.type !== TokenType.STRING &&
+      this.curToken.type !== TokenType.PRINT &&
+      this.curToken.type !== TokenType.INPUT
+    ) {
+      this.error('Expected package name after lisaaBring')
+      return null
+    }
+
+    const source = this.curToken.literal
+    this.nextToken()
+    return new ImportStatement(source)
   }
 
   parseParameterList() {

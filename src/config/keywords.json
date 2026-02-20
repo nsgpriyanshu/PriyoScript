@@ -17,6 +17,7 @@
 
     "new": "priyoCreate",
     "return": "priyoGiveBack",
+    "import": "lisaaBring",
 
     "if": "prakritiIf",
     "elif": "prakritiElseIf",
@@ -46,7 +47,6 @@
 
     "debugger": "prakritiThink",
 
-    "import": "lisaaBring",
     "export": "lisaaShare",
     "package": "lisaaBox",
 

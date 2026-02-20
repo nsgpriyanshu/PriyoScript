@@ -1,0 +1,5 @@
+monalisa {
+  priyoTell("Available packages:")
+  priyoTell(priyoPackage.list())
+  priyoTell("Has math? " + priyoPackage.has("math"))
+}

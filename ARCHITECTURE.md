@@ -40,6 +40,8 @@ src/
   runtime/
     environment.js          # Lexical scopes and variable semantics
     builtins.js             # Builtin functions
+  packages/
+    registry.js             # Built-in package manager registry
   errors/
     priyo-error.js          # Typed throwable error objects
     codes.js                # Stable error codes and stage/category enums
@@ -51,6 +53,9 @@ src/
   index.js                  # Dev runner entry
 bin/
   monalisa.js               # CLI entry
+packages/
+  math/
+    index.js                # Built-in math package (phase-1 package system)
 examples/
   basics/
   io/
@@ -135,6 +140,12 @@ examples/
   - `priyoListenSentence(...)`
   - `priyoListenNumber(...)`
   - `priyoListen(...)` (compatibility alias)
+- Package manager:
+  - `priyoPackage.list()`
+  - `priyoPackage.has(name)`
+  - `priyoPackage.use(name)`
+  - `lisaaBring <packageName>` (syntactic sugar for built-in package loading)
+  - current built-in package: `math` (acts as phase-1 template for upcoming array package)
 
 ## 5. Runtime Model
 
@@ -166,18 +177,40 @@ examples/
 
 ## 7. Current Limitations
 
-The following tokens/keywords exist partially or are reserved but not fully implemented:
+Current language/runtime limitations that still need dedicated implementation:
 
-- Modules/import/export/package execution
-- Arrays/list literals and array methods
-- `async/await/yield`
-- `interface`, `enum`, access modifiers
-- full `priyoParent` constructor chaining conventions beyond current method/property dispatch
+- No first-class array syntax in language grammar yet:
+  - no literal syntax like `[1, 2, 3]`
+  - no index syntax like `arr[0]`
+  - current workaround is `math` package array helpers
+- Package system is phase-1 built-in only:
+  - `lisaaBring` loads registered built-ins (currently `math`)
+  - no user-defined package files or module resolution yet
+  - `lisaaShare` / `lisaaBox` execution flow is not implemented
+- No async/concurrency execution model:
+  - `async/await/yield` tokens remain reserved
+- Type system remains fully dynamic:
+  - no static type checker
+  - no compile-time type validation
+- OOP semantics are strong but not exhaustive:
+  - advanced constructor-chain constraints are still limited
+  - access modifiers / interfaces / enums are reserved only
+- Standard library is intentionally minimal:
+  - only core builtins + `math` package currently exist
 
-## 8. Near-Term Development Targets ( Under Development )
+## 8. Future Plan (Roadmap)
 
-1. Add first-class array support (literal syntax, indexing, mutation helpers).
-2. Add package/module system (import/export/package runtime support).
-3. Add automated tests by pipeline layer (lexer/parser/compiler/vm integration).
-4. Expand OOP semantics (constructor chaining conventions, richer static/parent checks).
-5. Implement advanced control flow and exception handling.
+Planned development sequence:
+
+1. Add first-class array language support:
+   - literals, indexing, updates, and array iteration patterns.
+2. Expand package/module system:
+   - `lisaaBring` for user modules, plus `lisaaShare` and `lisaaBox` runtime semantics.
+3. Add automated tests by layer:
+   - lexer/parser/compiler/vm unit + integration coverage.
+4. Improve diagnostics:
+   - richer source-mapped errors and cleaner stack traces.
+5. Expand OOP semantics:
+   - stronger constructor-chain validation and stricter member checks.
+6. Add async and advanced runtime capabilities:
+   - staged support for `async/await` and future concurrency primitives.

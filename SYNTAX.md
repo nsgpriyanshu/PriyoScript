@@ -208,7 +208,40 @@ Runtime errors caught with `prakritiCatch (err)` expose metadata fields:
 - `err.metadata`
 - `err.stack`
 
-## 11. Functions
+## 11. Packages (Built-in Manager)
+
+Phase-1 package system is available through `priyoPackage`:
+
+```priyo
+priyoTell(priyoPackage.list())
+priyoKeep math = priyoPackage.use("math")
+priyoTell(math.add(2, 3))
+```
+
+Import shortcut syntax is also available:
+
+```priyo
+lisaaBring math
+priyoTell(math.add(2, 3))
+```
+
+Current built-in package:
+
+- `math`:
+  - `add(a, b)`, `sub(a, b)`, `mul(a, b)`, `div(a, b)`, `mod(a, b)`
+  - `sum(...)`, `average(...)`, `min(...)`, `max(...)`, `clamp(value, min, max)`
+  - array helpers:
+    - `array(...)`, `range(start, end, step?)`
+    - `push(arr, value)`, `pop(arr)`, `at(arr, index)`, `set(arr, index, value)`
+    - `length(arr)`, `sumArray(arr)`, `averageArray(arr)`, `minArray(arr)`, `maxArray(arr)`
+
+`priyoPackage` helpers:
+
+- `priyoPackage.list()`
+- `priyoPackage.has(name)`
+- `priyoPackage.use(name)`
+
+## 12. Functions
 
 Function declaration:
 
@@ -232,13 +265,13 @@ priyoGiveBack value
 
 `priyoGiveBack` is valid only inside functions.
 
-## 12. Scope Rules
+## 13. Scope Rules
 
 - `priyoChange` / `priyoPromise` are block-scoped.
 - `priyoKeep` is function-scoped.
 - Functions use lexical scope (closures are supported).
 
-## 13. Classes
+## 14. Classes
 
 Class declaration:
 
@@ -318,7 +351,7 @@ lisaaFamily CollegeStudent {
 }
 ```
 
-## 14. Current Limitations
+## 15. Current Limitations
 
 - No module/import execution yet.
 - Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.

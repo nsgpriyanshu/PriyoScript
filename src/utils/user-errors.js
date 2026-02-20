@@ -51,6 +51,10 @@ function humanizeError(input) {
       message: 'So Rude - A class name was used, but it is not declared.',
       tip: 'Define the class first using `lisaaFamily ClassName { ... }`.',
     },
+    [ErrorCodes.RUNTIME.UNKNOWN_PACKAGE]: {
+      message: 'So Rude - The requested package is not available.',
+      tip: 'Use `priyoPackage.list()` to see available built-in packages.',
+    },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
       tip: 'Check spelling and make sure the function/method exists before calling it.',

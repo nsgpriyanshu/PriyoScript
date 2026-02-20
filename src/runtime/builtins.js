@@ -1,6 +1,7 @@
 const readline = require('readline/promises')
 const { stdin, stdout } = require('process')
 const { logSuccess, logInfo, logWarn, logError, logBuild } = require('nstypocolors')
+const { createPackageManager } = require('../packages/registry')
 
 function toText(args) {
   return args
@@ -52,9 +53,11 @@ function createBuiltins(io = {}) {
   const output = io.stdout || stdout
   const logger = io.console || console
   const priyoTell = createPriyoTell(logger)
+  const priyoPackage = createPackageManager()
 
   return {
     priyoTell,
+    priyoPackage,
 
     priyoListenSentence: async (prompt = '') => {
       const rl = readline.createInterface({ input, output })

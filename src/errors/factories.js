@@ -71,6 +71,9 @@ function classifyRuntimeFailure(message) {
   if (/Unknown class/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_CLASS, category: ErrorCategory.USER }
   }
+  if (/Unknown package/i.test(message)) {
+    return { code: ErrorCodes.RUNTIME.UNKNOWN_PACKAGE, category: ErrorCategory.USER }
+  }
   if (/Unknown callable|Unknown builtin function/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_CALLABLE, category: ErrorCategory.USER }
   }

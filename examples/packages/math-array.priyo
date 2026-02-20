@@ -1,0 +1,17 @@
+monalisa {
+  priyoKeep math = priyoPackage.use("math")
+
+  priyoKeep numbers = math.array(10, 20, 30)
+  math.push(numbers, 40)
+  math.set(numbers, 1, 99)
+
+  priyoTell("Length: " + math.length(numbers))
+  priyoTell("At index 1: " + math.at(numbers, 1))
+  priyoTell("Sum: " + math.sumArray(numbers))
+  priyoTell("Average: " + math.averageArray(numbers))
+  priyoTell("Min: " + math.minArray(numbers))
+  priyoTell("Max: " + math.maxArray(numbers))
+  priyoTell("Popped: " + math.pop(numbers))
+  priyoTell(numbers)
+  priyoTell(math.range(1, 5))
+}

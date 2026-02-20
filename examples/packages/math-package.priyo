@@ -1,0 +1,9 @@
+monalisa {
+  priyoKeep pkg = priyoPackage.use("math")
+
+  priyoTell("add: " + pkg.add(10, 5))
+  priyoTell("sum: " + pkg.sum(1, 2, 3, 4, 5))
+  priyoTell("average: " + pkg.average(4, 6, 8, 10))
+  priyoTell("max: " + pkg.max(3, 12, 7, 9))
+  priyoTell("clamp: " + pkg.clamp(27, 0, 20))
+}

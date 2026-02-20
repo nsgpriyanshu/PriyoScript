@@ -62,6 +62,10 @@ class Compiler {
         this.compileFunctionDeclaration(stmt)
         return
 
+      case 'ImportStatement':
+        this.compileImportStatement(stmt)
+        return
+
       case 'TryStatement':
         this.compileTryStatement(stmt)
         return
@@ -290,6 +294,21 @@ class Compiler {
       name: stmt.name.name,
       params: stmt.params.map(param => param.name),
       instructions: this.compileCallableBody(stmt.body),
+    })
+  }
+
+  compileImportStatement(stmt) {
+    // lisaaBring math
+    // -> const math = priyoPackage.use("math")
+    this.emit(OpCode.LOAD_VARIABLE, 'priyoPackage')
+    this.emit(OpCode.PUSH_STRING, stmt.source)
+    this.emit(OpCode.CALL_METHOD, {
+      name: 'use',
+      argc: 1,
+    })
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: stmt.localName,
+      kind: 'const',
     })
   }
 
