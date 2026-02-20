@@ -53,6 +53,9 @@ src/
   index.js                  # Dev runner entry
 bin/
   monalisa.js               # CLI entry
+scripts/
+  build-windows-exe.ps1     # Build standalone Windows executable (pkg)
+  install-windows.ps1       # Install CLI executable for current user (PATH setup)
 packages/
   math/
     index.js                # Built-in math package (phase-1 package system)
@@ -94,6 +97,7 @@ examples/
 | Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
+| Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
 
 ### 4.1 Core syntax
 

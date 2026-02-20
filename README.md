@@ -34,6 +34,32 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 
 ## Installation
 
+### Windows `.exe` (no npm required for end users)
+
+For maintainers/release builders:
+
+```bash
+npm install
+npm run dist:win
+```
+
+This generates:
+
+- `dist/priyoscript.exe` (standalone CLI executable)
+
+Optional local install for current user (adds install folder to User PATH):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1
+```
+
+Then users can run:
+
+```bash
+monalisa -h
+monalisa your-file.priyo
+```
+
 ### Global CLI install (recommended)
 
 After publishing to npm:
