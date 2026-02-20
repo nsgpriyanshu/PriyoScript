@@ -35,6 +35,11 @@ const OpCode = {
   RETURN: 33,
   POP: 34,
   HALT: 35,
+  PUSH_TRY: 36,
+  BEGIN_CATCH: 37,
+  BEGIN_FINALLY: 38,
+  END_TRY: 39,
+  THROW: 40,
 }
 
 module.exports = { OpCode }

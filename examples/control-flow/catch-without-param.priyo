@@ -1,0 +1,9 @@
+monalisa {
+  prakritiTry {
+    priyoTell(100 / 0)
+  } prakritiCatch {
+    priyoTell("Caught without variable")
+  } prakritiAtEnd {
+    priyoTell("Cleanup complete")
+  }
+}

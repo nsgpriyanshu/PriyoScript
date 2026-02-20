@@ -1,0 +1,10 @@
+monalisa {
+  prakritiTry {
+    priyoTell("Trying risky math...")
+    priyoTell(10 / 0)
+  } prakritiCatch (err) {
+    priyoTell("Caught: " + err.message)
+  } prakritiAtEnd {
+    priyoTell("Finally always runs")
+  }
+}

@@ -1,0 +1,9 @@
+monalisa {
+  prakritiTry {
+    priyoTell(50 / 0)
+  } prakritiCatch (err) {
+    priyoTell("Message: " + err.message)
+    priyoTell("Code: " + err.code)
+    priyoTell("Stage: " + err.stage)
+  }
+}

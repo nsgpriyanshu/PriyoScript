@@ -1,0 +1,19 @@
+monalisa {
+  priyoKeep day = "friday"
+
+  prakritiChoose (day) {
+    prakritiCase ("monday") {
+      priyoTell("Start working")
+      prakritiStop
+    }
+
+    prakritiCase ("saturday") {
+      priyoTell("Weekend")
+      prakritiStop
+    }
+
+    prakritiOtherwise {
+      priyoTell("Normal day")
+    }
+  }
+}

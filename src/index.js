@@ -1,4 +1,5 @@
 const { runFile } = require('./core/run')
+const { printPriyoError } = require('./errors')
 
 async function main() {
   const filename = process.argv[2]
@@ -11,6 +12,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error(err.message)
+  printPriyoError(err, { mode: 'dev' })
   process.exit(1)
 })

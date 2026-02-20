@@ -4,7 +4,7 @@ Examples are grouped by language area:
 
 - `basics/`: declarations, assignment, expressions
 - `io/`: input/output builtins
-- `control-flow/`: conditionals, loops, break/continue
+- `control-flow/`: conditionals, switch/case, loops, break/continue, try/catch/finally/throw
 - `functions/`: function declarations, closures, recursion
 - `oop/`: classes, inheritance, static members
 - `scopes/`: block/function scope behavior and scope errors

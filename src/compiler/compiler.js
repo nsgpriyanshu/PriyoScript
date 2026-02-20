@@ -5,7 +5,9 @@ class Compiler {
   constructor() {
     this.instructions = []
     this.loopStack = []
+    this.breakStack = []
     this.scopeDepth = 0
+    this.tempCounter = 0
   }
 
   compile(program) {
@@ -44,6 +46,10 @@ class Compiler {
         this.compileForStatement(stmt)
         return
 
+      case 'SwitchStatement':
+        this.compileSwitchStatement(stmt)
+        return
+
       case 'BreakStatement':
         this.compileBreakStatement()
         return
@@ -54,6 +60,14 @@ class Compiler {
 
       case 'FunctionDeclaration':
         this.compileFunctionDeclaration(stmt)
+        return
+
+      case 'TryStatement':
+        this.compileTryStatement(stmt)
+        return
+
+      case 'ThrowStatement':
+        this.compileThrowStatement(stmt)
         return
 
       case 'ClassDeclaration':
@@ -192,13 +206,68 @@ class Compiler {
     this.leaveLoop()
   }
 
+  compileSwitchStatement(stmt) {
+    const enclosingScopeDepth = this.scopeDepth
+    this.emit(OpCode.ENTER_SCOPE)
+    this.scopeDepth++
+
+    const switchTempName = this.nextTempName('__switchValue')
+    this.compileExpression(stmt.discriminant)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: switchTempName,
+      kind: 'const',
+    })
+
+    const switchContext = this.enterSwitch({
+      breakTargetScopeDepth: enclosingScopeDepth,
+    })
+
+    const endJumps = []
+    let pendingCaseFalseJump = null
+
+    for (const switchCase of stmt.cases) {
+      const caseCheckStart = this.instructions.length
+      if (pendingCaseFalseJump != null) {
+        this.patchJump(pendingCaseFalseJump, caseCheckStart)
+      }
+
+      this.emit(OpCode.LOAD_VARIABLE, switchTempName)
+      this.compileExpression(switchCase.test)
+      this.emit(OpCode.EQ)
+      const jumpIfFalse = this.emit(OpCode.JUMP_IF_FALSE, -1)
+      pendingCaseFalseJump = jumpIfFalse
+
+      this.compileBlockStatement(switchCase.consequent)
+      endJumps.push(this.emit(OpCode.JUMP, -1))
+    }
+
+    const defaultStart = this.instructions.length
+    if (pendingCaseFalseJump != null) {
+      this.patchJump(pendingCaseFalseJump, defaultStart)
+    }
+
+    if (stmt.defaultCase) {
+      this.compileBlockStatement(stmt.defaultCase)
+    }
+
+    this.emit(OpCode.EXIT_SCOPE)
+    this.scopeDepth--
+
+    const endAddress = this.instructions.length
+    for (const jump of endJumps) {
+      this.patchJump(jump, endAddress)
+    }
+    this.patchSwitchBreaks(switchContext, endAddress, enclosingScopeDepth)
+    this.leaveSwitch()
+  }
+
   compileBreakStatement() {
-    const loopContext = this.currentLoop()
-    if (!loopContext) {
-      throw new Error('prakritiStop used outside loop')
+    const breakContext = this.currentBreakContext()
+    if (!breakContext) {
+      throw new Error('prakritiStop used outside loop/switch')
     }
     const jumpIndex = this.emit(OpCode.JUMP, -1)
-    loopContext.breakJumps.push({ jumpIndex, scopeDepthAtEmit: this.scopeDepth })
+    breakContext.breakJumps.push({ jumpIndex, scopeDepthAtEmit: this.scopeDepth })
   }
 
   compileContinueStatement() {
@@ -222,6 +291,71 @@ class Compiler {
       params: stmt.params.map(param => param.name),
       instructions: this.compileCallableBody(stmt.body),
     })
+  }
+
+  compileTryStatement(stmt) {
+    const tryHandlerIndex = this.emit(OpCode.PUSH_TRY, {
+      catchTarget: null,
+      finallyTarget: null,
+      scopeDepth: this.scopeDepth,
+    })
+
+    this.compileBlockStatement(stmt.block)
+
+    let jumpAfterTry = null
+    let jumpAfterCatch = null
+    if (stmt.handler || stmt.finalizer) {
+      jumpAfterTry = this.emit(OpCode.JUMP, -1)
+    }
+
+    let catchStart = null
+    if (stmt.handler) {
+      catchStart = this.instructions.length
+      this.emit(OpCode.ENTER_SCOPE)
+      this.scopeDepth++
+      this.emit(OpCode.BEGIN_CATCH, stmt.handler.param ? stmt.handler.param.name : null)
+      for (const catchStatement of stmt.handler.body.statements) {
+        this.compileStatement(catchStatement)
+      }
+      this.emit(OpCode.EXIT_SCOPE)
+      this.scopeDepth--
+
+      if (stmt.finalizer) {
+        jumpAfterCatch = this.emit(OpCode.JUMP, -1)
+      }
+    }
+
+    let finallyStart = null
+    if (stmt.finalizer) {
+      finallyStart = this.instructions.length
+      this.emit(OpCode.BEGIN_FINALLY)
+      this.compileBlockStatement(stmt.finalizer)
+    }
+
+    const endTryStart = this.instructions.length
+    this.emit(OpCode.END_TRY)
+    const endAddress = this.instructions.length
+
+    const tryHandler = this.instructions[tryHandlerIndex].operand
+    tryHandler.catchTarget = catchStart
+    tryHandler.finallyTarget = finallyStart
+
+    if (jumpAfterTry != null) {
+      this.patchJump(jumpAfterTry, stmt.finalizer ? finallyStart : endTryStart)
+    }
+    if (jumpAfterCatch != null) {
+      this.patchJump(jumpAfterCatch, finallyStart)
+    }
+
+    // Ensure switch-style contexts can jump here cleanly.
+    if (endAddress == null) {
+      throw new Error('Failed to compile try/catch/finally end label')
+    }
+  }
+
+  compileThrowStatement(stmt) {
+    this.compileExpression(stmt.argument)
+    this.emit(OpCode.THROW)
   }
 
   compileClassDeclaration(stmt) {
@@ -461,6 +595,7 @@ class Compiler {
 
   enterLoop({ continueTarget, continueTargetScopeDepth, loopScopeDepth }) {
     const loopContext = {
+      kind: 'loop',
       breakJumps: [],
       continueJumps: [],
       continueTarget,
@@ -468,19 +603,45 @@ class Compiler {
       loopScopeDepth,
     }
     this.loopStack.push(loopContext)
+    this.breakStack.push(loopContext)
     return loopContext
   }
 
   leaveLoop() {
     this.loopStack.pop()
+    this.breakStack.pop()
   }
 
   currentLoop() {
     return this.loopStack[this.loopStack.length - 1] || null
   }
 
+  enterSwitch({ breakTargetScopeDepth }) {
+    const switchContext = {
+      kind: 'switch',
+      breakJumps: [],
+      breakTargetScopeDepth,
+    }
+    this.breakStack.push(switchContext)
+    return switchContext
+  }
+
+  leaveSwitch() {
+    this.breakStack.pop()
+  }
+
+  currentBreakContext() {
+    return this.breakStack[this.breakStack.length - 1] || null
+  }
+
   patchLoopBreaks(loopContext, target, targetScopeDepth) {
     for (const { jumpIndex, scopeDepthAtEmit } of loopContext.breakJumps) {
+      this.patchScopedJump(jumpIndex, target, scopeDepthAtEmit, targetScopeDepth)
+    }
+  }
+
+  patchSwitchBreaks(switchContext, target, targetScopeDepth) {
+    for (const { jumpIndex, scopeDepthAtEmit } of switchContext.breakJumps) {
       this.patchScopedJump(jumpIndex, target, scopeDepthAtEmit, targetScopeDepth)
     }
   }
@@ -507,6 +668,11 @@ class Compiler {
       throw new Error('Invalid patched scope unwind during jump compilation')
     }
     this.instructions[jumpIndex].operand = { target, unwind }
+  }
+
+  nextTempName(prefix) {
+    this.tempCounter++
+    return `${prefix}_${this.tempCounter}`
   }
 }
 

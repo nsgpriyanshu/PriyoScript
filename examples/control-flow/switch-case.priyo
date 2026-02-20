@@ -1,0 +1,19 @@
+monalisa {
+  priyoKeep platform = "youtube"
+
+  prakritiChoose (platform) {
+    prakritiCase ("instagram") {
+      priyoTell("Reel mode")
+      prakritiStop
+    }
+
+    prakritiCase ("youtube") {
+      priyoTell("Long video mode")
+      prakritiStop
+    }
+
+    prakritiOtherwise {
+      priyoTell("Unknown platform")
+    }
+  }
+}

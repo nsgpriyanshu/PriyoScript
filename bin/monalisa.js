@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const { runFile } = require('../src/core/run')
 const { build, info, error } = require('../src/utils/logger')
-const { humanizeError } = require('../src/utils/user-errors')
+const { printPriyoError } = require('../src/errors')
 
 const { version: VERSION } = require('../package.json')
 
@@ -58,17 +58,13 @@ async function main() {
   try {
     await runFile(fullPath)
   } catch (err) {
-    const formatted = humanizeError(err.message)
-    error(formatted.message)
-
-    if (formatted.tip) {
-      info(`FYI (Tip): ${formatted.tip}`)
-    }
-
-    if (formatted.detail) {
-      info(`Details: ${formatted.detail}`)
-    }
-
+    printPriyoError(err, {
+      mode: 'cli',
+      logger: {
+        error,
+        info,
+      },
+    })
     process.exit(1)
   }
 }

@@ -1,78 +1,129 @@
-function humanizeError(rawMessage) {
-  const message = String(rawMessage || '').trim()
-  const primaryLine = message.split('\n')[0]
+const { ErrorCodes } = require('../errors/codes')
 
-  const rules = [
+function normalizeErrorInput(input) {
+  if (input && typeof input === 'object') {
+    return {
+      message: String(input.message || '').trim(),
+      code: input.code || null,
+      stage: input.stage || null,
+      metadata: input.metadata || {},
+    }
+  }
+
+  return {
+    message: String(input || '').trim(),
+    code: null,
+    stage: null,
+    metadata: {},
+  }
+}
+
+function humanizeError(input) {
+  const error = normalizeErrorInput(input)
+  const primaryLine = error.message.split('\n')[0]
+
+  const codeRules = {
+    [ErrorCodes.SYNTAX.PARSE_FAILED]: {
+      message: 'So Rude - There is a syntax issue in your code structure.',
+      tip: 'Check brackets, commas, and keyword spelling near the shown location.',
+    },
+    [ErrorCodes.SYNTAX.ILLEGAL_TOKEN]: {
+      message: 'Sorry - I could not understand part of this line.',
+      tip: 'Check for typos in keywords/operators and make sure the statement is complete.',
+    },
+    [ErrorCodes.SYNTAX.RESERVED_WORD]: {
+      message: 'So Disrespectfull - You used a reserved word that PriyoScript does not allow.',
+      tip: 'Use PriyoScript keywords from `keywords.json`.',
+    },
+    [ErrorCodes.RUNTIME.UNDEFINED_VARIABLE]: {
+      message: 'So Disrespectfull - A variable is being used before it is declared.',
+      tip: 'Declare it first with `priyoKeep`, `priyoChange`, or `priyoPromise`.',
+    },
+    [ErrorCodes.RUNTIME.CONST_REASSIGN]: {
+      message: 'So Rude - You are trying to change a constant value.',
+      tip: 'Use `priyoChange` for mutable values, or avoid reassigning `priyoPromise`.',
+    },
+    [ErrorCodes.RUNTIME.DIVISION_BY_ZERO]: {
+      message: 'Math error: dividing by zero is not allowed.',
+      tip: 'Check the denominator value before division/modulo.',
+    },
+    [ErrorCodes.RUNTIME.UNKNOWN_CLASS]: {
+      message: 'So Rude - A class name was used, but it is not declared.',
+      tip: 'Define the class first using `lisaaFamily ClassName { ... }`.',
+    },
+    [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
+      message: 'So Disrespectfull - A function or method call could not be resolved.',
+      tip: 'Check spelling and make sure the function/method exists before calling it.',
+    },
+    [ErrorCodes.RUNTIME.ARGUMENT_MISMATCH]: {
+      message: 'Hmmmm - The given input/arguments do not match what this call expects.',
+      tip: 'Check argument count and value types for this function or method.',
+    },
+    [ErrorCodes.RUNTIME.PROPERTY_ERROR]: {
+      message: 'So Rude - This object/class property access is not valid.',
+      tip: 'Verify the object exists and the property name is correct.',
+    },
+    [ErrorCodes.COMPILE.COMPILE_FAILED]: {
+      message: 'Sorry - The program could not be compiled.',
+      tip: 'Recheck syntax first. If syntax is fine, share this with the language maintainer.',
+    },
+    [ErrorCodes.ENGINE.INTERNAL]: {
+      message: 'Internal runtime issue: this looks like a language engine problem.',
+      tip: 'Please report this with the error code and details line.',
+    },
+  }
+
+  if (error.code && codeRules[error.code]) {
+    return {
+      message: codeRules[error.code].message,
+      tip: codeRules[error.code].tip,
+      detail: primaryLine,
+      code: error.code,
+      stage: error.stage,
+      metadata: error.metadata,
+    }
+  }
+
+  const textRules = [
     {
       test: /Block comment was started with \/\* but never closed with \*\//i,
-      userMessage:
+      message:
         'So Rude - Your multi-line comment is not closed. I found `/*` but did not find `*/`.',
       tip: 'Close the comment with `*/` before continuing your code.',
     },
     {
       test: /Program must start with "monalisa"/i,
-      userMessage: 'So Disrespectfull - This file must start with `monalisa { ... }`.',
+      message: 'So Disrespectfull - This file must start with `monalisa { ... }`.',
       tip: 'Wrap all code inside one entry block: `monalisa { ... }`.',
     },
     {
-      test: /can only be used inside loops/i,
-      userMessage: 'Hmm Hmm - This keyword is only valid inside a loop block.',
-      tip: 'Use `prakritiStop` / `prakritiGoOn` only inside `prakritiAsLongAs` or `prakritiCount`.',
+      test: /can only be used inside loops|can only be used inside loops or switch/i,
+      message: 'Hmm Hmm - This keyword is only valid inside a loop or switch block.',
+      tip: 'Use `prakritiStop` inside `prakritiAsLongAs`, `prakritiCount`, or `prakritiChoose` blocks.',
     },
     {
       test: /can only be used inside functions/i,
-      userMessage:
+      message:
         'So Disrespectfull - priyoGiveBack (Return) is only valid inside a lisaaTask (function).',
       tip: 'Use `priyoGiveBack` inside `lisaaTask ... { }`.',
     },
     {
-      test: /Undefined variable/i,
-      userMessage: 'So Disrespectfull - A variable is being used before it is declared.',
-      tip: 'Declare it first with `priyoKeep`, `priyoChange`, or `priyoPromise`.',
-    },
-    {
-      test: /Cannot reassign constant/i,
-      userMessage: 'So Rude - You are trying to change a constant value.',
-      tip: 'Use `priyoChange` for mutable values, or avoid reassigning `priyoPromise`.',
-    },
-    {
-      test: /Invalid number input/i,
-      userMessage: 'Hmmmm - The input is not a valid number.',
-      tip: 'Use digits only, for example: `42` or `3.14`.',
-    },
-    {
-      test: /Division by zero|Modulo by zero/i,
-      userMessage: 'Math error: dividing by zero is not allowed.',
-      tip: 'Check the denominator value before division/modulo.',
-    },
-    {
-      test: /Unknown class/i,
-      userMessage: 'So Rude - A class name was used, but it is not declared.',
-      tip: 'Define the class first using `lisaaFamily ClassName { ... }`.',
-    },
-    {
-      test: /Unknown callable|Unknown builtin function/i,
-      userMessage: 'So Disrespectfull - A function or method call could not be resolved.',
-      tip: 'Check spelling and make sure the function/method exists before calling it.',
-    },
-    {
-      test: /Expected .* but found/i,
-      userMessage: 'So Rude - There is a syntax mismatch in this line.',
-      tip: 'Check missing brackets, commas, or parentheses near the shown location.',
-    },
-    {
-      test: /Unexpected token/i,
-      userMessage: 'Sorry - I could not understand part of this line.',
-      tip: 'Check for typos in keywords/operators and make sure the statement is complete.',
+      test: /Try block requires catch and\/or finally/i,
+      message:
+        'So Rude - `prakritiTry` must be followed by `prakritiCatch` and/or `prakritiAtEnd`.',
+      tip: 'Use: `prakritiTry { ... } prakritiCatch (err) { ... }` or add `prakritiAtEnd { ... }`.',
     },
   ]
 
-  for (const rule of rules) {
-    if (rule.test.test(message)) {
+  for (const rule of textRules) {
+    if (rule.test.test(error.message)) {
       return {
-        message: rule.userMessage,
+        message: rule.message,
         tip: rule.tip,
         detail: primaryLine,
+        code: error.code,
+        stage: error.stage,
+        metadata: error.metadata,
       }
     }
   }
@@ -81,6 +132,9 @@ function humanizeError(rawMessage) {
     message: 'Hmm - Could not run this PriyoScript file due to a language/runtime error.',
     tip: 'Read the detail line below and check that statement first.',
     detail: primaryLine,
+    code: error.code,
+    stage: error.stage,
+    metadata: error.metadata,
   }
 }
 

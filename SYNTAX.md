@@ -121,6 +121,26 @@ prakritiIf (score >= 90) {
 }
 ```
 
+### Switch
+
+```priyo
+prakritiChoose (platform) {
+  prakritiCase ("instagram") {
+    priyoTell("Reel mode")
+    prakritiStop
+  }
+
+  prakritiCase ("youtube") {
+    priyoTell("Long video mode")
+    prakritiStop
+  }
+
+  prakritiOtherwise {
+    priyoTell("Unknown platform")
+  }
+}
+```
+
 ## 8. Loops
 
 ### While loop
@@ -148,9 +168,47 @@ prakritiStop    // break
 prakritiGoOn    // continue
 ```
 
-These are valid only inside loops.
+- `prakritiStop` is valid inside loops and `prakritiChoose`.
+- `prakritiGoOn` is valid only inside loops.
 
-## 10. Functions
+## 10. Error Handling
+
+```priyo
+prakritiTry {
+  priyoTell(10 / 0)
+} prakritiCatch (err) {
+  priyoTell("Caught: " + err)
+} prakritiAtEnd {
+  priyoTell("Cleanup")
+}
+```
+
+Catch parameter is optional:
+
+```priyo
+prakritiTry {
+  priyoTell(10 / 0)
+} prakritiCatch {
+  priyoTell("Handled error")
+}
+```
+
+Throwing custom values:
+
+```priyo
+prakritiThrow "Something went wrong"
+```
+
+Runtime errors caught with `prakritiCatch (err)` expose metadata fields:
+
+- `err.message`
+- `err.code`
+- `err.stage`
+- `err.category`
+- `err.metadata`
+- `err.stack`
+
+## 11. Functions
 
 Function declaration:
 
@@ -174,13 +232,13 @@ priyoGiveBack value
 
 `priyoGiveBack` is valid only inside functions.
 
-## 11. Scope Rules
+## 12. Scope Rules
 
 - `priyoChange` / `priyoPromise` are block-scoped.
 - `priyoKeep` is function-scoped.
 - Functions use lexical scope (closures are supported).
 
-## 12. Classes
+## 13. Classes
 
 Class declaration:
 
@@ -260,7 +318,7 @@ lisaaFamily CollegeStudent {
 }
 ```
 
-## 13. Current Limitations
+## 14. Current Limitations
 
 - No module/import execution yet.
-- `switch/case`, `try/catch`, and many reserved keywords are mapped but not fully implemented in parser/compiler/VM.
+- Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.

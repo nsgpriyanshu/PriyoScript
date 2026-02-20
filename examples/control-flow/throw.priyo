@@ -1,0 +1,7 @@
+monalisa {
+  prakritiTry {
+    prakritiThrow "Enrollment data missing"
+  } prakritiCatch (err) {
+    priyoTell("Handled throw: " + err)
+  }
+}

@@ -40,6 +40,12 @@ src/
   runtime/
     environment.js          # Lexical scopes and variable semantics
     builtins.js             # Builtin functions
+  errors/
+    priyo-error.js          # Typed throwable error objects
+    codes.js                # Stable error codes and stage/category enums
+    factories.js            # Error creation/classification helpers
+    formatter.js            # User/dev formatting
+    printer.js              # Shared printer for CLI/REPL/dev
   config/
     keywords.json           # Priyo keyword vocabulary (implemented + planned)
   index.js                  # Dev runner entry
@@ -84,10 +90,12 @@ examples/
 ### 4.4 Control flow
 
 - `prakritiIf`, `prakritiElseIf`, `prakritiElse`
+- `prakritiChoose`, `prakritiCase`, `prakritiOtherwise` (switch/case/default)
 - `prakritiAsLongAs` (while)
 - `prakritiCount` (for)
 - `prakritiStop` (break)
 - `prakritiGoOn` (continue)
+- `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
 
 ### 4.5 Functions
 
@@ -141,23 +149,35 @@ examples/
   - static fields
   - superclass reference
 
-## 6. Current Limitations
+## 6. Error System
+
+- Errors are real throwable objects (`PriyoSyntaxError`, `PriyoCompileError`, `PriyoRuntimeError`, `PriyoEngineError`).
+- Every error has structured metadata:
+  - `code`
+  - `stage` (syntax/compile/runtime/core)
+  - `category` (user/engine)
+  - `metadata` object
+- Pipeline stages are separated:
+  - parser -> syntax errors
+  - compiler -> compile errors
+  - VM/runtime -> runtime errors
+- CLI and future REPL share a common printer (`src/errors/printer.js`) to render humanized output consistently.
+- Dev entry prints developer-oriented output with code + stage.
+
+## 7. Current Limitations
 
 The following tokens/keywords exist partially or are reserved but not fully implemented:
 
 - Modules/import/export/package execution
 - Arrays/list literals and array methods
-- `switch/case/default`
-- `try/catch/finally/throw`
 - `async/await/yield`
 - `interface`, `enum`, access modifiers
 - full `priyoParent` constructor chaining conventions beyond current method/property dispatch
 
-## 7. Near-Term Development Targets ( Under Development )
+## 8. Near-Term Development Targets ( Under Development )
 
 1. Add first-class array support (literal syntax, indexing, mutation helpers).
 2. Add package/module system (import/export/package runtime support).
-3. Add structured error classes by stage (lexer/parser/compiler/vm).
-4. Add automated tests by pipeline layer (lexer/parser/compiler/vm integration).
-5. Expand OOP semantics (constructor chaining conventions, richer static/parent checks).
-6. Implement advanced control flow and exception handling.
+3. Add automated tests by pipeline layer (lexer/parser/compiler/vm integration).
+4. Expand OOP semantics (constructor chaining conventions, richer static/parent checks).
+5. Implement advanced control flow and exception handling.

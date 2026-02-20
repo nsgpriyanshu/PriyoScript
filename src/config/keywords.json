@@ -21,12 +21,19 @@
     "if": "prakritiIf",
     "elif": "prakritiElseIf",
     "else": "prakritiElse",
+    "switch": "prakritiChoose",
+    "case": "prakritiCase",
+    "default": "prakritiOtherwise",
 
     "for": "prakritiCount",
     "while": "prakritiAsLongAs",
 
     "break": "prakritiStop",
     "continue": "prakritiGoOn",
+    "try": "prakritiTry",
+    "catch": "prakritiCatch",
+    "finally": "prakritiAtEnd",
+    "throw": "prakritiThrow",
 
     "function": "lisaaTask",
     "class": "lisaaFamily",
@@ -34,17 +41,9 @@
     "static": "lisaaStable"
   },
   "planned": {
-    "switch": "prakritiChoose",
-    "case": "prakritiCase",
-    "default": "prakritiOtherwise",
-
     "do": "prakritiDo",
     "loop": "prakritiRepeat",
 
-    "try": "prakritiTry",
-    "catch": "prakritiCatch",
-    "finally": "prakritiAtEnd",
-    "throw": "prakritiThrow",
     "debugger": "prakritiThink",
 
     "import": "lisaaBring",

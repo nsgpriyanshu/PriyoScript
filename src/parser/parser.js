@@ -1,5 +1,6 @@
 const { Lexer } = require('../lexer/lexer')
 const { TokenType } = require('../lexer/token')
+const { createSyntaxError, classifySyntaxCode } = require('../errors')
 const {
   Program,
   EntryBlock,
@@ -10,10 +11,15 @@ const {
   IfStatement,
   WhileStatement,
   ForStatement,
+  SwitchStatement,
+  SwitchCase,
   BreakStatement,
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  TryStatement,
+  CatchClause,
+  ThrowStatement,
   ClassDeclaration,
   MethodDeclaration,
   ClassFieldDeclaration,
@@ -38,6 +44,7 @@ class Parser {
     this.peekToken = null
     this.errors = []
     this.loopDepth = 0
+    this.switchDepth = 0
     this.functionDepth = 0
     this.classMethodDepth = 0
 
@@ -102,9 +109,12 @@ class Parser {
   parseStatement() {
     if (this.curToken.type === TokenType.CLASS) return this.parseClassDeclaration()
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
+    if (this.curToken.type === TokenType.THROW) return this.parseThrowStatement()
+    if (this.curToken.type === TokenType.TRY) return this.parseTryStatement()
     if (this.curToken.type === TokenType.FUNCTION) return this.parseFunctionDeclaration()
     if (this.curToken.type === TokenType.BREAK) return this.parseBreakStatement()
     if (this.curToken.type === TokenType.CONTINUE) return this.parseContinueStatement()
+    if (this.curToken.type === TokenType.SWITCH) return this.parseSwitchStatement()
     if (this.curToken.type === TokenType.WHILE) return this.parseWhileStatement()
     if (this.curToken.type === TokenType.FOR) return this.parseForStatement()
     if (this.curToken.type === TokenType.IF) return this.parseIfStatement()
@@ -429,6 +439,57 @@ class Parser {
     return new ReturnStatement(argument)
   }
 
+  parseThrowStatement() {
+    this.nextToken()
+    const argument = this.parseExpression()
+    if (!argument) {
+      this.error('Expected expression after prakritiThrow')
+      return null
+    }
+    return new ThrowStatement(argument)
+  }
+
+  parseTryStatement() {
+    this.nextToken()
+    const tryBlock = this.parseBlockStatement()
+    if (!tryBlock) return null
+
+    let handler = null
+    if (this.curToken.type === TokenType.CATCH) {
+      this.nextToken()
+      let catchParam = null
+
+      if (this.curToken.type === TokenType.LPAREN) {
+        this.nextToken()
+        if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected catch variable name')) {
+          this.nextToken()
+          return null
+        }
+        catchParam = new Identifier(this.curToken.literal)
+        this.nextToken()
+        if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after catch variable')) return null
+      }
+
+      const catchBody = this.parseBlockStatement()
+      if (!catchBody) return null
+      handler = new CatchClause(catchParam, catchBody)
+    }
+
+    let finalizer = null
+    if (this.curToken.type === TokenType.FINALLY) {
+      this.nextToken()
+      finalizer = this.parseBlockStatement()
+      if (!finalizer) return null
+    }
+
+    if (!handler && !finalizer) {
+      this.error('Try block requires catch and/or finally')
+      return null
+    }
+
+    return new TryStatement(tryBlock, handler, finalizer)
+  }
+
   parseIfStatement() {
     const branches = []
 
@@ -505,9 +566,80 @@ class Parser {
     return new ForStatement(initializer, condition, update, body)
   }
 
+  parseSwitchStatement() {
+    this.nextToken()
+    if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after switch keyword')) return null
+
+    const discriminant = this.parseExpression()
+    if (!discriminant) {
+      this.error('Expected switch expression')
+      return null
+    }
+
+    if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after switch expression')) return null
+    if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" after switch header')) return null
+
+    const cases = []
+    let defaultCase = null
+
+    this.switchDepth++
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      if (this.curToken.type === TokenType.CASE) {
+        this.nextToken()
+        if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after case keyword')) {
+          this.switchDepth--
+          return null
+        }
+
+        const test = this.parseExpression()
+        if (!test) {
+          this.error('Expected case test expression')
+          this.switchDepth--
+          return null
+        }
+
+        if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after case test')) {
+          this.switchDepth--
+          return null
+        }
+
+        const consequent = this.parseBlockStatement()
+        if (!consequent) {
+          this.switchDepth--
+          return null
+        }
+        cases.push(new SwitchCase(test, consequent))
+        continue
+      }
+
+      if (this.curToken.type === TokenType.DEFAULT) {
+        if (defaultCase) {
+          this.error('Switch can only have one default block')
+          this.switchDepth--
+          return null
+        }
+        this.nextToken()
+        defaultCase = this.parseBlockStatement()
+        if (!defaultCase) {
+          this.switchDepth--
+          return null
+        }
+        continue
+      }
+
+      this.error('Switch body must contain only case/default blocks')
+      this.switchDepth--
+      return null
+    }
+    this.switchDepth--
+
+    if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" to close switch')) return null
+    return new SwitchStatement(discriminant, cases, defaultCase)
+  }
+
   parseBreakStatement() {
-    if (this.loopDepth === 0) {
-      this.error('prakritiStop can only be used inside loops')
+    if (this.loopDepth === 0 && this.switchDepth === 0) {
+      this.error('prakritiStop can only be used inside loops or switch')
       this.nextToken()
       return null
     }
@@ -833,7 +965,20 @@ function parse(source) {
   const program = parser.parseProgram()
 
   if (parser.errors.length > 0) {
-    throw new Error(parser.errors.join('\n'))
+    const message = parser.errors.join('\n')
+    const firstError = parser.errors[0] || ''
+    const locationMatch = /line (\d+), column (\d+)/i.exec(firstError)
+    const line = locationMatch ? Number(locationMatch[1]) : null
+    const column = locationMatch ? Number(locationMatch[2]) : null
+
+    throw createSyntaxError(message, {
+      code: classifySyntaxCode(message),
+      metadata: {
+        errors: parser.errors,
+        line,
+        column,
+      },
+    })
   }
 
   return program

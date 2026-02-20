@@ -2,6 +2,13 @@ const { OpCode } = require('../compiler/opcodes')
 const { Environment } = require('../runtime/environment')
 const { createBuiltins } = require('../runtime/builtins')
 
+class PriyoThrownValue {
+  constructor(value) {
+    this.__priyoThrown = true
+    this.value = value
+  }
+}
+
 class VM {
   constructor(instructions, options = {}) {
     this.instructions = instructions
@@ -19,320 +26,443 @@ class VM {
     this.environment = frameEnvironment
 
     const stack = []
+    const tryStack = []
+    let scopeDepth = 0
     let ip = 0
 
     try {
       while (ip < instructions.length) {
         const instr = instructions[ip]
 
-        switch (instr.op) {
-          case OpCode.PUSH_STRING:
-          case OpCode.PUSH_NUMBER:
-          case OpCode.PUSH_BOOLEAN:
-            stack.push(instr.operand)
-            break
+        try {
+          switch (instr.op) {
+            case OpCode.PUSH_STRING:
+            case OpCode.PUSH_NUMBER:
+            case OpCode.PUSH_BOOLEAN:
+              stack.push(instr.operand)
+              break
 
-          case OpCode.PUSH_NULL:
-            stack.push(null)
-            break
+            case OpCode.PUSH_NULL:
+              stack.push(null)
+              break
 
-          case OpCode.DEFINE_VARIABLE: {
-            const value = stack.pop()
-            const { name, kind } = instr.operand
-            this.environment.define(name, value, kind)
-            break
-          }
-
-          case OpCode.LOAD_VARIABLE: {
-            const value = this.environment.get(instr.operand)
-            stack.push(value)
-            break
-          }
-
-          case OpCode.SET_VARIABLE: {
-            const value = stack.pop()
-            this.environment.set(instr.operand, value)
-            break
-          }
-
-          case OpCode.ADD: {
-            const right = stack.pop()
-            const left = stack.pop()
-            if (typeof left === 'string' || typeof right === 'string') {
-              stack.push(String(left) + String(right))
+            case OpCode.DEFINE_VARIABLE: {
+              const value = stack.pop()
+              const { name, kind } = instr.operand
+              this.environment.define(name, value, kind)
               break
             }
-            this.ensureNumbers(left, right, 'ADD')
-            stack.push(left + right)
-            break
-          }
 
-          case OpCode.SUB: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'SUB')
-            stack.push(left - right)
-            break
-          }
+            case OpCode.LOAD_VARIABLE: {
+              const value = this.environment.get(instr.operand)
+              stack.push(value)
+              break
+            }
 
-          case OpCode.MUL: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'MUL')
-            stack.push(left * right)
-            break
-          }
+            case OpCode.SET_VARIABLE: {
+              const value = stack.pop()
+              this.environment.set(instr.operand, value)
+              break
+            }
 
-          case OpCode.DIV: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'DIV')
-            if (right === 0) throw new Error('Division by zero')
-            stack.push(left / right)
-            break
-          }
+            case OpCode.ADD: {
+              const right = stack.pop()
+              const left = stack.pop()
+              if (typeof left === 'string' || typeof right === 'string') {
+                stack.push(String(left) + String(right))
+                break
+              }
+              this.ensureNumbers(left, right, 'ADD')
+              stack.push(left + right)
+              break
+            }
 
-          case OpCode.MOD: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'MOD')
-            if (right === 0) throw new Error('Modulo by zero')
-            stack.push(left % right)
-            break
-          }
+            case OpCode.SUB: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'SUB')
+              stack.push(left - right)
+              break
+            }
 
-          case OpCode.EQ: {
-            const right = stack.pop()
-            const left = stack.pop()
-            stack.push(left === right)
-            break
-          }
+            case OpCode.MUL: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'MUL')
+              stack.push(left * right)
+              break
+            }
 
-          case OpCode.NOT_EQ: {
-            const right = stack.pop()
-            const left = stack.pop()
-            stack.push(left !== right)
-            break
-          }
+            case OpCode.DIV: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'DIV')
+              if (right === 0) throw new Error('Division by zero')
+              stack.push(left / right)
+              break
+            }
 
-          case OpCode.LT: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'LT')
-            stack.push(left < right)
-            break
-          }
+            case OpCode.MOD: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'MOD')
+              if (right === 0) throw new Error('Modulo by zero')
+              stack.push(left % right)
+              break
+            }
 
-          case OpCode.LTE: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'LTE')
-            stack.push(left <= right)
-            break
-          }
+            case OpCode.EQ: {
+              const right = stack.pop()
+              const left = stack.pop()
+              stack.push(left === right)
+              break
+            }
 
-          case OpCode.GT: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'GT')
-            stack.push(left > right)
-            break
-          }
+            case OpCode.NOT_EQ: {
+              const right = stack.pop()
+              const left = stack.pop()
+              stack.push(left !== right)
+              break
+            }
 
-          case OpCode.GTE: {
-            const right = stack.pop()
-            const left = stack.pop()
-            this.ensureNumbers(left, right, 'GTE')
-            stack.push(left >= right)
-            break
-          }
+            case OpCode.LT: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'LT')
+              stack.push(left < right)
+              break
+            }
 
-          case OpCode.AND: {
-            const right = stack.pop()
-            const left = stack.pop()
-            stack.push(this.isTruthy(left) && this.isTruthy(right))
-            break
-          }
+            case OpCode.LTE: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'LTE')
+              stack.push(left <= right)
+              break
+            }
 
-          case OpCode.OR: {
-            const right = stack.pop()
-            const left = stack.pop()
-            stack.push(this.isTruthy(left) || this.isTruthy(right))
-            break
-          }
+            case OpCode.GT: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'GT')
+              stack.push(left > right)
+              break
+            }
 
-          case OpCode.NOT: {
-            const value = stack.pop()
-            stack.push(!this.isTruthy(value))
-            break
-          }
+            case OpCode.GTE: {
+              const right = stack.pop()
+              const left = stack.pop()
+              this.ensureNumbers(left, right, 'GTE')
+              stack.push(left >= right)
+              break
+            }
 
-          case OpCode.JUMP_IF_FALSE: {
-            const condition = stack.pop()
-            if (!this.isTruthy(condition)) {
+            case OpCode.AND: {
+              const right = stack.pop()
+              const left = stack.pop()
+              stack.push(this.isTruthy(left) && this.isTruthy(right))
+              break
+            }
+
+            case OpCode.OR: {
+              const right = stack.pop()
+              const left = stack.pop()
+              stack.push(this.isTruthy(left) || this.isTruthy(right))
+              break
+            }
+
+            case OpCode.NOT: {
+              const value = stack.pop()
+              stack.push(!this.isTruthy(value))
+              break
+            }
+
+            case OpCode.JUMP_IF_FALSE: {
+              const condition = stack.pop()
+              if (!this.isTruthy(condition)) {
+                ip = instr.operand
+                continue
+              }
+              break
+            }
+
+            case OpCode.JUMP:
+              if (typeof instr.operand === 'object' && instr.operand !== null) {
+                const unwind = instr.operand.unwind || 0
+                this.unwindScopes(unwind)
+                scopeDepth -= unwind
+                ip = instr.operand.target
+                continue
+              }
               ip = instr.operand
               continue
-            }
-            break
-          }
 
-          case OpCode.JUMP:
-            if (typeof instr.operand === 'object' && instr.operand !== null) {
-              this.unwindScopes(instr.operand.unwind || 0)
-              ip = instr.operand.target
+            case OpCode.ENTER_SCOPE:
+              this.environment = new Environment(this.environment, { isFunctionScope: false })
+              scopeDepth++
+              break
+
+            case OpCode.EXIT_SCOPE:
+              if (!this.environment.parent) throw new Error('Cannot exit global scope')
+              this.environment = this.environment.parent
+              scopeDepth--
+              break
+
+            case OpCode.DEFINE_FUNCTION: {
+              const fnObj = {
+                type: 'user_function',
+                params: instr.operand.params,
+                instructions: instr.operand.instructions,
+                closure: this.environment,
+              }
+              this.environment.define(instr.operand.name, fnObj, 'const')
+              break
+            }
+
+            case OpCode.DEFINE_CLASS: {
+              let superClass = null
+              if (instr.operand.superClassName) {
+                const resolved = this.environment.get(instr.operand.superClassName)
+                if (!resolved || resolved.type !== 'class') {
+                  throw new Error(`Parent class "${instr.operand.superClassName}" not found`)
+                }
+                superClass = resolved
+              }
+
+              const methods = this.createMethodMap(instr.operand.methods)
+              const staticMethods = this.createMethodMap(instr.operand.staticMethods || [])
+
+              const classObj = {
+                type: 'class',
+                name: instr.operand.name,
+                methods,
+                staticMethods,
+                staticFields: new Map(),
+                staticFieldKinds: new Map(),
+                instanceFieldInitializers: instr.operand.instanceFields || [],
+                definitionEnv: this.environment,
+                superClass,
+              }
+
+              for (const method of [...methods.values(), ...staticMethods.values()]) {
+                method.ownerClass = classObj
+              }
+              this.environment.define(instr.operand.name, classObj, 'const')
+              await this.applyStaticFieldInitializers(classObj, instr.operand.staticFields || [])
+              break
+            }
+
+            case OpCode.CREATE_INSTANCE: {
+              const { name, argc } = instr.operand
+              const args = argc === 0 ? [] : stack.splice(-argc)
+              const classObj = this.environment.get(name)
+              if (!classObj || classObj.type !== 'class') {
+                throw new Error(`Unknown class: ${name}`)
+              }
+
+              const instance = {
+                type: 'instance',
+                classRef: classObj,
+                fields: new Map(),
+                constFields: new Set(),
+              }
+
+              await this.applyInstanceFieldInitializers(instance)
+
+              if (this.findMethod(classObj, 'init')) {
+                await this.callMethod(instance, 'init', args)
+              } else if (args.length > 0) {
+                throw new Error(`Class "${name}" does not define init(${args.length} args)`)
+              }
+
+              stack.push(instance)
+              break
+            }
+
+            case OpCode.GET_PROPERTY: {
+              const object = stack.pop()
+              const resolved = this.resolveProperty(object, instr.operand)
+              stack.push(resolved)
+              break
+            }
+
+            case OpCode.SET_PROPERTY: {
+              const value = stack.pop()
+              const object = stack.pop()
+              this.setProperty(object, instr.operand, value)
+              break
+            }
+
+            case OpCode.CALL_NAMED: {
+              const { name, argc } = instr.operand
+              const args = argc === 0 ? [] : stack.splice(-argc)
+              const result = await this.callNamed(name, args)
+              stack.push(result == null ? null : result)
+              break
+            }
+
+            case OpCode.CALL_METHOD: {
+              const { name, argc } = instr.operand
+              const args = argc === 0 ? [] : stack.splice(-argc)
+              const receiver = stack.pop()
+              const result = await this.callMember(receiver, name, args)
+              stack.push(result == null ? null : result)
+              break
+            }
+
+            case OpCode.CALL_SUPER_METHOD: {
+              const { name, argc } = instr.operand
+              const args = argc === 0 ? [] : stack.splice(-argc)
+              const receiver = this.environment.get('priyoSelf')
+              const currentOwner = this.environment.get('__priyoCurrentClass')
+              if (!currentOwner || currentOwner.type !== 'class') {
+                throw new Error('priyoParent call outside class method')
+              }
+              const superClass = currentOwner.superClass
+              if (!superClass) {
+                throw new Error(`Class "${currentOwner.name}" has no parent class`)
+              }
+              const result =
+                receiver && receiver.type === 'class'
+                  ? await this.callStaticMethod(receiver, name, args, superClass)
+                  : await this.callMethod(receiver, name, args, superClass)
+              stack.push(result == null ? null : result)
+              break
+            }
+
+            case OpCode.RETURN: {
+              if (!isFunctionFrame) {
+                throw new Error('Return statement cannot execute outside function')
+              }
+              const returnValue = stack.pop()
+              return { returned: true, value: returnValue == null ? null : returnValue }
+            }
+
+            case OpCode.POP:
+              stack.pop()
+              break
+
+            case OpCode.HALT:
+              return { returned: false, value: null }
+
+            case OpCode.PUSH_TRY:
+              tryStack.push({
+                catchTarget: instr.operand.catchTarget,
+                finallyTarget: instr.operand.finallyTarget,
+                scopeDepth: instr.operand.scopeDepth,
+                state: 'try',
+                pendingException: null,
+              })
+              break
+
+            case OpCode.BEGIN_CATCH: {
+              const handler = tryStack[tryStack.length - 1]
+              if (!handler) {
+                throw new Error('No active try handler for catch block')
+              }
+              handler.state = 'catch'
+              const caught = this.normalizeCaughtValue(handler.pendingException)
+              handler.pendingException = null
+              if (instr.operand) {
+                this.environment.define(instr.operand, caught, 'let')
+              }
+              break
+            }
+
+            case OpCode.BEGIN_FINALLY: {
+              const handler = tryStack[tryStack.length - 1]
+              if (!handler) {
+                throw new Error('No active try handler for finally block')
+              }
+              handler.state = 'finally'
+              break
+            }
+
+            case OpCode.END_TRY: {
+              const handler = tryStack.pop()
+              if (!handler) {
+                throw new Error('No active try handler to end')
+              }
+              if (handler.pendingException != null) {
+                throw handler.pendingException
+              }
+              break
+            }
+
+            case OpCode.THROW: {
+              const thrownValue = stack.pop()
+              throw new PriyoThrownValue(thrownValue)
+            }
+
+            default:
+              throw new Error(`Unknown opcode: ${instr.op}`)
+          }
+        } catch (err) {
+          let pendingException = err
+          let handled = false
+
+          while (tryStack.length > 0) {
+            const handler = tryStack[tryStack.length - 1]
+
+            const unwind = scopeDepth - handler.scopeDepth
+            if (unwind > 0) {
+              this.unwindScopes(unwind)
+              scopeDepth = handler.scopeDepth
+            }
+            stack.length = 0
+
+            if (handler.state === 'try') {
+              if (handler.catchTarget != null) {
+                handler.pendingException = pendingException
+                ip = handler.catchTarget
+                handled = true
+                break
+              }
+
+              if (handler.finallyTarget != null) {
+                handler.pendingException = pendingException
+                handler.state = 'finally'
+                ip = handler.finallyTarget
+                handled = true
+                break
+              }
+
+              tryStack.pop()
               continue
             }
-            ip = instr.operand
-            continue
 
-          case OpCode.ENTER_SCOPE:
-            this.environment = new Environment(this.environment, { isFunctionScope: false })
-            break
-
-          case OpCode.EXIT_SCOPE:
-            if (!this.environment.parent) throw new Error('Cannot exit global scope')
-            this.environment = this.environment.parent
-            break
-
-          case OpCode.DEFINE_FUNCTION: {
-            const fnObj = {
-              type: 'user_function',
-              params: instr.operand.params,
-              instructions: instr.operand.instructions,
-              closure: this.environment,
-            }
-            this.environment.define(instr.operand.name, fnObj, 'const')
-            break
-          }
-
-          case OpCode.DEFINE_CLASS: {
-            let superClass = null
-            if (instr.operand.superClassName) {
-              const resolved = this.environment.get(instr.operand.superClassName)
-              if (!resolved || resolved.type !== 'class') {
-                throw new Error(`Parent class "${instr.operand.superClassName}" not found`)
+            if (handler.state === 'catch') {
+              if (handler.finallyTarget != null) {
+                handler.pendingException = pendingException
+                handler.state = 'finally'
+                ip = handler.finallyTarget
+                handled = true
+                break
               }
-              superClass = resolved
+
+              tryStack.pop()
+              continue
             }
 
-            const methods = this.createMethodMap(instr.operand.methods)
-            const staticMethods = this.createMethodMap(instr.operand.staticMethods || [])
-
-            const classObj = {
-              type: 'class',
-              name: instr.operand.name,
-              methods,
-              staticMethods,
-              staticFields: new Map(),
-              staticFieldKinds: new Map(),
-              instanceFieldInitializers: instr.operand.instanceFields || [],
-              definitionEnv: this.environment,
-              superClass,
+            if (handler.state === 'finally') {
+              tryStack.pop()
+              continue
             }
 
-            for (const method of [...methods.values(), ...staticMethods.values()]) {
-              method.ownerClass = classObj
-            }
-            this.environment.define(instr.operand.name, classObj, 'const')
-            await this.applyStaticFieldInitializers(classObj, instr.operand.staticFields || [])
-            break
+            tryStack.pop()
           }
 
-          case OpCode.CREATE_INSTANCE: {
-            const { name, argc } = instr.operand
-            const args = argc === 0 ? [] : stack.splice(-argc)
-            const classObj = this.environment.get(name)
-            if (!classObj || classObj.type !== 'class') {
-              throw new Error(`Unknown class: ${name}`)
-            }
-
-            const instance = {
-              type: 'instance',
-              classRef: classObj,
-              fields: new Map(),
-              constFields: new Set(),
-            }
-
-            await this.applyInstanceFieldInitializers(instance)
-
-            if (this.findMethod(classObj, 'init')) {
-              await this.callMethod(instance, 'init', args)
-            } else if (args.length > 0) {
-              throw new Error(`Class "${name}" does not define init(${args.length} args)`)
-            }
-
-            stack.push(instance)
-            break
+          if (handled) {
+            continue
           }
 
-          case OpCode.GET_PROPERTY: {
-            const object = stack.pop()
-            const resolved = this.resolveProperty(object, instr.operand)
-            stack.push(resolved)
-            break
+          if (pendingException && pendingException.__priyoThrown) {
+            throw new Error(
+              `Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`,
+            )
           }
 
-          case OpCode.SET_PROPERTY: {
-            const value = stack.pop()
-            const object = stack.pop()
-            this.setProperty(object, instr.operand, value)
-            break
-          }
-
-          case OpCode.CALL_NAMED: {
-            const { name, argc } = instr.operand
-            const args = argc === 0 ? [] : stack.splice(-argc)
-            const result = await this.callNamed(name, args)
-            stack.push(result == null ? null : result)
-            break
-          }
-
-          case OpCode.CALL_METHOD: {
-            const { name, argc } = instr.operand
-            const args = argc === 0 ? [] : stack.splice(-argc)
-            const receiver = stack.pop()
-            const result = await this.callMember(receiver, name, args)
-            stack.push(result == null ? null : result)
-            break
-          }
-
-          case OpCode.CALL_SUPER_METHOD: {
-            const { name, argc } = instr.operand
-            const args = argc === 0 ? [] : stack.splice(-argc)
-            const receiver = this.environment.get('priyoSelf')
-            const currentOwner = this.environment.get('__priyoCurrentClass')
-            if (!currentOwner || currentOwner.type !== 'class') {
-              throw new Error('priyoParent call outside class method')
-            }
-            const superClass = currentOwner.superClass
-            if (!superClass) {
-              throw new Error(`Class "${currentOwner.name}" has no parent class`)
-            }
-            const result =
-              receiver && receiver.type === 'class'
-                ? await this.callStaticMethod(receiver, name, args, superClass)
-                : await this.callMethod(receiver, name, args, superClass)
-            stack.push(result == null ? null : result)
-            break
-          }
-
-          case OpCode.RETURN: {
-            if (!isFunctionFrame) {
-              throw new Error('Return statement cannot execute outside function')
-            }
-            const returnValue = stack.pop()
-            return { returned: true, value: returnValue == null ? null : returnValue }
-          }
-
-          case OpCode.POP:
-            stack.pop()
-            break
-
-          case OpCode.HALT:
-            return { returned: false, value: null }
-
-          default:
-            throw new Error(`Unknown opcode: ${instr.op}`)
+          throw pendingException
         }
 
         ip++
@@ -751,6 +881,54 @@ class VM {
     }
 
     throw new Error(`Property assignment is not supported on value type: ${typeof object}`)
+  }
+
+  normalizeCaughtValue(exception) {
+    if (exception && exception.__priyoThrown) {
+      return exception.value
+    }
+    if (exception && typeof exception === 'object' && 'message' in exception) {
+      return this.buildCaughtErrorPayload(exception)
+    }
+    return exception
+  }
+
+  formatThrownValue(value) {
+    if (value === null) return 'null'
+    if (value === undefined) return 'undefined'
+    if (typeof value === 'string') return value
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+    try {
+      return JSON.stringify(value)
+    } catch {
+      return String(value)
+    }
+  }
+
+  buildCaughtErrorPayload(exception) {
+    const payload = {
+      name: exception.name || 'Error',
+      message: exception.message || String(exception),
+      code: exception.code || null,
+      stage: exception.stage || 'runtime',
+      category: exception.category || null,
+      metadata: exception.metadata || {},
+      stack: this.normalizeStack(exception.stack),
+    }
+
+    // Mark as host object to ensure member/property access stays permissive.
+    payload.__priyoHostObject = true
+    return payload
+  }
+
+  normalizeStack(stackValue) {
+    if (!stackValue) return []
+    if (Array.isArray(stackValue)) return stackValue
+    return String(stackValue)
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .slice(0, 8)
   }
 
   registerBuiltinGlobals() {

@@ -39,7 +39,9 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
   - function/method calls and property access
 - Control flow:
   - `prakritiIf`, `prakritiElseIf`, `prakritiElse`
+  - `prakritiChoose`, `prakritiCase`, `prakritiOtherwise`
   - `prakritiAsLongAs` (while), `prakritiCount` (for)
+  - `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
   - `prakritiStop` (break), `prakritiGoOn` (continue)
 - Functions:
   - declarations, return values, closures, recursion
@@ -55,7 +57,7 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
   - single-line `// ...`
   - multi-line `/* ... */` -->
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. Its still lacks many features and has some quirks, but I plan to expand and improve it over time. However, the core syntax and design principles are already in place, and I am excited to share it with others as it evolves.
 
 ## Inspiration

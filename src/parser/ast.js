@@ -68,6 +68,23 @@ class ForStatement {
   }
 }
 
+class SwitchStatement {
+  constructor(discriminant, cases, defaultCase = null) {
+    this.type = 'SwitchStatement'
+    this.discriminant = discriminant
+    this.cases = cases
+    this.defaultCase = defaultCase
+  }
+}
+
+class SwitchCase {
+  constructor(test, consequent) {
+    this.type = 'SwitchCase'
+    this.test = test
+    this.consequent = consequent
+  }
+}
+
 class BreakStatement {
   constructor() {
     this.type = 'BreakStatement'
@@ -92,6 +109,30 @@ class FunctionDeclaration {
 class ReturnStatement {
   constructor(argument = null) {
     this.type = 'ReturnStatement'
+    this.argument = argument
+  }
+}
+
+class TryStatement {
+  constructor(block, handler = null, finalizer = null) {
+    this.type = 'TryStatement'
+    this.block = block
+    this.handler = handler
+    this.finalizer = finalizer
+  }
+}
+
+class CatchClause {
+  constructor(param = null, body) {
+    this.type = 'CatchClause'
+    this.param = param
+    this.body = body
+  }
+}
+
+class ThrowStatement {
+  constructor(argument) {
+    this.type = 'ThrowStatement'
     this.argument = argument
   }
 }
@@ -224,10 +265,15 @@ module.exports = {
   IfStatement,
   WhileStatement,
   ForStatement,
+  SwitchStatement,
+  SwitchCase,
   BreakStatement,
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  TryStatement,
+  CatchClause,
+  ThrowStatement,
   ClassDeclaration,
   MethodDeclaration,
   ClassFieldDeclaration,
