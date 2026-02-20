@@ -40,6 +40,9 @@ const OpCode = {
   BEGIN_FINALLY: 38,
   END_TRY: 39,
   THROW: 40,
+  BUILD_ARRAY: 41,
+  GET_INDEX: 42,
+  SET_INDEX: 43,
 }
 
 module.exports = { OpCode }

@@ -80,7 +80,11 @@ function classifyRuntimeFailure(message) {
   if (/expects .* args but got|Invalid number input/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.ARGUMENT_MISMATCH, category: ErrorCategory.USER }
   }
-  if (/Property .* not found|Property access|Property assignment/i.test(message)) {
+  if (
+    /Property .* not found|Property access|Property assignment|Array index access|Array index assignment|Array index must be|Array index .* out of range/i.test(
+      message,
+    )
+  ) {
     return { code: ErrorCodes.RUNTIME.PROPERTY_ERROR, category: ErrorCategory.USER }
   }
 

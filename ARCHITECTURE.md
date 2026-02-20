@@ -67,6 +67,34 @@ examples/
 
 ## 4. Implemented Language Features
 
+### 4.0 Feature Completion Table (100% as of now)
+
+| Area         | Feature                                                                              | Status |
+| ------------ | ------------------------------------------------------------------------------------ | ------ |
+| Core         | Entry block (`monalisa { ... }`)                                                     | 100%   |
+| Core         | Comments (`//`, `/* ... */`)                                                         | 100%   |
+| Core         | Literals (number, string, boolean, null)                                             | 100%   |
+| Variables    | `priyoKeep`, `priyoChange`, `priyoPromise`                                           | 100%   |
+| Variables    | Variable and property assignment                                                     | 100%   |
+| Arrays       | Array literals and index read/write (`[]`)                                           | 100%   |
+| Expressions  | Arithmetic, comparison, logical, grouping                                            | 100%   |
+| Expressions  | Function call and member access (`.`)                                                | 100%   |
+| Control flow | `if / else if / else`                                                                | 100%   |
+| Control flow | `switch / case / default`                                                            | 100%   |
+| Control flow | `while`, `for`, `break`, `continue`                                                  | 100%   |
+| Control flow | `try / catch / finally / throw`                                                      | 100%   |
+| Functions    | Declaration, return, closures, recursion                                             | 100%   |
+| OOP          | Classes, object creation, `priyoSelf`                                                | 100%   |
+| OOP          | Inheritance and parent access (`priyoParent`)                                        | 100%   |
+| OOP          | Static methods/fields and class fields                                               | 100%   |
+| Builtins     | `priyoTell` and color variants                                                       | 100%   |
+| Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                            | 100%   |
+| Packages     | Built-in package import (`lisaaBring`)                                               | 100%   |
+| Packages     | Built-in package registry (`priyoPackage.*`)                                         | 100%   |
+| Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
+| Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
+| CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
+
 ### 4.1 Core syntax
 
 - Entry block: `monalisa { ... }`
@@ -89,6 +117,8 @@ examples/
 - Comparison: `== != < <= > >=`
 - Logical: `&& || !`
 - Grouping with `(...)`
+- Array literal syntax: `[1, 2, 3]`
+- Array index read/write: `arr[0]`, `arr[1] = 99`
 - Function/method call expressions
 - Member access with `.`
 
@@ -145,7 +175,7 @@ examples/
   - `priyoPackage.has(name)`
   - `priyoPackage.use(name)`
   - `lisaaBring <packageName>` (syntactic sugar for built-in package loading)
-  - current built-in package: `math` (acts as phase-1 template for upcoming array package)
+  - current built-in package: `math` (arithmetic, trigonometry, and geometry helpers)
 
 ## 5. Runtime Model
 
@@ -179,10 +209,10 @@ examples/
 
 Current language/runtime limitations that still need dedicated implementation:
 
-- No first-class array syntax in language grammar yet:
-  - no literal syntax like `[1, 2, 3]`
-  - no index syntax like `arr[0]`
-  - current workaround is `math` package array helpers
+- Array support is phase-1 (core syntax complete, advanced features pending):
+  - no slice/range literal syntax like `arr[1:3]`
+  - no destructuring patterns
+  - no dedicated array methods in core language syntax (use builtins/packages)
 - Package system is phase-1 built-in only:
   - `lisaaBring` loads registered built-ins (currently `math`)
   - no user-defined package files or module resolution yet
@@ -202,8 +232,8 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Add first-class array language support:
-   - literals, indexing, updates, and array iteration patterns.
+1. Expand array ergonomics beyond phase-1:
+   - slicing, richer helpers, and iteration-friendly syntax patterns.
 2. Expand package/module system:
    - `lisaaBring` for user modules, plus `lisaaShare` and `lisaaBox` runtime semantics.
 3. Add automated tests by layer:

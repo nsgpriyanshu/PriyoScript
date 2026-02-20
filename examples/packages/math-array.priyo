@@ -1,17 +1,15 @@
 monalisa {
   priyoKeep math = priyoPackage.use("math")
 
-  priyoKeep numbers = math.array(10, 20, 30)
-  math.push(numbers, 40)
-  math.set(numbers, 1, 99)
+  priyoTell("Cube: " + math.cube(2))
+  priyoTell("Sqrt: " + math.sqrt(81))
+  priyoTell("Pow: " + math.pow(2, 8))
 
-  priyoTell("Length: " + math.length(numbers))
-  priyoTell("At index 1: " + math.at(numbers, 1))
-  priyoTell("Sum: " + math.sumArray(numbers))
-  priyoTell("Average: " + math.averageArray(numbers))
-  priyoTell("Min: " + math.minArray(numbers))
-  priyoTell("Max: " + math.maxArray(numbers))
-  priyoTell("Popped: " + math.pop(numbers))
-  priyoTell(numbers)
-  priyoTell(math.range(1, 5))
+  priyoKeep angle = math.degToRad(30)
+  priyoTell("sin(30deg): " + math.sin(angle))
+  priyoTell("cos(30deg): " + math.cos(angle))
+
+  priyoTell("Area Circle r=5: " + math.areaCircle(5))
+  priyoTell("Area Rectangle 10x20: " + math.areaRectangle(10, 20))
+  priyoTell("Area Triangle 8x4: " + math.areaTriangle(8, 4))
 }

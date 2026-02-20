@@ -29,11 +29,13 @@ const {
   ThisExpression,
   SuperExpression,
   MemberExpression,
+  IndexExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,
   NullLiteral,
+  ArrayLiteral,
   CallExpression,
   NewExpression,
 } = require('./ast')
@@ -423,12 +425,31 @@ class Parser {
       return null
     }
 
-    // Allow nested member targets like priyoSelf.profile.name = ...
-    while (this.curToken.type === TokenType.DOT) {
+    // Allow nested targets like:
+    // priyoSelf.profile.name = ...
+    // scores[0] = ...
+    // user.posts[1].title = ...
+    while (this.curToken.type === TokenType.DOT || this.curToken.type === TokenType.LBRACKET) {
+      if (this.curToken.type === TokenType.DOT) {
+        this.nextToken()
+        if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected property name after "."')) {
+          return null
+        }
+        target = new MemberExpression(target, new Identifier(this.curToken.literal))
+        this.nextToken()
+        continue
+      }
+
       this.nextToken()
-      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected property name after "."')) return null
-      target = new MemberExpression(target, new Identifier(this.curToken.literal))
-      this.nextToken()
+      const indexExpression = this.parseExpression()
+      if (!indexExpression) {
+        this.error('Expected index expression inside "[...]"')
+        return null
+      }
+      if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after index expression')) {
+        return null
+      }
+      target = new IndexExpression(target, indexExpression)
     }
 
     return target
@@ -812,6 +833,20 @@ class Parser {
         continue
       }
 
+      if (this.curToken.type === TokenType.LBRACKET) {
+        this.nextToken()
+        const indexExpression = this.parseExpression()
+        if (!indexExpression) {
+          this.error('Expected index expression inside "[...]"')
+          return null
+        }
+        if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after index expression')) {
+          return null
+        }
+        expression = new IndexExpression(expression, indexExpression)
+        continue
+      }
+
       break
     }
 
@@ -820,6 +855,9 @@ class Parser {
 
   parsePrimary() {
     switch (this.curToken.type) {
+      case TokenType.LBRACKET:
+        return this.parseArrayLiteral()
+
       case TokenType.STRING: {
         const node = new StringLiteral(this.curToken.literal)
         this.nextToken()
@@ -884,6 +922,34 @@ class Parser {
       default:
         return null
     }
+  }
+
+  parseArrayLiteral() {
+    const elements = []
+    // Array literal grammar: [expr, expr, ...]
+    this.nextToken() // consume '['
+
+    while (this.curToken.type !== TokenType.RBRACKET && this.curToken.type !== TokenType.EOF) {
+      const element = this.parseExpression()
+      if (!element) {
+        this.error('Invalid array element expression')
+        return null
+      }
+      elements.push(element)
+
+      if (this.curToken.type === TokenType.COMMA) {
+        this.nextToken()
+        continue
+      }
+
+      if (this.curToken.type !== TokenType.RBRACKET) {
+        this.error('Expected "," or "]" in array literal')
+        return null
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after array literal')) return null
+    return new ArrayLiteral(elements)
   }
 
   parseArgumentList() {
@@ -958,12 +1024,22 @@ class Parser {
     }
     const curSnapshot = this.curToken
     const peekSnapshot = this.peekToken
+    const errorCountSnapshot = this.errors.length
 
     try {
       this.nextToken()
-      while (this.curToken.type === TokenType.DOT) {
+      while (this.curToken.type === TokenType.DOT || this.curToken.type === TokenType.LBRACKET) {
+        if (this.curToken.type === TokenType.DOT) {
+          this.nextToken()
+          if (this.curToken.type !== TokenType.IDENTIFIER) return false
+          this.nextToken()
+          continue
+        }
+
         this.nextToken()
-        if (this.curToken.type !== TokenType.IDENTIFIER) return false
+        const indexExpression = this.parseExpression()
+        if (!indexExpression) return false
+        if (this.curToken.type !== TokenType.RBRACKET) return false
         this.nextToken()
       }
       return this.curToken.type === TokenType.ASSIGN
@@ -975,6 +1051,7 @@ class Parser {
       this.lexer.column = lexerSnapshot.column
       this.curToken = curSnapshot
       this.peekToken = peekSnapshot
+      this.errors.length = errorCountSnapshot
     }
   }
 }

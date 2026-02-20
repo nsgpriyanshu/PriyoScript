@@ -90,6 +90,11 @@ function humanizeError(input) {
 
   const textRules = [
     {
+      test: /Array index must be an integer number|Array index .* out of range/i,
+      message: 'So Rude - This array index is not valid.',
+      tip: 'Use a whole number index within array length. Example: for 3 items, valid indexes are 0, 1, 2.',
+    },
+    {
       test: /Block comment was started with \/\* but never closed with \*\//i,
       message:
         'So Rude - Your multi-line comment is not closed. I found `/*` but did not find `*/`.',

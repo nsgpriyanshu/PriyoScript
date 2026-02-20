@@ -2,6 +2,6 @@ monalisa {
   lisaaBring math
 
   priyoTell("add: " + math.add(5, 7))
-  priyoTell("range: ")
-  priyoTell(math.range(1, 4))
+  priyoTell("cube: " + math.cube(2))
+  priyoTell("areaTriangle: " + math.areaTriangle(12, 5))
 }

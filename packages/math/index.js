@@ -12,15 +12,9 @@ function ensureNonEmpty(values, methodName) {
   }
 }
 
-function ensureArray(value, methodName) {
-  if (!Array.isArray(value)) {
-    throw new Error(`math.${methodName} expects an array as the first argument`)
-  }
-}
-
-function ensureInteger(value, methodName, argName) {
-  if (!Number.isInteger(value)) {
-    throw new Error(`math.${methodName} expects integer ${argName}`)
+function ensureNonNegative(value, methodName, argName) {
+  if (value < 0) {
+    throw new Error(`math.${methodName} expects non-negative ${argName}`)
   }
 }
 
@@ -88,88 +82,100 @@ const mathPackage = {
     return Math.min(Math.max(value, minValue), maxValue)
   },
 
-  // -------------------------
-  // Array utilities (phase-1)
-  // -------------------------
-
-  array(...values) {
-    return [...values]
+  // General utilities
+  abs(value) {
+    ensureNumbers([value], 'abs')
+    return Math.abs(value)
   },
 
-  range(start, end, step = 1) {
-    ensureNumbers([start, end, step], 'range')
-    if (step === 0) {
-      throw new Error('math.range step cannot be zero')
-    }
-
-    const result = []
-    if (start <= end) {
-      for (let i = start; i <= end; i += Math.abs(step)) {
-        result.push(i)
-      }
-      return result
-    }
-
-    for (let i = start; i >= end; i -= Math.abs(step)) {
-      result.push(i)
-    }
-    return result
+  pow(base, exponent) {
+    ensureNumbers([base, exponent], 'pow')
+    return Math.pow(base, exponent)
   },
 
-  push(arr, value) {
-    ensureArray(arr, 'push')
-    arr.push(value)
-    return arr.length
+  sqrt(value) {
+    ensureNumbers([value], 'sqrt')
+    ensureNonNegative(value, 'sqrt', 'value')
+    return Math.sqrt(value)
   },
 
-  pop(arr) {
-    ensureArray(arr, 'pop')
-    return arr.pop()
+  cube(value) {
+    ensureNumbers([value], 'cube')
+    return value * value * value
   },
 
-  at(arr, index) {
-    ensureArray(arr, 'at')
-    ensureInteger(index, 'at', 'index')
-    return arr[index]
+  // Trigonometry (radian-based)
+  sin(radians) {
+    ensureNumbers([radians], 'sin')
+    return Math.sin(radians)
   },
 
-  set(arr, index, value) {
-    ensureArray(arr, 'set')
-    ensureInteger(index, 'set', 'index')
-    arr[index] = value
-    return value
+  cos(radians) {
+    ensureNumbers([radians], 'cos')
+    return Math.cos(radians)
   },
 
-  length(arr) {
-    ensureArray(arr, 'length')
-    return arr.length
+  tan(radians) {
+    ensureNumbers([radians], 'tan')
+    return Math.tan(radians)
   },
 
-  sumArray(arr) {
-    ensureArray(arr, 'sumArray')
-    ensureNumbers(arr, 'sumArray')
-    return arr.reduce((total, value) => total + value, 0)
+  asin(value) {
+    ensureNumbers([value], 'asin')
+    return Math.asin(value)
   },
 
-  averageArray(arr) {
-    ensureArray(arr, 'averageArray')
-    ensureNonEmpty(arr, 'averageArray')
-    ensureNumbers(arr, 'averageArray')
-    return arr.reduce((total, value) => total + value, 0) / arr.length
+  acos(value) {
+    ensureNumbers([value], 'acos')
+    return Math.acos(value)
   },
 
-  minArray(arr) {
-    ensureArray(arr, 'minArray')
-    ensureNonEmpty(arr, 'minArray')
-    ensureNumbers(arr, 'minArray')
-    return Math.min(...arr)
+  atan(value) {
+    ensureNumbers([value], 'atan')
+    return Math.atan(value)
   },
 
-  maxArray(arr) {
-    ensureArray(arr, 'maxArray')
-    ensureNonEmpty(arr, 'maxArray')
-    ensureNumbers(arr, 'maxArray')
-    return Math.max(...arr)
+  degToRad(degrees) {
+    ensureNumbers([degrees], 'degToRad')
+    return (degrees * Math.PI) / 180
+  },
+
+  radToDeg(radians) {
+    ensureNumbers([radians], 'radToDeg')
+    return (radians * 180) / Math.PI
+  },
+
+  // Geometry helpers
+  areaCircle(radius) {
+    ensureNumbers([radius], 'areaCircle')
+    ensureNonNegative(radius, 'areaCircle', 'radius')
+    return Math.PI * radius * radius
+  },
+
+  areaRectangle(length, width) {
+    ensureNumbers([length, width], 'areaRectangle')
+    ensureNonNegative(length, 'areaRectangle', 'length')
+    ensureNonNegative(width, 'areaRectangle', 'width')
+    return length * width
+  },
+
+  areaTriangle(base, height) {
+    ensureNumbers([base, height], 'areaTriangle')
+    ensureNonNegative(base, 'areaTriangle', 'base')
+    ensureNonNegative(height, 'areaTriangle', 'height')
+    return 0.5 * base * height
+  },
+
+  areaSquare(side) {
+    ensureNumbers([side], 'areaSquare')
+    ensureNonNegative(side, 'areaSquare', 'side')
+    return side * side
+  },
+
+  circumference(radius) {
+    ensureNumbers([radius], 'circumference')
+    ensureNonNegative(radius, 'circumference', 'radius')
+    return 2 * Math.PI * radius
   },
 }
 

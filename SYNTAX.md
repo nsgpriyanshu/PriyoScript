@@ -88,6 +88,31 @@ Supported operators:
 - `||`
 - `!`
 
+### Arrays
+
+Array literals:
+
+```priyo
+priyoKeep scores = [10, 20, 30]
+```
+
+Index read:
+
+```priyo
+priyoTell(scores[0])
+```
+
+Index write:
+
+```priyo
+scores[1] = 99
+```
+
+Notes:
+
+- Index must be an integer number.
+- Out-of-range index access throws a runtime error.
+
 ## 6. Built-in I/O
 
 ### Output
@@ -230,10 +255,16 @@ Current built-in package:
 - `math`:
   - `add(a, b)`, `sub(a, b)`, `mul(a, b)`, `div(a, b)`, `mod(a, b)`
   - `sum(...)`, `average(...)`, `min(...)`, `max(...)`, `clamp(value, min, max)`
-  - array helpers:
-    - `array(...)`, `range(start, end, step?)`
-    - `push(arr, value)`, `pop(arr)`, `at(arr, index)`, `set(arr, index, value)`
-    - `length(arr)`, `sumArray(arr)`, `averageArray(arr)`, `minArray(arr)`, `maxArray(arr)`
+  - utility:
+    - `abs(value)`, `pow(base, exponent)`, `sqrt(value)`, `cube(value)`
+  - trigonometry:
+    - `sin(radians)`, `cos(radians)`, `tan(radians)`
+    - `asin(value)`, `acos(value)`, `atan(value)`
+    - `degToRad(degrees)`, `radToDeg(radians)`
+  - geometry:
+    - `areaCircle(radius)`, `areaRectangle(length, width)`
+    - `areaTriangle(base, height)`, `areaSquare(side)`
+    - `circumference(radius)`
 
 `priyoPackage` helpers:
 
@@ -353,5 +384,5 @@ lisaaFamily CollegeStudent {
 
 ## 15. Current Limitations
 
-- No module/import execution yet.
+- No user-defined module file resolution yet (built-in `lisaaBring` works for registered packages).
 - Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.

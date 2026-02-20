@@ -212,6 +212,14 @@ class MemberExpression {
   }
 }
 
+class IndexExpression {
+  constructor(object, index) {
+    this.type = 'IndexExpression'
+    this.object = object
+    this.index = index
+  }
+}
+
 class Identifier {
   constructor(name) {
     this.type = 'Identifier'
@@ -244,6 +252,13 @@ class NullLiteral {
   constructor() {
     this.type = 'NullLiteral'
     this.value = null
+  }
+}
+
+class ArrayLiteral {
+  constructor(elements) {
+    this.type = 'ArrayLiteral'
+    this.elements = elements
   }
 }
 
@@ -291,11 +306,13 @@ module.exports = {
   ThisExpression,
   SuperExpression,
   MemberExpression,
+  IndexExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,
   NullLiteral,
+  ArrayLiteral,
   CallExpression,
   NewExpression,
 }

@@ -1,0 +1,6 @@
+monalisa {
+  priyoKeep nums = [1, 2, 3]
+  priyoTell(nums[0])
+  nums[1] = 99
+  priyoTell(nums[1])
+}

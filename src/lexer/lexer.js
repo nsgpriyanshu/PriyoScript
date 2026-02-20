@@ -228,6 +228,14 @@ class Lexer {
         token.type = TokenType.RBRACE
         token.literal = '}'
         break
+      case '[':
+        token.type = TokenType.LBRACKET
+        token.literal = '['
+        break
+      case ']':
+        token.type = TokenType.RBRACKET
+        token.literal = ']'
+        break
       case ',':
         token.type = TokenType.COMMA
         token.literal = ','

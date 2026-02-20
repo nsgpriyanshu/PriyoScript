@@ -103,6 +103,8 @@ const TokenType = {
   RPAREN: 'RPAREN',
   LBRACE: 'LBRACE',
   RBRACE: 'RBRACE',
+  LBRACKET: 'LBRACKET',
+  RBRACKET: 'RBRACKET',
 }
 
 module.exports = { TokenType }

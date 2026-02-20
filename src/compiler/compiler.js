@@ -114,6 +114,14 @@ class Compiler {
       return
     }
 
+    if (stmt.identifier.type === 'IndexExpression') {
+      this.compileExpression(stmt.identifier.object)
+      this.compileExpression(stmt.identifier.index)
+      this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_INDEX)
+      return
+    }
+
     throw new Error(`Invalid assignment target: ${stmt.identifier.type}`)
   }
 
@@ -462,6 +470,15 @@ class Compiler {
         this.emit(OpCode.PUSH_NULL)
         break
 
+      case 'ArrayLiteral':
+        // Stack layout before BUILD_ARRAY: [..., el1, el2, ..., elN]
+        // BUILD_ARRAY(N) packs the last N stack values into one JS array.
+        for (const element of expr.elements) {
+          this.compileExpression(element)
+        }
+        this.emit(OpCode.BUILD_ARRAY, expr.elements.length)
+        break
+
       case 'Identifier':
         this.emit(OpCode.LOAD_VARIABLE, expr.name)
         break
@@ -477,6 +494,13 @@ class Compiler {
       case 'MemberExpression':
         this.compileExpression(expr.object)
         this.emit(OpCode.GET_PROPERTY, expr.property.name)
+        break
+
+      case 'IndexExpression':
+        // Evaluate target and index, then delegate bounds/type checks to VM.
+        this.compileExpression(expr.object)
+        this.compileExpression(expr.index)
+        this.emit(OpCode.GET_INDEX)
         break
 
       case 'CallExpression':

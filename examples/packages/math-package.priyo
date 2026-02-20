@@ -6,4 +6,6 @@ monalisa {
   priyoTell("average: " + pkg.average(4, 6, 8, 10))
   priyoTell("max: " + pkg.max(3, 12, 7, 9))
   priyoTell("clamp: " + pkg.clamp(27, 0, 20))
+  priyoTell("cube: " + pkg.cube(2))
+  priyoTell("areaSquare: " + pkg.areaSquare(9))
 }

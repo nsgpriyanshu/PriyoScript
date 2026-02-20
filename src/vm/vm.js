@@ -46,6 +46,17 @@ class VM {
               stack.push(null)
               break
 
+            case OpCode.BUILD_ARRAY: {
+              const elementCount = instr.operand || 0
+              if (elementCount === 0) {
+                stack.push([])
+                break
+              }
+              // Keep literal order stable: [a, b, c] should remain [a, b, c].
+              stack.push(stack.splice(-elementCount))
+              break
+            }
+
             case OpCode.DEFINE_VARIABLE: {
               const value = stack.pop()
               const { name, kind } = instr.operand
@@ -290,6 +301,21 @@ class VM {
               const value = stack.pop()
               const object = stack.pop()
               this.setProperty(object, instr.operand, value)
+              break
+            }
+
+            case OpCode.GET_INDEX: {
+              const index = stack.pop()
+              const target = stack.pop()
+              stack.push(this.getIndexValue(target, index))
+              break
+            }
+
+            case OpCode.SET_INDEX: {
+              const value = stack.pop()
+              const index = stack.pop()
+              const target = stack.pop()
+              this.setIndexValue(target, index, value)
               break
             }
 
@@ -881,6 +907,35 @@ class VM {
     }
 
     throw new Error(`Property assignment is not supported on value type: ${typeof object}`)
+  }
+
+  getIndexValue(target, index) {
+    if (!Array.isArray(target)) {
+      throw new Error('Array index access requires an array value')
+    }
+    const normalizedIndex = this.normalizeArrayIndex(index)
+    if (normalizedIndex < 0 || normalizedIndex >= target.length) {
+      throw new Error(`Array index ${normalizedIndex} is out of range (length ${target.length})`)
+    }
+    return target[normalizedIndex]
+  }
+
+  setIndexValue(target, index, value) {
+    if (!Array.isArray(target)) {
+      throw new Error('Array index assignment requires an array value')
+    }
+    const normalizedIndex = this.normalizeArrayIndex(index)
+    if (normalizedIndex < 0 || normalizedIndex >= target.length) {
+      throw new Error(`Array index ${normalizedIndex} is out of range (length ${target.length})`)
+    }
+    target[normalizedIndex] = value
+  }
+
+  normalizeArrayIndex(index) {
+    if (typeof index !== 'number' || !Number.isInteger(index)) {
+      throw new Error('Array index must be an integer number')
+    }
+    return index
   }
 
   normalizeCaughtValue(exception) {

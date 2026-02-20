@@ -27,6 +27,7 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 4. Colorful console output for better user experience.
 5. Comprehensive error handling with descriptive messages.
 6. Built-in package manager with `lisaaBring` shortcut and `math` package.
+7. First-class arrays in language syntax (`[ ]` and index access), independent from packages.
 
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.

@@ -1,0 +1,5 @@
+monalisa {
+  priyoKeep nums = [10, 20, 30]
+  priyoKeep i = 2
+  priyoTell(nums[i])
+}
