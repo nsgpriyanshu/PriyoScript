@@ -1,0 +1,9 @@
+monalisa {
+  priyoKeep scores = [10, 20, 30, 40]
+
+  priyoTell(priyoArray.length(scores))
+  priyoTell(priyoArray.first(scores))
+  priyoTell(priyoArray.last(scores))
+  priyoTell(priyoArray.slice(scores, 1, 3))
+  priyoTell(priyoArray.join(scores, "-"))
+}

@@ -68,6 +68,15 @@ class ForStatement {
   }
 }
 
+class ForEachStatement {
+  constructor(item, iterable, body) {
+    this.type = 'ForEachStatement'
+    this.item = item
+    this.iterable = iterable
+    this.body = body
+  }
+}
+
 class SwitchStatement {
   constructor(discriminant, cases, defaultCase = null) {
     this.type = 'SwitchStatement'
@@ -220,6 +229,15 @@ class IndexExpression {
   }
 }
 
+class SliceExpression {
+  constructor(object, start = null, end = null) {
+    this.type = 'SliceExpression'
+    this.object = object
+    this.start = start
+    this.end = end
+  }
+}
+
 class Identifier {
   constructor(name) {
     this.type = 'Identifier'
@@ -288,6 +306,7 @@ module.exports = {
   IfStatement,
   WhileStatement,
   ForStatement,
+  ForEachStatement,
   SwitchStatement,
   SwitchCase,
   BreakStatement,
@@ -307,6 +326,7 @@ module.exports = {
   SuperExpression,
   MemberExpression,
   IndexExpression,
+  SliceExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,

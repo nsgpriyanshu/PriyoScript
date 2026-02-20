@@ -248,6 +248,10 @@ class Lexer {
         token.type = TokenType.DOT
         token.literal = '.'
         break
+      case ':':
+        token.type = TokenType.COLON
+        token.literal = ':'
+        break
       case '"':
         token.type = TokenType.STRING
         token.literal = this.readString()

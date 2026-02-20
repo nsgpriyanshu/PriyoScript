@@ -90,9 +90,9 @@ function humanizeError(input) {
 
   const textRules = [
     {
-      test: /Array index must be an integer number|Array index .* out of range/i,
+      test: /Array index must be an integer number|Array index .* out of range|Array slicing requires|Array slice .* must be/i,
       message: 'So Rude - This array index is not valid.',
-      tip: 'Use a whole number index within array length. Example: for 3 items, valid indexes are 0, 1, 2.',
+      tip: 'Use integer index/slice bounds and make sure the target value is an array.',
     },
     {
       test: /Block comment was started with \/\* but never closed with \*\//i,

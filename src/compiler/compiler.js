@@ -46,6 +46,10 @@ class Compiler {
         this.compileForStatement(stmt)
         return
 
+      case 'ForEachStatement':
+        this.compileForEachStatement(stmt)
+        return
+
       case 'SwitchStatement':
         this.compileSwitchStatement(stmt)
         return
@@ -214,6 +218,71 @@ class Compiler {
     if (exitJump != null) {
       this.patchJump(exitJump, endAddress)
     }
+    this.patchLoopBreaks(loopContext, endAddress, loopContext.loopScopeDepth)
+    this.leaveLoop()
+  }
+
+  compileForEachStatement(stmt) {
+    const arrayTempName = this.nextTempName('__forEachArray')
+    const indexTempName = this.nextTempName('__forEachIndex')
+
+    // Resolve iterable once before loop so expression side-effects run only once.
+    this.compileExpression(stmt.iterable)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: arrayTempName,
+      kind: 'const',
+    })
+
+    this.emit(OpCode.PUSH_NUMBER, 0)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: indexTempName,
+      kind: 'let',
+    })
+
+    const loopStart = this.instructions.length
+    const loopContext = this.enterLoop({
+      continueTarget: null,
+      continueTargetScopeDepth: null,
+      loopScopeDepth: this.scopeDepth,
+    })
+
+    // index < iterable.length
+    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
+    this.emit(OpCode.LOAD_VARIABLE, arrayTempName)
+    this.emit(OpCode.GET_PROPERTY, 'length')
+    this.emit(OpCode.LT)
+    const exitJump = this.emit(OpCode.JUMP_IF_FALSE, -1)
+
+    // Per-iteration scope: expose loop item as const binding.
+    this.emit(OpCode.ENTER_SCOPE)
+    this.scopeDepth++
+    this.emit(OpCode.LOAD_VARIABLE, arrayTempName)
+    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
+    this.emit(OpCode.GET_INDEX)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: stmt.item.name,
+      kind: 'const',
+    })
+
+    for (const bodyStatement of stmt.body.statements) {
+      this.compileStatement(bodyStatement)
+    }
+
+    this.emit(OpCode.EXIT_SCOPE)
+    this.scopeDepth--
+
+    const updateStart = this.instructions.length
+    this.patchLoopContinues(loopContext, updateStart, this.scopeDepth)
+
+    // index = index + 1
+    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
+    this.emit(OpCode.PUSH_NUMBER, 1)
+    this.emit(OpCode.ADD)
+    this.emit(OpCode.SET_VARIABLE, indexTempName)
+    this.emit(OpCode.JUMP, loopStart)
+
+    const endAddress = this.instructions.length
+    this.patchJump(exitJump, endAddress)
     this.patchLoopBreaks(loopContext, endAddress, loopContext.loopScopeDepth)
     this.leaveLoop()
   }
@@ -501,6 +570,21 @@ class Compiler {
         this.compileExpression(expr.object)
         this.compileExpression(expr.index)
         this.emit(OpCode.GET_INDEX)
+        break
+
+      case 'SliceExpression':
+        this.compileExpression(expr.object)
+        if (expr.start) {
+          this.compileExpression(expr.start)
+        } else {
+          this.emit(OpCode.PUSH_NULL)
+        }
+        if (expr.end) {
+          this.compileExpression(expr.end)
+        } else {
+          this.emit(OpCode.PUSH_NULL)
+        }
+        this.emit(OpCode.SLICE_ARRAY)
         break
 
       case 'CallExpression':

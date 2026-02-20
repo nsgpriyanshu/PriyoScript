@@ -1,0 +1,7 @@
+monalisa {
+  priyoKeep scores = [10, 20, 30, 40, 50]
+
+  priyoTell(scores[1:4])
+  priyoTell(scores[:2])
+  priyoTell(scores[3:])
+}

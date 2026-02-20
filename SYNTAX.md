@@ -108,10 +108,19 @@ Index write:
 scores[1] = 99
 ```
 
+Slicing:
+
+```priyo
+priyoTell(scores[1:3])   // start inclusive, end exclusive
+priyoTell(scores[:2])    // from start
+priyoTell(scores[2:])    // till end
+```
+
 Notes:
 
 - Index must be an integer number.
 - Out-of-range index access throws a runtime error.
+- Slice bounds must be integer numbers.
 
 ## 6. Built-in I/O
 
@@ -183,6 +192,14 @@ prakritiAsLongAs (i < 3) {
 ```priyo
 prakritiCount (priyoChange i = 0; i < 3; i = i + 1) {
   priyoTell(i)
+}
+```
+
+### Foreach over arrays
+
+```priyo
+prakritiCount (item priyoInside scores) {
+  priyoTell(item)
 }
 ```
 
@@ -271,6 +288,20 @@ Current built-in package:
 - `priyoPackage.list()`
 - `priyoPackage.has(name)`
 - `priyoPackage.use(name)`
+
+Array helper object:
+
+- `priyoArray.length(arr)`
+- `priyoArray.push(arr, value)`
+- `priyoArray.pop(arr)`
+- `priyoArray.at(arr, index)`
+- `priyoArray.slice(arr, start?, end?)`
+- `priyoArray.first(arr)`
+- `priyoArray.last(arr)`
+- `priyoArray.reverse(arr)`
+- `priyoArray.includes(arr, value)`
+- `priyoArray.indexOf(arr, value)`
+- `priyoArray.join(arr, separator?)`
 
 ## 12. Functions
 

@@ -97,6 +97,7 @@ const TokenType = {
   COMMA: 'COMMA',
   SEMICOLON: 'SEMICOLON',
   DOT: 'DOT',
+  COLON: 'COLON',
 
   // Brackets
   LPAREN: 'LPAREN',

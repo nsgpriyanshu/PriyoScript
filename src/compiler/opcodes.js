@@ -43,6 +43,7 @@ const OpCode = {
   BUILD_ARRAY: 41,
   GET_INDEX: 42,
   SET_INDEX: 43,
+  SLICE_ARRAY: 44,
 }
 
 module.exports = { OpCode }

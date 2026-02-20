@@ -28,6 +28,7 @@
 
     "for": "prakritiCount",
     "while": "prakritiAsLongAs",
+    "in": "priyoInside",
 
     "break": "prakritiStop",
     "continue": "prakritiGoOn",
@@ -59,7 +60,6 @@
     "await": "prakritiPause",
     "yield": "prakritiGiveSome",
 
-    "in": "priyoInside",
     "with": "priyoWith",
 
     "implements": "lisaaFollow",

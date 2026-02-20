@@ -11,6 +11,7 @@ const {
   IfStatement,
   WhileStatement,
   ForStatement,
+  ForEachStatement,
   SwitchStatement,
   SwitchCase,
   BreakStatement,
@@ -30,6 +31,7 @@ const {
   SuperExpression,
   MemberExpression,
   IndexExpression,
+  SliceExpression,
   Identifier,
   StringLiteral,
   NumberLiteral,
@@ -583,6 +585,13 @@ class Parser {
     this.nextToken()
     if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after for keyword')) return null
 
+    // Iteration-friendly foreach syntax:
+    // prakritiCount (item priyoInside items) { ... }
+    if (this.isForEachHeaderStart()) {
+      const forEach = this.parseForEachStatement()
+      return forEach
+    }
+
     const initializer = this.parseForInitializer()
     if (!this.consumeCurrent(TokenType.SEMICOLON, 'Expected ";" after for initializer')) return null
 
@@ -605,6 +614,29 @@ class Parser {
     if (!body) return null
 
     return new ForStatement(initializer, condition, update, body)
+  }
+
+  parseForEachStatement() {
+    const item = new Identifier(this.curToken.literal)
+    this.nextToken()
+
+    if (!this.consumeCurrent(TokenType.IN, 'Expected priyoInside between item and iterable'))
+      return null
+
+    const iterable = this.parseExpression()
+    if (!iterable) {
+      this.error('Expected iterable expression after priyoInside')
+      return null
+    }
+
+    if (!this.consumeCurrent(TokenType.RPAREN, 'Expected ")" after foreach header')) return null
+
+    this.loopDepth++
+    const body = this.parseBlockStatement()
+    this.loopDepth--
+    if (!body) return null
+
+    return new ForEachStatement(item, iterable, body)
   }
 
   parseSwitchStatement() {
@@ -835,15 +867,9 @@ class Parser {
 
       if (this.curToken.type === TokenType.LBRACKET) {
         this.nextToken()
-        const indexExpression = this.parseExpression()
-        if (!indexExpression) {
-          this.error('Expected index expression inside "[...]"')
-          return null
-        }
-        if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after index expression')) {
-          return null
-        }
-        expression = new IndexExpression(expression, indexExpression)
+        const indexed = this.parseIndexOrSliceExpression(expression)
+        if (!indexed) return null
+        expression = indexed
         continue
       }
 
@@ -952,6 +978,59 @@ class Parser {
     return new ArrayLiteral(elements)
   }
 
+  parseIndexOrSliceExpression(objectExpression) {
+    // [:end] / [:] slices.
+    if (this.curToken.type === TokenType.COLON) {
+      this.nextToken()
+
+      let end = null
+      if (this.curToken.type !== TokenType.RBRACKET) {
+        end = this.parseExpression()
+        if (!end) {
+          this.error('Expected slice end expression after ":"')
+          return null
+        }
+      }
+
+      if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after slice expression')) {
+        return null
+      }
+
+      return new SliceExpression(objectExpression, null, end)
+    }
+
+    // [start] or [start:end]
+    const firstExpression = this.parseExpression()
+    if (!firstExpression) {
+      this.error('Expected index expression inside "[...]"')
+      return null
+    }
+
+    if (this.curToken.type === TokenType.COLON) {
+      this.nextToken()
+
+      let end = null
+      if (this.curToken.type !== TokenType.RBRACKET) {
+        end = this.parseExpression()
+        if (!end) {
+          this.error('Expected slice end expression after ":"')
+          return null
+        }
+      }
+
+      if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after slice expression')) {
+        return null
+      }
+
+      return new SliceExpression(objectExpression, firstExpression, end)
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after index expression')) {
+      return null
+    }
+    return new IndexExpression(objectExpression, firstExpression)
+  }
+
   parseArgumentList() {
     const args = []
     while (this.curToken.type !== TokenType.RPAREN && this.curToken.type !== TokenType.EOF) {
@@ -1037,8 +1116,10 @@ class Parser {
         }
 
         this.nextToken()
+        if (this.curToken.type === TokenType.COLON) return false
         const indexExpression = this.parseExpression()
         if (!indexExpression) return false
+        if (this.curToken.type === TokenType.COLON) return false
         if (this.curToken.type !== TokenType.RBRACKET) return false
         this.nextToken()
       }
@@ -1053,6 +1134,11 @@ class Parser {
       this.peekToken = peekSnapshot
       this.errors.length = errorCountSnapshot
     }
+  }
+
+  isForEachHeaderStart() {
+    if (this.curToken.type !== TokenType.IDENTIFIER) return false
+    return this.peekToken && this.peekToken.type === TokenType.IN
   }
 }
 

@@ -80,6 +80,8 @@ examples/
 | Variables    | `priyoKeep`, `priyoChange`, `priyoPromise`                                           | 100%   |
 | Variables    | Variable and property assignment                                                     | 100%   |
 | Arrays       | Array literals and index read/write (`[]`)                                           | 100%   |
+| Arrays       | Array slicing (`arr[start:end]`)                                                     | 100%   |
+| Arrays       | Iteration-friendly foreach (`prakritiCount (item priyoInside arr)`)                  | 100%   |
 | Expressions  | Arithmetic, comparison, logical, grouping                                            | 100%   |
 | Expressions  | Function call and member access (`.`)                                                | 100%   |
 | Control flow | `if / else if / else`                                                                | 100%   |
@@ -123,6 +125,7 @@ examples/
 - Grouping with `(...)`
 - Array literal syntax: `[1, 2, 3]`
 - Array index read/write: `arr[0]`, `arr[1] = 99`
+- Array slicing: `arr[1:4]`, `arr[:3]`, `arr[2:]`
 - Function/method call expressions
 - Member access with `.`
 
@@ -132,6 +135,7 @@ examples/
 - `prakritiChoose`, `prakritiCase`, `prakritiOtherwise` (switch/case/default)
 - `prakritiAsLongAs` (while)
 - `prakritiCount` (for)
+- `prakritiCount (item priyoInside items) { ... }` (foreach over arrays)
 - `prakritiStop` (break)
 - `prakritiGoOn` (continue)
 - `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
@@ -180,6 +184,11 @@ examples/
   - `priyoPackage.use(name)`
   - `lisaaBring <packageName>` (syntactic sugar for built-in package loading)
   - current built-in package: `math` (arithmetic, trigonometry, and geometry helpers)
+- Array helpers:
+  - `priyoArray.length(arr)`, `priyoArray.push(arr, value)`, `priyoArray.pop(arr)`
+  - `priyoArray.at(arr, index)`, `priyoArray.slice(arr, start?, end?)`
+  - `priyoArray.first(arr)`, `priyoArray.last(arr)`, `priyoArray.reverse(arr)`
+  - `priyoArray.includes(arr, value)`, `priyoArray.indexOf(arr, value)`, `priyoArray.join(arr, sep?)`
 
 ## 5. Runtime Model
 
@@ -213,10 +222,10 @@ examples/
 
 Current language/runtime limitations that still need dedicated implementation:
 
-- Array support is phase-1 (core syntax complete, advanced features pending):
-  - no slice/range literal syntax like `arr[1:3]`
-  - no destructuring patterns
-  - no dedicated array methods in core language syntax (use builtins/packages)
+- Array support is now expanded (phase-2 ergonomic layer):
+  - slicing, helper APIs, and foreach loops are implemented
+  - no destructuring patterns yet
+  - no functional callback helpers (`map/filter/reduce`) yet
 - Package system is phase-1 built-in only:
   - `lisaaBring` loads registered built-ins (currently `math`)
   - no user-defined package files or module resolution yet
@@ -236,8 +245,8 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Expand array ergonomics beyond phase-1:
-   - slicing, richer helpers, and iteration-friendly syntax patterns.
+1. Add advanced array features beyond current ergonomics:
+   - destructuring and higher-order callback helpers.
 2. Expand package/module system:
    - `lisaaBring` for user modules, plus `lisaaShare` and `lisaaBox` runtime semantics.
 3. Add automated tests by layer:

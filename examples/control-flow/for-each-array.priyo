@@ -1,0 +1,7 @@
+monalisa {
+  priyoKeep topics = ["Reels", "YouTube Shorts", "Podcast"]
+
+  prakritiCount (topic priyoInside topics) {
+    priyoTell("Topic: " + topic)
+  }
+}

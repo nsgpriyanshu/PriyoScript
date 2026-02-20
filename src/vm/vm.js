@@ -319,6 +319,14 @@ class VM {
               break
             }
 
+            case OpCode.SLICE_ARRAY: {
+              const end = stack.pop()
+              const start = stack.pop()
+              const target = stack.pop()
+              stack.push(this.sliceArrayValue(target, start, end))
+              break
+            }
+
             case OpCode.CALL_NAMED: {
               const { name, argc } = instr.operand
               const args = argc === 0 ? [] : stack.splice(-argc)
@@ -931,11 +939,37 @@ class VM {
     target[normalizedIndex] = value
   }
 
+  sliceArrayValue(target, start, end) {
+    if (!Array.isArray(target)) {
+      throw new Error('Array slicing requires an array value')
+    }
+
+    const startIndex = this.normalizeSliceIndex(start, 'start', target.length)
+    const endIndex = this.normalizeSliceIndex(end, 'end', target.length)
+    return target.slice(startIndex, endIndex)
+  }
+
   normalizeArrayIndex(index) {
     if (typeof index !== 'number' || !Number.isInteger(index)) {
       throw new Error('Array index must be an integer number')
     }
     return index
+  }
+
+  normalizeSliceIndex(index, boundName, arrayLength) {
+    if (index == null) {
+      return boundName === 'start' ? 0 : arrayLength
+    }
+
+    if (typeof index !== 'number' || !Number.isInteger(index)) {
+      throw new Error(`Array slice ${boundName} must be an integer number`)
+    }
+
+    if (index < 0) {
+      return Math.max(0, arrayLength + index)
+    }
+
+    return Math.min(arrayLength, index)
   }
 
   normalizeCaughtValue(exception) {
