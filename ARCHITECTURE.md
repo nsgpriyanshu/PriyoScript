@@ -218,7 +218,16 @@ examples/
 - CLI and future REPL share a common printer (`src/errors/printer.js`) to render humanized output consistently.
 - Dev entry prints developer-oriented output with code + stage.
 
-## 7. Current Limitations
+## 7. Automated Testing Architecture
+
+We use **Vitest** for our unit testing framework, providing fast, modular test execution. Test suites are divided functionally to ensure production-grade resilience by proving each distinct phase of execution independently, making debugging easier when the pipeline breaks:
+
+- **Lexer Tests** (\`tests/lexer.test.js\`): Verify tokenizer correctly segments raw source code into streams of tokens and handles custom PriyoScript keywords (e.g. \`priyoKeep\`, \`lisaaTask\`).
+- **Parser Tests** (\`tests/parser.test.js\`): Ensure AST structures are properly generated, validating expressions, bindings, and control flow nodes.
+- **Compiler Tests** (\`tests/compiler.test.js\`): Verify the AST is successfully lowered into expected linear bytecode instructions (\`OpCodes\`). Checks stack discipline and correct branch patching for \`JUMP\` instructions.
+- **VM/Runtime Tests** (\`tests/vm.test.js\`): End-to-end integration tests executing source code through the pipeline into the actual \`VM\`. Validates language features and output via \`priyoTell\` by spying on the host environment output logger.
+
+## 8. Current Limitations
 
 Current language/runtime limitations that still need dedicated implementation:
 
@@ -241,7 +250,7 @@ Current language/runtime limitations that still need dedicated implementation:
 - Standard library is intentionally minimal:
   - only core builtins + `math` package currently exist
 
-## 8. Future Plan (Roadmap)
+## 9. Future Plan (Roadmap)
 
 Planned development sequence:
 
@@ -249,8 +258,8 @@ Planned development sequence:
    - destructuring and higher-order callback helpers.
 2. Expand package/module system:
    - `lisaaBring` for user modules, plus `lisaaShare` and `lisaaBox` runtime semantics.
-3. Add automated tests by layer:
-   - lexer/parser/compiler/vm unit + integration coverage.
+3. Add automated tests by layer (Completed):
+   - lexer/parser/compiler/vm unit + integration coverage implemented using Vitest.
 4. Improve diagnostics:
    - richer source-mapped errors and cleaner stack traces.
 5. Expand OOP semantics:

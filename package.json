@@ -30,6 +30,8 @@
     "lint:fix": "eslint . --fix",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
+    "test": "vitest",
+    "test:run": "vitest run",
     "release": "cliff-jumper"
   },
   "keywords": [
@@ -64,7 +66,8 @@
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
     "pkg": "^5.8.1",
-    "prettier": "3.8.1"
+    "prettier": "3.8.1",
+    "vitest": "^4.0.18"
   },
   "dependencies": {
     "nstypocolors": "^2.2.0"
