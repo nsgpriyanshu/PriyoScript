@@ -111,7 +111,7 @@ tests/
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
-| CLI          | Interactive REPL (`-repl` and no-arg launch)                                          | 100%   |
+| CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
 
 ### 4.1 Core syntax

@@ -512,9 +512,12 @@ class VM {
           }
 
           if (pendingException && pendingException.__priyoThrown) {
-            throw new Error(`Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`, {
-              cause: pendingException,
-            })
+            throw new Error(
+              `Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`,
+              {
+                cause: pendingException,
+              },
+            )
           }
 
           throw pendingException
@@ -691,7 +694,12 @@ class VM {
       return this.callMethod(callee.receiver, callee.methodName, args, callee.startClass)
     }
     if (callee && callee.type === 'bound_static_method') {
-      return this.callStaticMethod(callee.classRef, callee.methodName, args, callee.startClass || null)
+      return this.callStaticMethod(
+        callee.classRef,
+        callee.methodName,
+        args,
+        callee.startClass || null,
+      )
     }
 
     if (callee && callee.type === 'user_function') {

@@ -22,9 +22,7 @@ function needsMoreInput(buffer) {
   const openBrackets = countOccurrences(buffer, '[')
   const closeBrackets = countOccurrences(buffer, ']')
 
-  return (
-    openBraces > closeBraces || openParens > closeParens || openBrackets > closeBrackets
-  )
+  return openBraces > closeBraces || openParens > closeParens || openBrackets > closeBrackets
 }
 
 function wrapSnippet(source) {

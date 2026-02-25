@@ -120,8 +120,7 @@ async function runSource(source, options = {}) {
   }
 
   const activeModuleContext =
-    moduleContext ||
-    (ast.kind === 'package' ? { exports: { __priyoHostObject: true } } : null)
+    moduleContext || (ast.kind === 'package' ? { exports: { __priyoHostObject: true } } : null)
 
   try {
     const vm = new VM(bytecode, {
