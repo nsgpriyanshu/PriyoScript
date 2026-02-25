@@ -99,4 +99,38 @@ describe('Compiler', () => {
         expect(instructions[1].operand).toBe(7) // Jump over if block and JUMP instruction
         expect(instructions[6].operand).toBe(7) // Forward JUMP points to HALT
     })
+
+    it('should compile array destructuring declarations', () => {
+        const input = `
+      monalisa {
+        priyoChange [a, b] = [1, 2]
+      }
+    `
+        const instructions = compileInput(input)
+        const ops = instructions.map(instr => instr.op)
+        expect(ops).toContain(OpCode.BUILD_ARRAY)
+        expect(ops).toContain(OpCode.GET_INDEX)
+        expect(
+            instructions.some(
+                instr => instr.op === OpCode.DEFINE_VARIABLE && instr.operand?.name === 'a'
+            )
+        ).toBe(true)
+        expect(
+            instructions.some(
+                instr => instr.op === OpCode.DEFINE_VARIABLE && instr.operand?.name === 'b'
+            )
+        ).toBe(true)
+    })
+
+    it('should compile user module path imports', () => {
+        const input = `
+      monalisa {
+        lisaaBring "./profile.priyo"
+      }
+    `
+        const instructions = compileInput(input)
+        expect(instructions[0].op).toBe(OpCode.IMPORT_MODULE)
+        expect(instructions[0].operand.source).toBe('./profile.priyo')
+        expect(instructions[1].op).toBe(OpCode.DEFINE_VARIABLE)
+    })
 })

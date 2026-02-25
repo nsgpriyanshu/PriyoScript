@@ -77,4 +77,15 @@ describe('Lexer', () => {
         }
         expect(toks).toEqual(['let', 'x', '=', '10', '+'])
     })
+
+    it('should tokenize module keywords', () => {
+        const input = 'lisaaBox { lisaaShare campus }'
+        const lexer = new Lexer(input)
+
+        expect(lexer.nextToken().type).toBe(TokenType.PACKAGE)
+        expect(lexer.nextToken().type).toBe(TokenType.LBRACE)
+        expect(lexer.nextToken().type).toBe(TokenType.EXPORT)
+        expect(lexer.nextToken().type).toBe(TokenType.IDENTIFIER)
+        expect(lexer.nextToken().type).toBe(TokenType.RBRACE)
+    })
 })

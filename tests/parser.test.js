@@ -87,4 +87,34 @@ describe('Parser', () => {
         expect(func.body.statements).toHaveLength(1)
         expect(func.body.statements[0].type).toBe('ReturnStatement')
     })
+
+    it('should parse array destructuring declarations', () => {
+        const input = `
+      monalisa {
+        priyoChange [first, second] = [10, 20]
+      }
+    `
+        const { program, errors } = parse(input)
+
+        expect(errors).toHaveLength(0)
+        const stmt = program.entry.body[0]
+        expect(stmt.type).toBe('VariableDeclaration')
+        expect(stmt.identifier.type).toBe('ArrayPattern')
+        expect(stmt.identifier.elements[0].name).toBe('first')
+        expect(stmt.identifier.elements[1].name).toBe('second')
+    })
+
+    it('should parse module box with exports', () => {
+        const input = `
+      lisaaBox {
+        priyoKeep name = "priyo"
+        lisaaShare name
+      }
+    `
+        const { program, errors } = parse(input)
+        expect(errors).toHaveLength(0)
+        expect(program.kind).toBe('package')
+        expect(program.root.type).toBe('PackageBlock')
+        expect(program.root.body[1].type).toBe('ExportStatement')
+    })
 })
