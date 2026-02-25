@@ -1,13 +1,21 @@
 class Program {
-  constructor(entry) {
+  constructor(root, kind = 'entry') {
     this.type = 'Program'
-    this.entry = entry
+    this.kind = kind
+    this.root = root
+    this.entry = kind === 'entry' ? root : null
   }
 }
 
 class EntryBlock {
   constructor(body) {
     this.type = 'EntryBlock'
+    this.body = body
+  }
+}
+class PackageBlock {
+  constructor(body) {
+    this.type = 'PackageBlock'
     this.body = body
   }
 }
@@ -123,10 +131,17 @@ class ReturnStatement {
 }
 
 class ImportStatement {
-  constructor(source, localName = null) {
+  constructor(source, localName = null, sourceType = 'identifier') {
     this.type = 'ImportStatement'
     this.source = source
     this.localName = localName || source
+    this.sourceType = sourceType
+  }
+}
+class ExportStatement {
+  constructor(identifier) {
+    this.type = 'ExportStatement'
+    this.identifier = identifier
   }
 }
 
@@ -244,6 +259,12 @@ class Identifier {
     this.name = name
   }
 }
+class ArrayPattern {
+  constructor(elements) {
+    this.type = 'ArrayPattern'
+    this.elements = elements
+  }
+}
 
 class StringLiteral {
   constructor(value) {
@@ -299,6 +320,7 @@ class NewExpression {
 module.exports = {
   Program,
   EntryBlock,
+  PackageBlock,
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
@@ -314,6 +336,7 @@ module.exports = {
   FunctionDeclaration,
   ReturnStatement,
   ImportStatement,
+  ExportStatement,
   TryStatement,
   CatchClause,
   ThrowStatement,
@@ -328,6 +351,7 @@ module.exports = {
   IndexExpression,
   SliceExpression,
   Identifier,
+  ArrayPattern,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,

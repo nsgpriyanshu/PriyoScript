@@ -74,10 +74,13 @@ function classifyRuntimeFailure(message) {
   if (/Unknown package/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_PACKAGE, category: ErrorCategory.USER }
   }
+  if (/Unknown module path import|Module file not found|Imported modules must start with lisaaBox/i.test(message)) {
+    return { code: ErrorCodes.RUNTIME.UNKNOWN_MODULE, category: ErrorCategory.USER }
+  }
   if (/Unknown callable|Unknown builtin function/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_CALLABLE, category: ErrorCategory.USER }
   }
-  if (/expects .* args but got|Invalid number input/i.test(message)) {
+  if (/expects .* args but got|Invalid number input|Expected a callable callback function/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.ARGUMENT_MISMATCH, category: ErrorCategory.USER }
   }
   if (

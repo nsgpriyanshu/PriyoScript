@@ -18,6 +18,8 @@
     "new": "priyoCreate",
     "return": "priyoGiveBack",
     "import": "lisaaBring",
+    "export": "lisaaShare",
+    "package": "lisaaBox",
 
     "if": "prakritiIf",
     "elif": "prakritiElseIf",
@@ -47,9 +49,6 @@
     "loop": "prakritiRepeat",
 
     "debugger": "prakritiThink",
-
-    "export": "lisaaShare",
-    "package": "lisaaBox",
 
     "delete": "priyoForget",
     "typeof": "priyoWhatIs",

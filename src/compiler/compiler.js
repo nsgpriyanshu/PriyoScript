@@ -11,12 +11,12 @@ class Compiler {
   }
 
   compile(program) {
-    const entry = program.entry
-    if (!entry || entry.type !== 'EntryBlock') {
-      throw new Error('Invalid AST: missing entry block')
+    const root = program.root || program.entry
+    if (!root || (root.type !== 'EntryBlock' && root.type !== 'PackageBlock')) {
+      throw new Error('Invalid AST: missing root block')
     }
 
-    for (const stmt of entry.body) {
+    for (const stmt of root.body) {
       this.compileStatement(stmt)
     }
 
@@ -70,6 +70,10 @@ class Compiler {
         this.compileImportStatement(stmt)
         return
 
+      case 'ExportStatement':
+        this.compileExportStatement(stmt)
+        return
+
       case 'TryStatement':
         this.compileTryStatement(stmt)
         return
@@ -97,11 +101,38 @@ class Compiler {
   }
 
   compileVariableDeclaration(stmt) {
+    if (stmt.identifier.type === 'ArrayPattern') {
+      this.compileArrayDestructuringDeclaration(stmt)
+      return
+    }
+
     this.compileExpression(stmt.initializer)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: stmt.identifier.name,
       kind: stmt.kind,
     })
+  }
+
+  compileArrayDestructuringDeclaration(stmt) {
+    const sourceTempName = this.nextTempName('__destructureSource')
+    this.compileExpression(stmt.initializer)
+    this.emit(OpCode.DEFINE_VARIABLE, {
+      name: sourceTempName,
+      kind: 'const',
+    })
+
+    for (let index = 0; index < stmt.identifier.elements.length; index++) {
+      const element = stmt.identifier.elements[index]
+      if (!element) continue
+
+      this.emit(OpCode.LOAD_VARIABLE, sourceTempName)
+      this.emit(OpCode.PUSH_NUMBER, index)
+      this.emit(OpCode.GET_INDEX)
+      this.emit(OpCode.DEFINE_VARIABLE, {
+        name: element.name,
+        kind: stmt.kind,
+      })
+    }
   }
 
   compileAssignmentStatement(stmt) {
@@ -375,6 +406,17 @@ class Compiler {
   }
 
   compileImportStatement(stmt) {
+    if (stmt.sourceType === 'string') {
+      this.emit(OpCode.IMPORT_MODULE, {
+        source: stmt.source,
+      })
+      this.emit(OpCode.DEFINE_VARIABLE, {
+        name: stmt.localName,
+        kind: 'const',
+      })
+      return
+    }
+
     // lisaaBring math
     // -> const math = priyoPackage.use("math")
     this.emit(OpCode.LOAD_VARIABLE, 'priyoPackage')
@@ -387,6 +429,11 @@ class Compiler {
       name: stmt.localName,
       kind: 'const',
     })
+  }
+
+  compileExportStatement(stmt) {
+    this.emit(OpCode.LOAD_VARIABLE, stmt.identifier.name)
+    this.emit(OpCode.EXPORT_NAME, stmt.identifier.name)
   }
 
   compileTryStatement(stmt) {

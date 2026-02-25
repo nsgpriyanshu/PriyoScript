@@ -14,6 +14,9 @@ class VM {
     this.instructions = instructions
     this.environment = options.environment || new Environment(null, { isFunctionScope: true })
     this.builtins = options.builtins || createBuiltins(options.io)
+    this.moduleLoader = options.moduleLoader || null
+    this.currentFile = options.currentFile || null
+    this.moduleContext = options.moduleContext || null
     this.registerBuiltinGlobals()
   }
 
@@ -327,6 +330,24 @@ class VM {
               break
             }
 
+            case OpCode.IMPORT_MODULE: {
+              if (!this.moduleLoader) {
+                throw new Error('Module loader is not configured for lisaaBring path imports')
+              }
+              const moduleExports = await this.moduleLoader(instr.operand.source, this.currentFile)
+              stack.push(moduleExports)
+              break
+            }
+
+            case OpCode.EXPORT_NAME: {
+              if (!this.moduleContext || !this.moduleContext.exports) {
+                throw new Error('lisaaShare can only be used inside lisaaBox modules')
+              }
+              const value = stack.pop()
+              this.moduleContext.exports[instr.operand] = value
+              break
+            }
+
             case OpCode.CALL_NAMED: {
               const { name, argc } = instr.operand
               const args = argc === 0 ? [] : stack.splice(-argc)
@@ -491,9 +512,9 @@ class VM {
           }
 
           if (pendingException && pendingException.__priyoThrown) {
-            throw new Error(
-              `Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`,
-            )
+            throw new Error(`Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`, {
+              cause: pendingException,
+            })
           }
 
           throw pendingException
@@ -558,18 +579,135 @@ class VM {
       return this.callMethod(receiver, methodName, args)
     }
 
+    if (receiver === this.builtins.priyoArray && this.isArrayHigherOrderHelper(methodName)) {
+      return this.callArrayHigherOrderHelper(methodName, args)
+    }
+
     if (
       receiver &&
       (receiver.__priyoHostObject || typeof receiver === 'function' || typeof receiver === 'object')
     ) {
-      const fn = receiver[methodName]
-      if (typeof fn !== 'function') {
+      const member = receiver[methodName]
+      if (member == null) {
         throw new Error(`Method "${methodName}" not found on this object`)
       }
-      return await fn(...args)
+
+      if (typeof member === 'function') {
+        return await member(...args)
+      }
+
+      return this.invokeCallableValue(member, args)
     }
 
     throw new Error(`Method call requires an instance/class/object for "${methodName}"`)
+  }
+
+  isArrayHigherOrderHelper(methodName) {
+    return ['map', 'filter', 'reduce', 'forEach', 'find', 'some', 'every'].includes(methodName)
+  }
+
+  async callArrayHigherOrderHelper(methodName, args) {
+    const arrayValue = args[0]
+    const callback = args[1]
+
+    if (!Array.isArray(arrayValue)) {
+      throw new Error(`priyoArray.${methodName} expects an array as the first argument`)
+    }
+
+    if (methodName === 'reduce') {
+      const hasInitial = args.length >= 3
+      if (!hasInitial && arrayValue.length === 0) {
+        throw new Error('priyoArray.reduce requires a non-empty array or an initial value')
+      }
+
+      let index = hasInitial ? 0 : 1
+      let accumulator = hasInitial ? args[2] : arrayValue[0]
+      for (; index < arrayValue.length; index++) {
+        accumulator = await this.invokeCallableValue(callback, [accumulator, arrayValue[index]])
+      }
+      return accumulator
+    }
+
+    if (methodName === 'forEach') {
+      for (let index = 0; index < arrayValue.length; index++) {
+        await this.invokeCallableValue(callback, [arrayValue[index]])
+      }
+      return null
+    }
+
+    if (methodName === 'map') {
+      const result = []
+      for (let index = 0; index < arrayValue.length; index++) {
+        result.push(await this.invokeCallableValue(callback, [arrayValue[index]]))
+      }
+      return result
+    }
+
+    if (methodName === 'filter') {
+      const result = []
+      for (let index = 0; index < arrayValue.length; index++) {
+        const keep = await this.invokeCallableValue(callback, [arrayValue[index]])
+        if (this.isTruthy(keep)) result.push(arrayValue[index])
+      }
+      return result
+    }
+
+    if (methodName === 'find') {
+      for (let index = 0; index < arrayValue.length; index++) {
+        const keep = await this.invokeCallableValue(callback, [arrayValue[index]])
+        if (this.isTruthy(keep)) return arrayValue[index]
+      }
+      return null
+    }
+
+    if (methodName === 'some') {
+      for (let index = 0; index < arrayValue.length; index++) {
+        const keep = await this.invokeCallableValue(callback, [arrayValue[index]])
+        if (this.isTruthy(keep)) return true
+      }
+      return false
+    }
+
+    if (methodName === 'every') {
+      for (let index = 0; index < arrayValue.length; index++) {
+        const keep = await this.invokeCallableValue(callback, [arrayValue[index]])
+        if (!this.isTruthy(keep)) return false
+      }
+      return true
+    }
+
+    throw new Error(`Unknown priyoArray helper: ${methodName}`)
+  }
+
+  async invokeCallableValue(callee, args) {
+    if (typeof callee === 'function') {
+      return await callee(...args)
+    }
+
+    if (callee && callee.type === 'bound_method') {
+      return this.callMethod(callee.receiver, callee.methodName, args)
+    }
+    if (callee && callee.type === 'bound_super_method') {
+      return this.callMethod(callee.receiver, callee.methodName, args, callee.startClass)
+    }
+    if (callee && callee.type === 'bound_static_method') {
+      return this.callStaticMethod(callee.classRef, callee.methodName, args, callee.startClass || null)
+    }
+
+    if (callee && callee.type === 'user_function') {
+      if (args.length !== callee.params.length) {
+        throw new Error(`Callback expects ${callee.params.length} args but got ${args.length}`)
+      }
+
+      const callEnv = new Environment(callee.closure, { isFunctionScope: true })
+      for (let i = 0; i < callee.params.length; i++) {
+        callEnv.define(callee.params[i], args[i], 'let')
+      }
+      const result = await this.executeFrame(callee.instructions, callEnv, true)
+      return result.value
+    }
+
+    throw new Error('Expected a callable callback function')
   }
 
   async callMethod(receiver, methodName, args, startClass = null) {

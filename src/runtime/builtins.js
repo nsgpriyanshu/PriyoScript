@@ -131,6 +131,65 @@ function createPriyoArrayHelpers() {
       }
       return arr.slice(start == null ? 0 : start, end == null ? arr.length : end)
     },
+
+    // Higher-order helpers are VM-aware for PriyoScript callbacks.
+    map(arr, callback) {
+      ensureArray(arr, 'map')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.map expects a callback function')
+      }
+      return arr.map(callback)
+    },
+
+    filter(arr, callback) {
+      ensureArray(arr, 'filter')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.filter expects a callback function')
+      }
+      return arr.filter(callback)
+    },
+
+    reduce(arr, callback, initialValue) {
+      ensureArray(arr, 'reduce')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.reduce expects a callback function')
+      }
+      return arguments.length >= 3 ? arr.reduce(callback, initialValue) : arr.reduce(callback)
+    },
+
+    forEach(arr, callback) {
+      ensureArray(arr, 'forEach')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.forEach expects a callback function')
+      }
+      arr.forEach(callback)
+      return null
+    },
+
+    find(arr, callback) {
+      ensureArray(arr, 'find')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.find expects a callback function')
+      }
+      const value = arr.find(callback)
+      return value === undefined ? null : value
+    },
+
+    some(arr, callback) {
+      ensureArray(arr, 'some')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.some expects a callback function')
+      }
+      return arr.some(callback)
+    },
+
+    every(arr, callback) {
+      ensureArray(arr, 'every')
+      if (typeof callback !== 'function') {
+        throw new Error('priyoArray.every expects a callback function')
+      }
+      return arr.every(callback)
+    },
   }
 }
 

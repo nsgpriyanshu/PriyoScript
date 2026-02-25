@@ -4,6 +4,7 @@ const { createSyntaxError, classifySyntaxCode } = require('../errors')
 const {
   Program,
   EntryBlock,
+  PackageBlock,
   ExpressionStatement,
   VariableDeclaration,
   AssignmentStatement,
@@ -19,6 +20,7 @@ const {
   FunctionDeclaration,
   ReturnStatement,
   ImportStatement,
+  ExportStatement,
   TryStatement,
   CatchClause,
   ThrowStatement,
@@ -33,6 +35,7 @@ const {
   IndexExpression,
   SliceExpression,
   Identifier,
+  ArrayPattern,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,
@@ -87,9 +90,20 @@ class Parser {
   }
 
   parseProgram() {
-    const entry = this.parseEntryBlock()
-    if (!entry) return null
-    return new Program(entry)
+    if (this.curToken.type === TokenType.ENTRY) {
+      const entry = this.parseEntryBlock()
+      if (!entry) return null
+      return new Program(entry, 'entry')
+    }
+
+    if (this.curToken.type === TokenType.PACKAGE) {
+      const pkg = this.parsePackageBlock()
+      if (!pkg) return null
+      return new Program(pkg, 'package')
+    }
+
+    this.error('Program must start with "monalisa" or "lisaaBox"')
+    return null
   }
 
   parseEntryBlock() {
@@ -111,7 +125,22 @@ class Parser {
     return new EntryBlock(body)
   }
 
+  parsePackageBlock() {
+    this.nextToken()
+    if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" after lisaaBox')) return null
+
+    const body = []
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      const stmt = this.parseStatement()
+      if (stmt) body.push(stmt)
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" after lisaaBox block')) return null
+    return new PackageBlock(body)
+  }
+
   parseStatement() {
+    if (this.curToken.type === TokenType.EXPORT) return this.parseExportStatement()
     if (this.curToken.type === TokenType.CLASS) return this.parseClassDeclaration()
     if (this.curToken.type === TokenType.IMPORT) return this.parseImportStatement()
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
@@ -324,8 +353,23 @@ class Parser {
     }
 
     const source = this.curToken.literal
+    const sourceType = this.curToken.type === TokenType.STRING ? 'string' : 'identifier'
+    const localName =
+      sourceType === 'string' ? this.deriveModuleLocalName(source) : this.curToken.literal
     this.nextToken()
-    return new ImportStatement(source)
+    return new ImportStatement(source, localName, sourceType)
+  }
+
+  parseExportStatement() {
+    this.nextToken()
+    if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected identifier after lisaaShare')) {
+      this.nextToken()
+      return null
+    }
+
+    const identifier = new Identifier(this.curToken.literal)
+    this.nextToken()
+    return new ExportStatement(identifier)
   }
 
   parseParameterList() {
@@ -364,27 +408,76 @@ class Parser {
     const kind = kindByToken[this.curToken.type]
     this.nextToken()
 
-    if (
-      !this.expectCurrent(TokenType.IDENTIFIER, 'Variable name expected after declaration keyword')
-    ) {
-      this.nextToken()
-      return null
-    }
+    let identifier = null
+    if (this.curToken.type === TokenType.LBRACKET) {
+      identifier = this.parseArrayBindingPattern()
+      if (!identifier) return null
+    } else {
+      if (
+        !this.expectCurrent(
+          TokenType.IDENTIFIER,
+          'Variable name expected after declaration keyword',
+        )
+      ) {
+        this.nextToken()
+        return null
+      }
 
-    const identifier = new Identifier(this.curToken.literal)
-    this.nextToken()
+      identifier = new Identifier(this.curToken.literal)
+      this.nextToken()
+    }
 
     let initializer = new NullLiteral()
     if (this.curToken.type === TokenType.ASSIGN) {
       this.nextToken()
       initializer = this.parseExpression()
       if (!initializer) return null
+    } else if (identifier.type === 'ArrayPattern') {
+      this.error('Array destructuring declaration requires an initializer')
+      return null
     } else if (kind === 'const') {
       this.error('Constant declaration requires an initializer')
       return null
     }
 
     return new VariableDeclaration(kind, identifier, initializer)
+  }
+
+  parseArrayBindingPattern() {
+    if (!this.consumeCurrent(TokenType.LBRACKET, 'Expected "[" to start array destructuring'))
+      return null
+
+    const elements = []
+    while (this.curToken.type !== TokenType.RBRACKET && this.curToken.type !== TokenType.EOF) {
+      if (this.curToken.type === TokenType.COMMA) {
+        // Allow holes: [first, , third]
+        elements.push(null)
+        this.nextToken()
+        continue
+      }
+
+      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected identifier in array destructuring')) {
+        this.nextToken()
+        return null
+      }
+
+      elements.push(new Identifier(this.curToken.literal))
+      this.nextToken()
+
+      if (this.curToken.type === TokenType.COMMA) {
+        this.nextToken()
+        continue
+      }
+
+      if (this.curToken.type !== TokenType.RBRACKET) {
+        this.error('Expected "," or "]" in array destructuring')
+        return null
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after array destructuring'))
+      return null
+    return new ArrayPattern(elements)
   }
 
   parseAssignmentStatement() {
@@ -403,7 +496,7 @@ class Parser {
   }
 
   parseAssignmentTarget() {
-    let target = null
+    let target
 
     if (this.curToken.type === TokenType.IDENTIFIER) {
       target = new Identifier(this.curToken.literal)
@@ -588,8 +681,7 @@ class Parser {
     // Iteration-friendly foreach syntax:
     // prakritiCount (item priyoInside items) { ... }
     if (this.isForEachHeaderStart()) {
-      const forEach = this.parseForEachStatement()
-      return forEach
+      return this.parseForEachStatement()
     }
 
     const initializer = this.parseForInitializer()
@@ -1139,6 +1231,17 @@ class Parser {
   isForEachHeaderStart() {
     if (this.curToken.type !== TokenType.IDENTIFIER) return false
     return this.peekToken && this.peekToken.type === TokenType.IN
+  }
+
+  deriveModuleLocalName(modulePath) {
+    const normalized = String(modulePath || '')
+      .replace(/\\/g, '/')
+      .split('/')
+      .pop()
+      .replace(/\.priyo$/i, '')
+      .trim()
+    const safe = normalized.replace(/[^a-zA-Z0-9_]/g, '_')
+    return safe || 'module'
   }
 }
 

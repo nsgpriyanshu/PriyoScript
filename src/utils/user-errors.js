@@ -55,6 +55,10 @@ function humanizeError(input) {
       message: 'So Rude - The requested package is not available.',
       tip: 'Use `priyoPackage.list()` to see available built-in packages.',
     },
+    [ErrorCodes.RUNTIME.UNKNOWN_MODULE]: {
+      message: 'So Rude - The requested module could not be loaded.',
+      tip: 'Use `lisaaBring "relative/path"` and make sure the module file uses `lisaaBox { ... }`.',
+    },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
       tip: 'Check spelling and make sure the function/method exists before calling it.',
@@ -101,9 +105,10 @@ function humanizeError(input) {
       tip: 'Close the comment with `*/` before continuing your code.',
     },
     {
-      test: /Program must start with "monalisa"/i,
-      message: 'So Disrespectfull - This file must start with `monalisa { ... }`.',
-      tip: 'Wrap all code inside one entry block: `monalisa { ... }`.',
+      test: /Program must start with "monalisa" or "lisaaBox"/i,
+      message:
+        'So Disrespectfull - This file must start with `monalisa { ... }` or `lisaaBox { ... }`.',
+      tip: 'Use `monalisa` for app files and `lisaaBox` for importable module files.',
     },
     {
       test: /can only be used inside loops|can only be used inside loops or switch/i,
