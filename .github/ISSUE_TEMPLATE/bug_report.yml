@@ -1,0 +1,41 @@
+name: Bug Report
+description: Report a bug in PriyoScript parser/compiler/runtime/CLI
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal `.priyo` snippet and commands to reproduce
+      placeholder: |
+        monalisa {
+          ...
+        }
+        Command: monalisa file.priyo
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior / Error Output
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: e.g. v1.6.0
