@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const { runFile } = require('../src/core/run')
+const { startRepl } = require('../src/repl/repl')
 const { build, info, error } = require('../src/utils/logger')
 const { printPriyoError } = require('../src/errors')
 const { ErrorCodes } = require('../src/errors/codes')
@@ -36,6 +37,8 @@ const ERROR_CODE_HELP = {
   [ErrorCodes.RUNTIME.INVALID_INPUT]:
     'Input did not match required format (for example number input).',
   [ErrorCodes.RUNTIME.UNKNOWN_PACKAGE]: 'Package name was not found in built-in package registry.',
+  [ErrorCodes.RUNTIME.UNKNOWN_MODULE]:
+    'Module path import failed. Check lisaaBring path and ensure module starts with lisaaBox.',
   [ErrorCodes.ENGINE.INTERNAL]:
     'Engine/internal error. Usually a runtime/compiler bug, not user code.',
 }
@@ -49,6 +52,7 @@ It executes .priyo files directly.
 
 Usage:
   monalisa <file.priyo>              Execute a PriyoScript file
+  monalisa -repl                     Start interactive REPL
   monalisa -v | -version             Show CLI version
   monalisa -h | -help                Show general help
   monalisa -syntax                   Show quick syntax help
@@ -82,6 +86,12 @@ Functions / Classes:
 Packages:
   lisaaBring math
   priyoTell(math.add(2, 3))
+
+Modules:
+  // in module.priyo
+  lisaaBox { lisaaShare sum }
+  // in app
+  lisaaBring "./module.priyo"
 `)
 }
 
@@ -138,6 +148,21 @@ if (arg === '-errors') {
   process.exit(0)
 }
 
+if (arg === '-repl') {
+  startRepl({ logger: { build, info, error } }).catch(err => {
+    printPriyoError(err, {
+      mode: 'cli',
+      logger: {
+        error,
+        info,
+      },
+    })
+    process.exit(1)
+  })
+  process.on('SIGINT', () => process.exit(0))
+  return
+}
+
 if (arg === '-explain') {
   printSingleErrorHelp(args[1])
   process.exit(0)
@@ -148,9 +173,18 @@ if (arg === '-explain') {
 -------------------------- */
 
 if (!arg) {
-  error('So Rude - Provide a PriyoScript file to run.')
-  info('FYI: Use `monalisa your-filename.priyo`.')
-  process.exit(1)
+  startRepl({ logger: { build, info, error } }).catch(err => {
+    printPriyoError(err, {
+      mode: 'cli',
+      logger: {
+        error,
+        info,
+      },
+    })
+    process.exit(1)
+  })
+  process.on('SIGINT', () => process.exit(0))
+  return
 }
 
 const fullPath = path.resolve(process.cwd(), arg)

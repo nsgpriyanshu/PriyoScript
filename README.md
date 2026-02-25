@@ -29,6 +29,10 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 6. Built-in package manager with `lisaaBring` shortcut and `math` package.
 7. First-class arrays in language syntax (`[ ]` and index access), independent from packages.
 8. Array ergonomics: slicing (`arr[1:3]`), `priyoArray` helpers, and foreach (`prakritiCount (x priyoInside arr)`).
+9. Interactive REPL mode with shared runtime state and built-in REPL commands.
+10. Array destructuring and higher-order helpers (`map/filter/reduce/find/some/every`).
+11. User module system with `lisaaBring`, `lisaaBox`, and `lisaaShare`.
+12. Source-aware diagnostics with file/line context and cleaner stack previews.
 
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.
@@ -59,6 +63,7 @@ Then users can run:
 ```bash
 monalisa -h
 monalisa your-file.priyo
+monalisa -repl
 ```
 
 ### Global CLI install (recommended)
@@ -75,6 +80,7 @@ Run:
 monalisa -v
 monalisa -h
 monalisa your-file.priyo
+monalisa -repl
 ```
 
 ### Install directly from GitHub

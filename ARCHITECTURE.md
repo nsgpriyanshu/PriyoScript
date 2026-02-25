@@ -24,6 +24,8 @@ No transpilation, no `eval`, no AST-walk interpreter at runtime.
 src/
   core/
     run.js                  # Shared execute pipeline for CLI and dev entry
+  repl/
+    repl.js                 # Interactive REPL loop with shared runtime state
   lexer/
     lexer.js                # Tokenizer
     token.js                # Token kinds
@@ -65,7 +67,13 @@ examples/
   control-flow/
   functions/
   oop/
+  modules/
   scopes/
+tests/
+  lexer.test.js
+  parser.test.js
+  compiler.test.js
+  vm.test.js
 ```
 
 ## 4. Implemented Language Features
@@ -82,6 +90,8 @@ examples/
 | Arrays       | Array literals and index read/write (`[]`)                                           | 100%   |
 | Arrays       | Array slicing (`arr[start:end]`)                                                     | 100%   |
 | Arrays       | Iteration-friendly foreach (`prakritiCount (item priyoInside arr)`)                  | 100%   |
+| Arrays       | Array destructuring declarations (`priyoChange [a, b] = arr`)                        | 100%   |
+| Arrays       | Higher-order helpers (`map/filter/reduce/find/some/every`)                           | 100%   |
 | Expressions  | Arithmetic, comparison, logical, grouping                                            | 100%   |
 | Expressions  | Function call and member access (`.`)                                                | 100%   |
 | Control flow | `if / else if / else`                                                                | 100%   |
@@ -96,9 +106,12 @@ examples/
 | Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                            | 100%   |
 | Packages     | Built-in package import (`lisaaBring`)                                               | 100%   |
 | Packages     | Built-in package registry (`priyoPackage.*`)                                         | 100%   |
+| Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                           | 100%   |
 | Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
+| Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
+| CLI          | Interactive REPL (`-repl` and no-arg launch)                                          | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
 
 ### 4.1 Core syntax
@@ -126,6 +139,7 @@ examples/
 - Array literal syntax: `[1, 2, 3]`
 - Array index read/write: `arr[0]`, `arr[1] = 99`
 - Array slicing: `arr[1:4]`, `arr[:3]`, `arr[2:]`
+- Array destructuring declaration: `priyoChange [a, b] = arr`
 - Function/method call expressions
 - Member access with `.`
 
@@ -189,6 +203,11 @@ examples/
   - `priyoArray.at(arr, index)`, `priyoArray.slice(arr, start?, end?)`
   - `priyoArray.first(arr)`, `priyoArray.last(arr)`, `priyoArray.reverse(arr)`
   - `priyoArray.includes(arr, value)`, `priyoArray.indexOf(arr, value)`, `priyoArray.join(arr, sep?)`
+  - higher-order: `map`, `filter`, `reduce`, `forEach`, `find`, `some`, `every`
+- User modules:
+  - module root: `lisaaBox { ... }`
+  - export binding: `lisaaShare name`
+  - import by path: `lisaaBring "./module.priyo"`
 
 ## 5. Runtime Model
 
@@ -215,7 +234,7 @@ examples/
   - parser -> syntax errors
   - compiler -> compile errors
   - VM/runtime -> runtime errors
-- CLI and future REPL share a common printer (`src/errors/printer.js`) to render humanized output consistently.
+- CLI and REPL share a common printer (`src/errors/printer.js`) to render humanized output consistently.
 - Dev entry prints developer-oriented output with code + stage.
 
 ## 7. Automated Testing Architecture
@@ -231,14 +250,11 @@ We use **Vitest** for our unit testing framework, providing fast, modular test e
 
 Current language/runtime limitations that still need dedicated implementation:
 
-- Array support is now expanded (phase-2 ergonomic layer):
-  - slicing, helper APIs, and foreach loops are implemented
-  - no destructuring patterns yet
-  - no functional callback helpers (`map/filter/reduce`) yet
-- Package system is phase-1 built-in only:
-  - `lisaaBring` loads registered built-ins (currently `math`)
-  - no user-defined package files or module resolution yet
-  - `lisaaShare` / `lisaaBox` execution flow is not implemented
+- Package + module system currently supports:
+  - built-in package import (`lisaaBring math`)
+  - user modules via path import (`lisaaBring "./file.priyo"`)
+  - module exports via `lisaaShare`
+  - limitation: no named import list/alias syntax yet
 - No async/concurrency execution model:
   - `async/await/yield` tokens remain reserved
 - Type system remains fully dynamic:
@@ -254,17 +270,9 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Add advanced array features beyond current ergonomics:
-   - destructuring and higher-order callback helpers.
-2. Expand package/module system:
-   - `lisaaBring` for user modules, plus `lisaaShare` and `lisaaBox` runtime semantics.
-3. Add automated tests by layer (Completed):
-   - lexer/parser/compiler/vm unit + integration coverage implemented using Vitest.
-4. Improve diagnostics:
-   - richer source-mapped errors and cleaner stack traces.
-5. Expand OOP semantics:
+1. Expand OOP semantics:
    - stronger constructor-chain validation and stricter member checks.
-6. Add async and advanced runtime capabilities:
+2. Add async and advanced runtime capabilities:
    - staged support for `async/await` and future concurrency primitives.
-7. Add native distribution channels:
+3. Add native distribution channels:
    - standalone binaries/installers for Windows/macOS/Linux (beyond npm global install).

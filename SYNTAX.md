@@ -122,6 +122,13 @@ Notes:
 - Out-of-range index access throws a runtime error.
 - Slice bounds must be integer numbers.
 
+Array destructuring (declaration):
+
+```priyo
+priyoChange [first, second] = [10, 20]
+priyoTell(first + second)
+```
+
 ## 6. Built-in I/O
 
 ### Output
@@ -302,8 +309,54 @@ Array helper object:
 - `priyoArray.includes(arr, value)`
 - `priyoArray.indexOf(arr, value)`
 - `priyoArray.join(arr, separator?)`
+- `priyoArray.map(arr, callback)`
+- `priyoArray.filter(arr, callback)`
+- `priyoArray.reduce(arr, callback, initialValue?)`
+- `priyoArray.forEach(arr, callback)`
+- `priyoArray.find(arr, callback)`
+- `priyoArray.some(arr, callback)`
+- `priyoArray.every(arr, callback)`
 
-## 12. Functions
+Callback can be a normal PriyoScript function:
+
+```priyo
+lisaaTask double(x) {
+  priyoGiveBack x * 2
+}
+
+priyoKeep result = priyoArray.map([1, 2, 3], double)
+```
+
+## 12. Modules (`lisaaBring`, `lisaaBox`, `lisaaShare`)
+
+User module file:
+
+```priyo
+lisaaBox {
+  lisaaTask square(x) {
+    priyoGiveBack x * x
+  }
+
+  lisaaShare square
+}
+```
+
+Import module in app:
+
+```priyo
+monalisa {
+  lisaaBring "./math-utils.priyo"
+  priyoTell(math_utils.square(5))
+}
+```
+
+Notes:
+
+- Module files must start with `lisaaBox { ... }`.
+- `lisaaShare name` exports a top-level binding.
+- For path imports, variable name is derived from file name (sanitized).
+
+## 13. Functions
 
 Function declaration:
 
@@ -327,13 +380,13 @@ priyoGiveBack value
 
 `priyoGiveBack` is valid only inside functions.
 
-## 13. Scope Rules
+## 14. Scope Rules
 
 - `priyoChange` / `priyoPromise` are block-scoped.
 - `priyoKeep` is function-scoped.
 - Functions use lexical scope (closures are supported).
 
-## 14. Classes
+## 15. Classes
 
 Class declaration:
 
@@ -413,7 +466,6 @@ lisaaFamily CollegeStudent {
 }
 ```
 
-## 15. Current Limitations
+## 16. Current Limitations
 
-- No user-defined module file resolution yet (built-in `lisaaBring` works for registered packages).
 - Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.
