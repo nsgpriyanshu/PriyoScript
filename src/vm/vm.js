@@ -254,6 +254,8 @@ class VM {
                 staticFields: new Map(),
                 staticFieldKinds: new Map(),
                 instanceFieldInitializers: instr.operand.instanceFields || [],
+                strictInstanceFields: false,
+                strictStaticFields: false,
                 definitionEnv: this.environment,
                 superClass,
               }
@@ -881,6 +883,7 @@ class VM {
   }
 
   async applyStaticFieldInitializers(classObj, staticFieldDefs) {
+    classObj.strictStaticFields = staticFieldDefs.length > 0
     for (const field of staticFieldDefs) {
       const value = await this.evaluateInitializer(field.instructions, classObj, classObj, true)
       classObj.staticFields.set(field.name, value)
@@ -890,6 +893,9 @@ class VM {
 
   async applyInstanceFieldInitializers(instance) {
     const classChain = this.collectClassChain(instance.classRef)
+    instance.classRef.strictInstanceFields = classChain.some(
+      classObj => (classObj.instanceFieldInitializers || []).length > 0,
+    )
     for (const classObj of classChain) {
       for (const field of classObj.instanceFieldInitializers || []) {
         const value = await this.evaluateInitializer(field.instructions, classObj, instance, false)
@@ -913,6 +919,10 @@ class VM {
       cursor = cursor.superClass
     }
     return null
+  }
+
+  hasDeclaredStaticField(classObj, propertyName) {
+    return this.findStaticFieldOwner(classObj, propertyName) != null
   }
 
   createMethodMap(methodList) {
@@ -1024,6 +1034,9 @@ class VM {
     }
 
     if (object.type === 'instance') {
+      if (object.classRef.strictInstanceFields && !object.fields.has(propertyName)) {
+        throw new Error(`Field "${propertyName}" is not declared on ${object.classRef.name}`)
+      }
       if (
         object.constFields &&
         object.constFields.has(propertyName) &&
@@ -1036,6 +1049,9 @@ class VM {
     }
 
     if (object.type === 'class') {
+      if (object.strictStaticFields && !this.hasDeclaredStaticField(object, propertyName)) {
+        throw new Error(`Static field "${propertyName}" is not declared on ${object.name}`)
+      }
       if (
         object.staticFieldKinds.get(propertyName) === 'const' &&
         object.staticFields.has(propertyName)
@@ -1050,6 +1066,12 @@ class VM {
       if (object.isStatic) {
         if (!object.startClass) {
           throw new Error('priyoParent has no parent class')
+        }
+        if (
+          object.startClass.strictStaticFields &&
+          !this.hasDeclaredStaticField(object.startClass, propertyName)
+        ) {
+          throw new Error(`Parent static field "${propertyName}" is not declared`)
         }
         if (
           object.startClass.staticFieldKinds.get(propertyName) === 'const' &&
@@ -1067,6 +1089,14 @@ class VM {
         object.receiver.fields.has(propertyName)
       ) {
         throw new Error(`Cannot reassign constant field "${propertyName}"`)
+      }
+      if (
+        object.receiver.classRef.strictInstanceFields &&
+        !object.receiver.fields.has(propertyName)
+      ) {
+        throw new Error(
+          `Parent field "${propertyName}" is not declared on ${object.receiver.classRef.name}`,
+        )
       }
       object.receiver.fields.set(propertyName, value)
       return

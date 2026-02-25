@@ -931,6 +931,26 @@ class Compiler {
         `Class "${classDeclaration.name.name}" must call priyoParent(...) as first statement in init`,
       )
     }
+
+    // Child init must delegate to parent exactly once.
+    let parentConstructorCallCount = 0
+    for (const statement of initMethod.body.statements) {
+      if (
+        statement.type === 'ExpressionStatement' &&
+        statement.expression &&
+        statement.expression.type === 'CallExpression' &&
+        statement.expression.callee &&
+        statement.expression.callee.type === 'SuperExpression'
+      ) {
+        parentConstructorCallCount++
+      }
+    }
+
+    if (parentConstructorCallCount > 1) {
+      throw new Error(
+        `Class "${classDeclaration.name.name}" cannot call priyoParent(...) more than once in init`,
+      )
+    }
   }
 }
 

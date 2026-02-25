@@ -1,10 +1,25 @@
 const readline = require('readline/promises')
 const { stdin, stdout } = require('process')
-const { runSource, createModuleRuntime } = require('../core/run')
+const fs = require('fs')
+const path = require('path')
+const { runSource, runFile, createModuleRuntime } = require('../core/run')
 const { Environment } = require('../runtime/environment')
 const { createBuiltins } = require('../runtime/builtins')
 const { printPriyoError } = require('../errors')
 const { build, info } = require('../utils/logger')
+
+function colorBuildPrompt(text) {
+  const palette = [127, 163, 199, 200, 206, 212, 218, 225]
+  if (!text) return text
+  return text
+    .split('')
+    .map((char, i) => {
+      const t = text.length === 1 ? 0 : i / (text.length - 1)
+      const idx = Math.floor(t * (palette.length - 1))
+      return `\x1b[38;5;${palette[idx]}m${char}\x1b[0m`
+    })
+    .join('')
+}
 
 function countOccurrences(value, char) {
   let count = 0
@@ -29,6 +44,24 @@ function wrapSnippet(source) {
   return `monalisa {\n${source}\n}`
 }
 
+function toExecutableSource(source) {
+  const trimmed = String(source || '').trim()
+  if (/^(monalisa|lisaaBox)\b/.test(trimmed)) {
+    return trimmed
+  }
+  return wrapSnippet(trimmed)
+}
+
+function parseReplCommand(line) {
+  const trimmed = line.trim()
+  if (!trimmed.startsWith('.')) return null
+  const [command, ...rest] = trimmed.split(/\s+/)
+  return {
+    command,
+    args: rest,
+  }
+}
+
 async function startRepl(options = {}) {
   const logger = options.logger || { build, info, error: console.error }
   const rl = readline.createInterface({
@@ -41,6 +74,7 @@ async function startRepl(options = {}) {
     stdin: options.input || stdin,
     stdout: options.output || stdout,
     console: console,
+    prompt: message => rl.question(message),
   })
   let moduleRuntime = createModuleRuntime({
     stdin: options.input || stdin,
@@ -56,44 +90,92 @@ async function startRepl(options = {}) {
 
   try {
     while (true) {
-      const prompt = buffer ? '... ' : 'priyo> '
+      // To use default white/plain prompt instead, replace this with:
+      // const prompt = buffer ? '... ' : 'priyo> '
+      const prompt = buffer ? colorBuildPrompt('... ') : colorBuildPrompt('priyo> ')
       const line = await rl.question(prompt)
       const trimmed = line.trim()
 
       if (!buffer && trimmed === '') continue
-      if (!buffer && trimmed === '.exit') break
 
-      if (!buffer && trimmed === '.help') {
-        logger.info('REPL commands:')
-        logger.info('  .help   Show this help')
-        logger.info('  .clear  Clear current multiline buffer')
-        logger.info('  .reset  Reset runtime state (variables/functions/classes)')
-        logger.info('  .exit   Exit REPL')
-        continue
-      }
+      if (!buffer) {
+        const replCommand = parseReplCommand(line)
+        if (replCommand) {
+          if (replCommand.command === '.exit') break
 
-      if (!buffer && trimmed === '.clear') {
-        buffer = ''
-        logger.info('Buffer cleared.')
-        continue
-      }
+          if (replCommand.command === '.help') {
+            logger.info('REPL commands:')
+            logger.info('  .help            Show this help')
+            logger.info('  .clear           Clear current multiline buffer')
+            logger.info('  .reset           Reset runtime state and module cache')
+            logger.info('  .load <file>     Execute a .priyo file in current REPL context')
+            logger.info('  .exit            Exit REPL')
+            continue
+          }
 
-      if (!buffer && trimmed === '.reset') {
-        environment = new Environment(null, { isFunctionScope: true })
-        builtins = createBuiltins({
-          stdin: options.input || stdin,
-          stdout: options.output || stdout,
-          console: console,
-        })
-        moduleRuntime.clearModuleCache()
-        logger.info('Runtime state reset.')
-        continue
+          if (replCommand.command === '.clear') {
+            buffer = ''
+            logger.info('Buffer cleared.')
+            continue
+          }
+
+          if (replCommand.command === '.reset') {
+            environment = new Environment(null, { isFunctionScope: true })
+            moduleRuntime = createModuleRuntime({
+              stdin: options.input || stdin,
+              stdout: options.output || stdout,
+            })
+            builtins = createBuiltins({
+              stdin: options.input || stdin,
+              stdout: options.output || stdout,
+              console: console,
+              prompt: message => rl.question(message),
+            })
+            logger.info('Runtime state reset.')
+            continue
+          }
+
+          if (replCommand.command === '.load') {
+            const target = replCommand.args.join(' ').trim()
+            if (!target) {
+              logger.error('Missing file path. Usage: .load <file.priyo>')
+              continue
+            }
+            const absolutePath = path.resolve(process.cwd(), target)
+            if (!fs.existsSync(absolutePath)) {
+              logger.error(`File not found: ${target}`)
+              continue
+            }
+            try {
+              await runFile(absolutePath, {
+                environment,
+                builtins,
+                moduleLoader: moduleRuntime.moduleLoader,
+                moduleCache: moduleRuntime.moduleCache,
+              })
+              logger.info(`Loaded: ${target}`)
+            } catch (err) {
+              printPriyoError(err, {
+                mode: 'cli',
+                logger: {
+                  error: logger.error || console.error,
+                  info: logger.info || console.log,
+                },
+              })
+            }
+            continue
+          }
+
+          logger.error(`Unknown REPL command: ${replCommand.command}`)
+          logger.info('Use .help to see available commands.')
+          continue
+        }
       }
 
       buffer = buffer ? `${buffer}\n${line}` : line
       if (needsMoreInput(buffer)) continue
 
-      const source = wrapSnippet(buffer)
+      const source = toExecutableSource(buffer)
       try {
         await runSource(source, {
           environment,

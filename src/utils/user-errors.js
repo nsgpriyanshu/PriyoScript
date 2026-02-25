@@ -132,6 +132,11 @@ function humanizeError(input) {
       message: 'So Rude - `priyoParent` is being used in an invalid class context.',
       tip: 'Use `priyoParent(...)` only inside child `init(...)` and use `priyoParent.method(...)` for parent methods.',
     },
+    {
+      test: /Field .* is not declared|Static field .* is not declared|Parent field .* is not declared|Parent static field .* is not declared/i,
+      message: 'So Rude - You are assigning a class field that is not declared.',
+      tip: 'Declare the field in the class body first, or remove field declarations to keep fully dynamic assignment.',
+    },
   ]
 
   for (const rule of textRules) {

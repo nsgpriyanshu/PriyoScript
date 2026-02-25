@@ -217,4 +217,61 @@ monalisa {
       message: expect.stringMatching(/must call priyoParent\(\.\.\.\) as first statement in init/i),
     })
   })
+
+  it('should reject duplicate parent constructor calls in child init', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily Base {
+          lisaaTask init(name) {
+            priyoSelf.name = name
+          }
+        }
+        lisaaFamily Child lisaaInherit Base {
+          lisaaTask init(name) {
+            priyoParent(name)
+            priyoParent(name)
+          }
+        }
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      message: expect.stringMatching(/cannot call priyoParent\(\.\.\.\) more than once/i),
+    })
+  })
+
+  it('should enforce strict declared-field assignment when class declares fields', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily Student {
+          priyoKeep name = ""
+
+          lisaaTask init() {
+            priyoSelf.name = "Priyo"
+            priyoSelf.age = 20
+          }
+        }
+        priyoCreate Student()
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      message: expect.stringMatching(/Field "age" is not declared on Student/i),
+    })
+  })
+
+  it('should keep dynamic instance fields for classes without field declarations', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily DynamicStudent {
+          lisaaTask init() {
+            priyoSelf.name = "Priyo"
+            priyoSelf.age = 20
+          }
+        }
+        priyoKeep student = priyoCreate DynamicStudent()
+        priyoTell(student.age)
+      }
+    `
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith(20)
+  })
 })

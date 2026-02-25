@@ -1,5 +1,17 @@
 # PriyoScript Architecture
 
+## Current Version Snapshot
+
+- Version: `v1.7.0`
+- CI baseline:
+  - `npm run lint` passes
+  - `npm run test:run` passes
+- Major additions in this version:
+  - module imports v2 (`alias`, `named imports`, cycle guard)
+  - destructuring v3 (nested + default patterns for array/object declarations)
+  - stricter inherited constructor rule (`priyoParent(...)` first in child `init(...)`)
+  - REPL `.reset` now clears runtime state and module cache
+
 ## 1. Purpose
 
 PriyoScript is a bytecode-interpreted language running on Node.js.
@@ -103,6 +115,7 @@ tests/
 | OOP          | Classes, object creation, `priyoSelf`                                                | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                        | 100%   |
 | OOP          | Static methods/fields and class fields                                               | 100%   |
+| OOP          | Constructor-chain validation + stricter declared-member assignment checks            | 100%   |
 | Builtins     | `priyoTell` and color variants                                                       | 100%   |
 | Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                            | 100%   |
 | Packages     | Built-in package import (`lisaaBring`)                                               | 100%   |
@@ -110,6 +123,7 @@ tests/
 | Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                           | 100%   |
 | Modules      | Import alias + named imports + cycle guard                                           | 100%   |
 | Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
+| Runtime      | REPL module cache invalidation on reset                                              | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
@@ -177,6 +191,11 @@ tests/
   - parent method: `priyoParent.method(...)`
   - parent property access: `priyoParent.field`
   - parent property write: `priyoParent.field = ...`
+  - constructor-chain rule: in child `init(...)`, `priyoParent(...)` must be first and cannot appear more than once
+- Stricter member checks:
+  - if a class declares instance fields, assignment to undeclared instance fields is rejected
+  - if a class declares static fields, assignment to undeclared static fields is rejected
+  - dynamic field assignment remains allowed for classes with no declared fields (backward compatibility)
 - Static members:
   - static method declaration: `lisaaStable lisaaTask ...`
   - static field read/write via class object
@@ -216,6 +235,7 @@ tests/
   - alias import: `lisaaBring "./module.priyo": moduleAlias`
   - named import: `lisaaBring "./module.priyo": [x, y: localY]`
   - cycle guard for recursive module graphs
+  - REPL `.reset` clears module cache to avoid stale imports during iterative development
 
 ## 5. Runtime Model
 
@@ -272,7 +292,7 @@ Current language/runtime limitations that still need dedicated implementation:
   - no static type checker
   - no compile-time type validation
 - OOP semantics are strong but not exhaustive:
-  - advanced constructor-chain constraints are still limited
+  - additional inheritance invariants can still be expanded
   - access modifiers / interfaces / enums are reserved only
 - Standard library is intentionally minimal:
   - only core builtins + `math` package currently exist
@@ -281,9 +301,7 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Expand OOP semantics:
-   - stronger constructor-chain validation and stricter member checks.
-2. Add async and advanced runtime capabilities:
+1. Add async and advanced runtime capabilities:
    - staged support for `async/await` and future concurrency primitives.
-3. Add native distribution channels:
+2. Add native distribution channels:
    - standalone binaries/installers for Windows/macOS/Linux (beyond npm global install).

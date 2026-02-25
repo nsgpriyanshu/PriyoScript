@@ -449,9 +449,14 @@ Notes:
 - Inheritance is supported with `lisaaInherit`.
 - Parent constructor shorthand is supported with `priyoParent(...)` inside child `init(...)`.
 - In child classes, `priyoParent(...)` must be the first statement of `init(...)`.
+- In child classes, `priyoParent(...)` can appear only once in `init(...)`.
 - Parent method call is supported with `priyoParent.method(...)`.
 - Parent property access is supported with `priyoParent.property`.
 - Parent property write is supported with `priyoParent.property = value`.
+- Stricter declared-member checks:
+  - If the class declares instance fields, assigning undeclared instance fields throws an error.
+  - If the class declares static fields, assigning undeclared static fields throws an error.
+  - If the class declares no fields, dynamic field assignment remains allowed.
 
 Inheritance example:
 

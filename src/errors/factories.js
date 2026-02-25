@@ -92,7 +92,7 @@ function classifyRuntimeFailure(message) {
     return { code: ErrorCodes.RUNTIME.ARGUMENT_MISMATCH, category: ErrorCategory.USER }
   }
   if (
-    /Property .* not found|Property access|Property assignment|Array index access|Array index assignment|Array index must be|Array index .* out of range|Array slicing requires|Array slice .* must be/i.test(
+    /Property .* not found|Property access|Property assignment|Field .* is not declared|Static field .* is not declared|Parent field .* is not declared|Parent static field .* is not declared|Array index access|Array index assignment|Array index must be|Array index .* out of range|Array slicing requires|Array slice .* must be/i.test(
       message,
     )
   ) {

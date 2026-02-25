@@ -34,6 +34,7 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 11. User module system with `lisaaBring`, `lisaaBox`, and `lisaaShare`.
 12. Module imports v2: alias and named imports with cycle guards.
 13. Source-aware diagnostics with file/line context and cleaner stack previews.
+14. OOP hardening: stricter constructor-chain validation and declared-member assignment checks.
 
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.

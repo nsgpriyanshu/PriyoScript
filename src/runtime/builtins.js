@@ -197,9 +197,24 @@ function createBuiltins(io = {}) {
   const input = io.stdin || stdin
   const output = io.stdout || stdout
   const logger = io.console || console
+  const promptReader = typeof io.prompt === 'function' ? io.prompt : null
   const priyoTell = createPriyoTell(logger)
   const priyoPackage = createPackageManager()
   const priyoArray = createPriyoArrayHelpers()
+
+  async function askUser(prompt = '') {
+    const message = prompt == null ? '' : String(prompt)
+    if (promptReader) {
+      return await promptReader(message)
+    }
+
+    const rl = readline.createInterface({ input, output })
+    try {
+      return await rl.question(message)
+    } finally {
+      rl.close()
+    }
+  }
 
   return {
     priyoTell,
@@ -207,41 +222,22 @@ function createBuiltins(io = {}) {
     priyoArray,
 
     priyoListenSentence: async (prompt = '') => {
-      const rl = readline.createInterface({ input, output })
-      try {
-        const message = prompt == null ? '' : String(prompt)
-        return await rl.question(message)
-      } finally {
-        rl.close()
-      }
+      return askUser(prompt)
     },
 
     priyoListenNumber: async (prompt = '') => {
-      const rl = readline.createInterface({ input, output })
-      try {
-        const message = prompt == null ? '' : String(prompt)
-        const raw = await rl.question(message)
-        const value = Number(raw.trim())
+      const raw = await askUser(prompt)
+      const value = Number(raw.trim())
 
-        if (Number.isNaN(value)) {
-          throw new Error(`Invalid number input: "${raw}"`)
-        }
-
-        return value
-      } finally {
-        rl.close()
+      if (Number.isNaN(value)) {
+        throw new Error(`Invalid number input: "${raw}"`)
       }
+      return value
     },
 
     // Backward-compatible alias.
     priyoListen: async (prompt = '') => {
-      const rl = readline.createInterface({ input, output })
-      try {
-        const message = prompt == null ? '' : String(prompt)
-        return await rl.question(message)
-      } finally {
-        rl.close()
-      }
+      return askUser(prompt)
     },
   }
 }
