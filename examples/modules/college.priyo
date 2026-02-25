@@ -1,0 +1,10 @@
+lisaaBox {
+  lisaaTask cgpaToGradePoint(cgpa) {
+    priyoGiveBack cgpa * 10
+  }
+
+  priyoKeep campus = "NSEC"
+
+  lisaaShare cgpaToGradePoint
+  lisaaShare campus
+}

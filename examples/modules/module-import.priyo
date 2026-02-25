@@ -1,0 +1,6 @@
+monalisa {
+  lisaaBring "./college.priyo"
+
+  priyoTell(college.campus)
+  priyoTell(college.cgpaToGradePoint(8))
+}

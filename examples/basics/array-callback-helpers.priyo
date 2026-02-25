@@ -1,0 +1,22 @@
+monalisa {
+  lisaaTask double(x) {
+    priyoGiveBack x * 2
+  }
+
+  lisaaTask isEven(x) {
+    priyoGiveBack x % 2 == 0
+  }
+
+  lisaaTask sum(acc, value) {
+    priyoGiveBack acc + value
+  }
+
+  priyoKeep scores = [10, 15, 20, 25]
+  priyoKeep doubled = priyoArray.map(scores, double)
+  priyoKeep evens = priyoArray.filter(scores, isEven)
+  priyoKeep total = priyoArray.reduce(scores, sum, 0)
+
+  priyoTell(doubled)
+  priyoTell(evens)
+  priyoTell(total)
+}

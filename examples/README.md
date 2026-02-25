@@ -8,6 +8,7 @@ Examples are grouped by language area:
 - `functions/`: function declarations, closures, recursion
 - `oop/`: classes, inheritance, static members
 - `packages/`: built-in package manager and package usage
+- `modules/`: user module import/export via `lisaaBring`, `lisaaBox`, `lisaaShare`
 - `scopes/`: block/function scope behavior and scope errors
 
 Run any file with:
