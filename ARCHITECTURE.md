@@ -92,6 +92,7 @@ tests/
 | Arrays       | Iteration-friendly foreach (`prakritiCount (item priyoInside arr)`)                  | 100%   |
 | Arrays       | Array destructuring declarations (`priyoChange [a, b] = arr`)                        | 100%   |
 | Arrays       | Higher-order helpers (`map/filter/reduce/find/some/every`)                           | 100%   |
+| Arrays       | Nested/default destructuring patterns (`[]`, `{}`)                                   | 100%   |
 | Expressions  | Arithmetic, comparison, logical, grouping                                            | 100%   |
 | Expressions  | Function call and member access (`.`)                                                | 100%   |
 | Control flow | `if / else if / else`                                                                | 100%   |
@@ -107,6 +108,7 @@ tests/
 | Packages     | Built-in package import (`lisaaBring`)                                               | 100%   |
 | Packages     | Built-in package registry (`priyoPackage.*`)                                         | 100%   |
 | Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                           | 100%   |
+| Modules      | Import alias + named imports + cycle guard                                           | 100%   |
 | Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
@@ -140,6 +142,9 @@ tests/
 - Array index read/write: `arr[0]`, `arr[1] = 99`
 - Array slicing: `arr[1:4]`, `arr[:3]`, `arr[2:]`
 - Array destructuring declaration: `priyoChange [a, b] = arr`
+- Nested/default destructuring patterns:
+  - array: `priyoChange [a = 1, [b]] = value`
+  - object: `priyoChange {x, y: alias = 10} = value`
 - Function/method call expressions
 - Member access with `.`
 
@@ -208,6 +213,9 @@ tests/
   - module root: `lisaaBox { ... }`
   - export binding: `lisaaShare name`
   - import by path: `lisaaBring "./module.priyo"`
+  - alias import: `lisaaBring "./module.priyo": moduleAlias`
+  - named import: `lisaaBring "./module.priyo": [x, y: localY]`
+  - cycle guard for recursive module graphs
 
 ## 5. Runtime Model
 
@@ -254,7 +262,10 @@ Current language/runtime limitations that still need dedicated implementation:
   - built-in package import (`lisaaBring math`)
   - user modules via path import (`lisaaBring "./file.priyo"`)
   - module exports via `lisaaShare`
-  - limitation: no named import list/alias syntax yet
+  - alias and named import list syntax
+- Destructuring supports nested/default patterns in declarations.
+- Remaining limitation:
+  - no rest/spread destructuring syntax yet
 - No async/concurrency execution model:
   - `async/await/yield` tokens remain reserved
 - Type system remains fully dynamic:

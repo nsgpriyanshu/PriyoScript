@@ -46,6 +46,7 @@ const OpCode = {
   SLICE_ARRAY: 44,
   IMPORT_MODULE: 45,
   EXPORT_NAME: 46,
+  DESTRUCTURE_DEFINE: 47,
 }
 
 module.exports = { OpCode }

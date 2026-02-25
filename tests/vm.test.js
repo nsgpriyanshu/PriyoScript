@@ -74,12 +74,16 @@ describe('VM & Runtime', () => {
   it('should evaluate array destructuring declarations', async () => {
     const code = `
       monalisa {
-        priyoChange [first, second] = [11, 22]
-        priyoTell(first + second)
+        priyoChange [first = 5, [second], third] = [11, [22], 33]
+        priyoTell(first + second + third)
+        priyoKeep math = priyoPackage.use("math")
+        priyoChange {add, unknown = 99} = math
+        priyoTell(unknown)
       }
     `
     await runSource(code)
-    expect(logSpy).toHaveBeenCalledWith(33)
+    expect(logSpy).toHaveBeenCalledWith(66)
+    expect(logSpy).toHaveBeenCalledWith(99)
   })
 
   it('should evaluate priyoArray callback helpers', async () => {
@@ -128,9 +132,11 @@ lisaaBox {
       appPath,
       `
 monalisa {
-  lisaaBring "./college.priyo"
-  priyoTell(college.square(5))
-  priyoTell(college.campus)
+  lisaaBring "./college.priyo": collegeModule
+  lisaaBring "./college.priyo": [campus, square: sq]
+  priyoTell(collegeModule.square(5))
+  priyoTell(campus)
+  priyoTell(sq(6))
 }
       `,
       'utf8',
@@ -140,8 +146,75 @@ monalisa {
       await runFile(appPath)
       expect(logSpy).toHaveBeenCalledWith(25)
       expect(logSpy).toHaveBeenCalledWith('NSEC')
+      expect(logSpy).toHaveBeenCalledWith(36)
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true })
     }
+  })
+
+  it('should reject cyclic module imports', async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'priyoscript-cycle-'))
+    const aPath = path.join(tempDir, 'a.priyo')
+    const bPath = path.join(tempDir, 'b.priyo')
+    const appPath = path.join(tempDir, 'main.priyo')
+
+    fs.writeFileSync(
+      aPath,
+      `
+lisaaBox {
+  lisaaBring "./b.priyo"
+  lisaaShare b
+}
+      `,
+      'utf8',
+    )
+    fs.writeFileSync(
+      bPath,
+      `
+lisaaBox {
+  lisaaBring "./a.priyo"
+  lisaaShare a
+}
+      `,
+      'utf8',
+    )
+    fs.writeFileSync(
+      appPath,
+      `
+monalisa {
+  lisaaBring "./a.priyo"
+}
+      `,
+      'utf8',
+    )
+
+    try {
+      await expect(runFile(appPath)).rejects.toMatchObject({
+        message: expect.stringMatching(/Cyclic module import detected/i),
+      })
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('should enforce parent constructor call rules', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily Base {
+          lisaaTask init(name) {
+            priyoSelf.name = name
+          }
+        }
+        lisaaFamily Child lisaaInherit Base {
+          lisaaTask init(name) {
+            priyoSelf.extra = "x"
+            priyoParent(name)
+          }
+        }
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      message: expect.stringMatching(/must call priyoParent\(\.\.\.\) as first statement in init/i),
+    })
   })
 })

@@ -32,7 +32,8 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 9. Interactive REPL mode with shared runtime state and built-in REPL commands.
 10. Array destructuring and higher-order helpers (`map/filter/reduce/find/some/every`).
 11. User module system with `lisaaBring`, `lisaaBox`, and `lisaaShare`.
-12. Source-aware diagnostics with file/line context and cleaner stack previews.
+12. Module imports v2: alias and named imports with cycle guards.
+13. Source-aware diagnostics with file/line context and cleaner stack previews.
 
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.

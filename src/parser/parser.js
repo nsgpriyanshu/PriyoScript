@@ -36,6 +36,9 @@ const {
   SliceExpression,
   Identifier,
   ArrayPattern,
+  ObjectPattern,
+  ObjectPatternProperty,
+  DefaultPattern,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,
@@ -354,10 +357,70 @@ class Parser {
 
     const source = this.curToken.literal
     const sourceType = this.curToken.type === TokenType.STRING ? 'string' : 'identifier'
-    const localName =
+    let localName =
       sourceType === 'string' ? this.deriveModuleLocalName(source) : this.curToken.literal
+    const namedImports = []
     this.nextToken()
-    return new ImportStatement(source, localName, sourceType)
+
+    if (this.curToken.type === TokenType.COLON) {
+      this.nextToken()
+      if (this.curToken.type === TokenType.LBRACKET) {
+        this.nextToken()
+        while (this.curToken.type !== TokenType.RBRACKET && this.curToken.type !== TokenType.EOF) {
+          if (
+            !this.expectCurrent(TokenType.IDENTIFIER, 'Expected export name in named import list')
+          ) {
+            this.nextToken()
+            return null
+          }
+          const exportedName = this.curToken.literal
+          this.nextToken()
+
+          let localImportedName = exportedName
+          if (this.curToken.type === TokenType.COLON) {
+            this.nextToken()
+            if (
+              !this.expectCurrent(
+                TokenType.IDENTIFIER,
+                'Expected alias name after ":" in named import',
+              )
+            ) {
+              this.nextToken()
+              return null
+            }
+            localImportedName = this.curToken.literal
+            this.nextToken()
+          }
+
+          namedImports.push({
+            imported: exportedName,
+            local: localImportedName,
+          })
+
+          if (this.curToken.type === TokenType.COMMA) {
+            this.nextToken()
+            continue
+          }
+
+          if (this.curToken.type !== TokenType.RBRACKET) {
+            this.error('Expected "," or "]" in named import list')
+            return null
+          }
+        }
+
+        if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after named import list'))
+          return null
+      } else {
+        if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected alias name after ":" in import')) {
+          this.nextToken()
+          return null
+        }
+        localName = this.curToken.literal
+        this.nextToken()
+      }
+    }
+
+    return new ImportStatement(source, localName, sourceType, namedImports)
   }
 
   parseExportStatement() {
@@ -408,9 +471,9 @@ class Parser {
     const kind = kindByToken[this.curToken.type]
     this.nextToken()
 
-    let identifier = null
-    if (this.curToken.type === TokenType.LBRACKET) {
-      identifier = this.parseArrayBindingPattern()
+    let identifier
+    if (this.curToken.type === TokenType.LBRACKET || this.curToken.type === TokenType.LBRACE) {
+      identifier = this.parseBindingPattern()
       if (!identifier) return null
     } else {
       if (
@@ -432,8 +495,8 @@ class Parser {
       this.nextToken()
       initializer = this.parseExpression()
       if (!initializer) return null
-    } else if (identifier.type === 'ArrayPattern') {
-      this.error('Array destructuring declaration requires an initializer')
+    } else if (identifier.type !== 'Identifier') {
+      this.error('Destructuring declaration requires an initializer')
       return null
     } else if (kind === 'const') {
       this.error('Constant declaration requires an initializer')
@@ -441,6 +504,22 @@ class Parser {
     }
 
     return new VariableDeclaration(kind, identifier, initializer)
+  }
+
+  parseBindingPattern() {
+    if (this.curToken.type === TokenType.LBRACKET) {
+      return this.parseArrayBindingPattern()
+    }
+    if (this.curToken.type === TokenType.LBRACE) {
+      return this.parseObjectBindingPattern()
+    }
+    if (this.curToken.type === TokenType.IDENTIFIER) {
+      const id = new Identifier(this.curToken.literal)
+      this.nextToken()
+      return id
+    }
+    this.error('Expected a binding pattern')
+    return null
   }
 
   parseArrayBindingPattern() {
@@ -456,13 +535,20 @@ class Parser {
         continue
       }
 
-      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected identifier in array destructuring')) {
-        this.nextToken()
-        return null
-      }
+      const pattern = this.parseBindingPattern()
+      if (!pattern) return null
 
-      elements.push(new Identifier(this.curToken.literal))
-      this.nextToken()
+      let element = pattern
+      if (this.curToken.type === TokenType.ASSIGN) {
+        this.nextToken()
+        const defaultValue = this.parseExpression()
+        if (!defaultValue) {
+          this.error('Expected default value in array destructuring')
+          return null
+        }
+        element = new DefaultPattern(pattern, defaultValue)
+      }
+      elements.push(element)
 
       if (this.curToken.type === TokenType.COMMA) {
         this.nextToken()
@@ -478,6 +564,59 @@ class Parser {
     if (!this.consumeCurrent(TokenType.RBRACKET, 'Expected "]" after array destructuring'))
       return null
     return new ArrayPattern(elements)
+  }
+
+  parseObjectBindingPattern() {
+    if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" to start object destructuring'))
+      return null
+
+    const properties = []
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      if (
+        !this.expectCurrent(TokenType.IDENTIFIER, 'Expected property name in object destructuring')
+      ) {
+        this.nextToken()
+        return null
+      }
+
+      const key = this.curToken.literal
+      this.nextToken()
+
+      let valuePattern
+      if (this.curToken.type === TokenType.COLON) {
+        this.nextToken()
+        valuePattern = this.parseBindingPattern()
+        if (!valuePattern) return null
+      } else {
+        valuePattern = new Identifier(key)
+      }
+
+      if (this.curToken.type === TokenType.ASSIGN) {
+        this.nextToken()
+        const defaultValue = this.parseExpression()
+        if (!defaultValue) {
+          this.error('Expected default value in object destructuring')
+          return null
+        }
+        valuePattern = new DefaultPattern(valuePattern, defaultValue)
+      }
+
+      properties.push(new ObjectPatternProperty(key, valuePattern))
+
+      if (this.curToken.type === TokenType.COMMA) {
+        this.nextToken()
+        continue
+      }
+
+      if (this.curToken.type !== TokenType.RBRACE) {
+        this.error('Expected "," or "}" in object destructuring')
+        return null
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" after object destructuring'))
+      return null
+    return new ObjectPattern(properties)
   }
 
   parseAssignmentStatement() {

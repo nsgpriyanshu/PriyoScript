@@ -57,7 +57,7 @@ function humanizeError(input) {
     },
     [ErrorCodes.RUNTIME.UNKNOWN_MODULE]: {
       message: 'So Rude - The requested module could not be loaded.',
-      tip: 'Use `lisaaBring "relative/path"` and make sure the module file uses `lisaaBox { ... }`.',
+      tip: 'Use `lisaaBring "relative/path"`; ensure the module uses `lisaaBox { ... }` and avoid cyclic imports.',
     },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
@@ -126,6 +126,11 @@ function humanizeError(input) {
       message:
         'So Rude - `prakritiTry` must be followed by `prakritiCatch` and/or `prakritiAtEnd`.',
       tip: 'Use: `prakritiTry { ... } prakritiCatch (err) { ... }` or add `prakritiAtEnd { ... }`.',
+    },
+    {
+      test: /priyoParent/i,
+      message: 'So Rude - `priyoParent` is being used in an invalid class context.',
+      tip: 'Use `priyoParent(...)` only inside child `init(...)` and use `priyoParent.method(...)` for parent methods.',
     },
   ]
 

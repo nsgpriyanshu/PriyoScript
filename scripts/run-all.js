@@ -40,7 +40,7 @@ function runAll() {
 
     try {
       execSync(`node "${ENTRY}" "${file}"`, { stdio: 'inherit' })
-    } catch (err) {
+    } catch {
       console.error(`\nError while running: ${file}\n`)
     }
 

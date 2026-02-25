@@ -91,7 +91,8 @@ describe('Parser', () => {
   it('should parse array destructuring declarations', () => {
     const input = `
       monalisa {
-        priyoChange [first, second] = [10, 20]
+        priyoChange [first = 1, [second], third] = [10, [20], 30]
+        priyoChange {campus, profile: {city = "Kolkata"}} = student
       }
     `
     const { program, errors } = parse(input)
@@ -100,8 +101,10 @@ describe('Parser', () => {
     const stmt = program.entry.body[0]
     expect(stmt.type).toBe('VariableDeclaration')
     expect(stmt.identifier.type).toBe('ArrayPattern')
-    expect(stmt.identifier.elements[0].name).toBe('first')
-    expect(stmt.identifier.elements[1].name).toBe('second')
+    expect(stmt.identifier.elements[0].type).toBe('DefaultPattern')
+    expect(stmt.identifier.elements[1].type).toBe('ArrayPattern')
+    const objStmt = program.entry.body[1]
+    expect(objStmt.identifier.type).toBe('ObjectPattern')
   })
 
   it('should parse module box with exports', () => {
@@ -116,5 +119,20 @@ describe('Parser', () => {
     expect(program.kind).toBe('package')
     expect(program.root.type).toBe('PackageBlock')
     expect(program.root.body[1].type).toBe('ExportStatement')
+  })
+
+  it('should parse import alias and named imports', () => {
+    const input = `
+      monalisa {
+        lisaaBring "./college.priyo": collegeModule
+        lisaaBring "./college.priyo": [campus, cgpaToGradePoint: gradeFn]
+      }
+    `
+    const { program, errors } = parse(input)
+    expect(errors).toHaveLength(0)
+    expect(program.entry.body[0].type).toBe('ImportStatement')
+    expect(program.entry.body[0].localName).toBe('collegeModule')
+    expect(program.entry.body[1].namedImports).toHaveLength(2)
+    expect(program.entry.body[1].namedImports[1].local).toBe('gradeFn')
   })
 })

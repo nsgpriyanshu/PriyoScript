@@ -73,6 +73,60 @@ function resolveModulePath(importSource, importerFile) {
   return `${resolved}.priyo`
 }
 
+function createModuleRuntime(io = {}) {
+  const moduleCache = new Map()
+  const loadingModules = new Set()
+
+  const moduleLoader = async (importSource, importerFile) => {
+    const modulePath = resolveModulePath(importSource, importerFile)
+    if (!modulePath) {
+      throw new Error(`Unknown module path import: "${importSource}"`)
+    }
+
+    if (!fs.existsSync(modulePath)) {
+      throw new Error(`Module file not found: "${importSource}"`)
+    }
+
+    if (loadingModules.has(modulePath)) {
+      throw new Error(`Cyclic module import detected for "${importSource}"`)
+    }
+
+    if (moduleCache.has(modulePath)) {
+      return moduleCache.get(modulePath)
+    }
+
+    loadingModules.add(modulePath)
+    const moduleExports = { __priyoHostObject: true }
+    moduleCache.set(modulePath, moduleExports)
+
+    try {
+      const moduleSource = fs.readFileSync(modulePath, 'utf8')
+      await runSource(moduleSource, {
+        filename: modulePath,
+        expectModule: true,
+        moduleContext: { exports: moduleExports },
+        moduleLoader,
+        moduleCache,
+        environment: new Environment(null, { isFunctionScope: true }),
+        builtins: createBuiltins(io),
+        io,
+      })
+      return moduleExports
+    } finally {
+      loadingModules.delete(modulePath)
+    }
+  }
+
+  return {
+    moduleCache,
+    moduleLoader,
+    clearModuleCache() {
+      moduleCache.clear()
+      loadingModules.clear()
+    },
+  }
+}
+
 async function runSource(source, options = {}) {
   const {
     printBytecode = false,
@@ -157,51 +211,19 @@ async function runSource(source, options = {}) {
 async function runFile(filename, options = {}) {
   const fullPath = path.resolve(process.cwd(), filename)
   const source = fs.readFileSync(fullPath, 'utf8')
-  const moduleCache = options.moduleCache || new Map()
-
-  const moduleLoader =
-    options.moduleLoader ||
-    (async (importSource, importerFile) => {
-      const modulePath = resolveModulePath(importSource, importerFile)
-      if (!modulePath) {
-        throw new Error(`Unknown module path import: "${importSource}"`)
-      }
-
-      if (!fs.existsSync(modulePath)) {
-        throw new Error(`Module file not found: "${importSource}"`)
-      }
-
-      if (moduleCache.has(modulePath)) {
-        return moduleCache.get(modulePath)
-      }
-
-      const moduleExports = { __priyoHostObject: true }
-      moduleCache.set(modulePath, moduleExports)
-
-      const moduleSource = fs.readFileSync(modulePath, 'utf8')
-      await runSource(moduleSource, {
-        ...options,
-        filename: modulePath,
-        expectModule: true,
-        moduleContext: { exports: moduleExports },
-        moduleLoader,
-        moduleCache,
-        environment: new Environment(null, { isFunctionScope: true }),
-        builtins: createBuiltins(options.io),
-      })
-
-      return moduleExports
-    })
+  const moduleRuntime = options.moduleRuntime || createModuleRuntime(options.io)
+  const moduleLoader = options.moduleLoader || moduleRuntime.moduleLoader
 
   return runSource(source, {
     ...options,
     filename: fullPath,
     moduleLoader,
-    moduleCache,
+    moduleCache: moduleRuntime.moduleCache,
   })
 }
 
 module.exports = {
   runSource,
   runFile,
+  createModuleRuntime,
 }

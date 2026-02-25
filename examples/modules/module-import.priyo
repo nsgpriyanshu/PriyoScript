@@ -1,6 +1,8 @@
 monalisa {
-  lisaaBring "./college.priyo"
+  lisaaBring "./college.priyo": collegeModule
+  lisaaBring "./college.priyo": [campus, cgpaToGradePoint: gradePoint]
 
-  priyoTell(college.campus)
-  priyoTell(college.cgpaToGradePoint(8))
+  priyoTell(collegeModule.campus)
+  priyoTell(campus)
+  priyoTell(gradePoint(8))
 }

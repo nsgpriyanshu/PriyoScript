@@ -103,34 +103,25 @@ describe('Compiler', () => {
   it('should compile array destructuring declarations', () => {
     const input = `
       monalisa {
-        priyoChange [a, b] = [1, 2]
+        priyoChange [a = 1, [b], c] = [1, [2], 3]
       }
     `
     const instructions = compileInput(input)
     const ops = instructions.map(instr => instr.op)
     expect(ops).toContain(OpCode.BUILD_ARRAY)
-    expect(ops).toContain(OpCode.GET_INDEX)
-    expect(
-      instructions.some(
-        instr => instr.op === OpCode.DEFINE_VARIABLE && instr.operand?.name === 'a',
-      ),
-    ).toBe(true)
-    expect(
-      instructions.some(
-        instr => instr.op === OpCode.DEFINE_VARIABLE && instr.operand?.name === 'b',
-      ),
-    ).toBe(true)
+    expect(ops).toContain(OpCode.DESTRUCTURE_DEFINE)
   })
 
   it('should compile user module path imports', () => {
     const input = `
       monalisa {
-        lisaaBring "./profile.priyo"
+        lisaaBring "./profile.priyo": [campus, square: sq]
       }
     `
     const instructions = compileInput(input)
     expect(instructions[0].op).toBe(OpCode.IMPORT_MODULE)
     expect(instructions[0].operand.source).toBe('./profile.priyo')
-    expect(instructions[1].op).toBe(OpCode.DEFINE_VARIABLE)
+    expect(instructions.some(instr => instr.op === OpCode.GET_PROPERTY)).toBe(true)
+    expect(instructions.some(instr => instr.op === OpCode.DEFINE_VARIABLE)).toBe(true)
   })
 })

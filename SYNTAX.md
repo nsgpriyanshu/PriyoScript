@@ -129,6 +129,13 @@ priyoChange [first, second] = [10, 20]
 priyoTell(first + second)
 ```
 
+Nested/default destructuring:
+
+```priyo
+priyoChange [a = 10, [b], c] = [1, [2], 3]
+priyoChange {add, missing = 99} = priyoPackage.use("math")
+```
+
 ## 6. Built-in I/O
 
 ### Output
@@ -350,6 +357,18 @@ monalisa {
 }
 ```
 
+Import alias:
+
+```priyo
+lisaaBring "./math-utils.priyo": utils
+```
+
+Named imports (with optional alias):
+
+```priyo
+lisaaBring "./math-utils.priyo": [square, cube: cubeFn]
+```
+
 Notes:
 
 - Module files must start with `lisaaBox { ... }`.
@@ -429,6 +448,7 @@ Notes:
 - Methods are declared with `lisaaTask` inside `lisaaFamily`.
 - Inheritance is supported with `lisaaInherit`.
 - Parent constructor shorthand is supported with `priyoParent(...)` inside child `init(...)`.
+- In child classes, `priyoParent(...)` must be the first statement of `init(...)`.
 - Parent method call is supported with `priyoParent.method(...)`.
 - Parent property access is supported with `priyoParent.property`.
 - Parent property write is supported with `priyoParent.property = value`.

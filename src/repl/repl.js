@@ -1,6 +1,6 @@
 const readline = require('readline/promises')
 const { stdin, stdout } = require('process')
-const { runSource } = require('../core/run')
+const { runSource, createModuleRuntime } = require('../core/run')
 const { Environment } = require('../runtime/environment')
 const { createBuiltins } = require('../runtime/builtins')
 const { printPriyoError } = require('../errors')
@@ -42,8 +42,14 @@ async function startRepl(options = {}) {
     stdout: options.output || stdout,
     console: console,
   })
+  let moduleRuntime = createModuleRuntime({
+    stdin: options.input || stdin,
+    stdout: options.output || stdout,
+  })
 
-  logger.build('PriyoScript REPL')
+  const { version: VERSION } = require('../../package.json')
+
+  logger.build(`Hey, this is PriyoScript REPL - v${VERSION}`)
   logger.info('Type .help for commands, .exit to quit.')
 
   let buffer = ''
@@ -79,6 +85,7 @@ async function startRepl(options = {}) {
           stdout: options.output || stdout,
           console: console,
         })
+        moduleRuntime.clearModuleCache()
         logger.info('Runtime state reset.')
         continue
       }
@@ -88,7 +95,12 @@ async function startRepl(options = {}) {
 
       const source = wrapSnippet(buffer)
       try {
-        await runSource(source, { environment, builtins })
+        await runSource(source, {
+          environment,
+          builtins,
+          moduleLoader: moduleRuntime.moduleLoader,
+          moduleCache: moduleRuntime.moduleCache,
+        })
       } catch (err) {
         printPriyoError(err, {
           mode: 'cli',

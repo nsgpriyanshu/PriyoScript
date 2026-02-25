@@ -101,8 +101,8 @@ class Compiler {
   }
 
   compileVariableDeclaration(stmt) {
-    if (stmt.identifier.type === 'ArrayPattern') {
-      this.compileArrayDestructuringDeclaration(stmt)
+    if (stmt.identifier.type !== 'Identifier') {
+      this.compileDestructuringDeclaration(stmt)
       return
     }
 
@@ -113,26 +113,12 @@ class Compiler {
     })
   }
 
-  compileArrayDestructuringDeclaration(stmt) {
-    const sourceTempName = this.nextTempName('__destructureSource')
+  compileDestructuringDeclaration(stmt) {
     this.compileExpression(stmt.initializer)
-    this.emit(OpCode.DEFINE_VARIABLE, {
-      name: sourceTempName,
-      kind: 'const',
+    this.emit(OpCode.DESTRUCTURE_DEFINE, {
+      kind: stmt.kind,
+      pattern: this.serializeBindingPattern(stmt.identifier),
     })
-
-    for (let index = 0; index < stmt.identifier.elements.length; index++) {
-      const element = stmt.identifier.elements[index]
-      if (!element) continue
-
-      this.emit(OpCode.LOAD_VARIABLE, sourceTempName)
-      this.emit(OpCode.PUSH_NUMBER, index)
-      this.emit(OpCode.GET_INDEX)
-      this.emit(OpCode.DEFINE_VARIABLE, {
-        name: element.name,
-        kind: stmt.kind,
-      })
-    }
   }
 
   compileAssignmentStatement(stmt) {
@@ -410,10 +396,28 @@ class Compiler {
       this.emit(OpCode.IMPORT_MODULE, {
         source: stmt.source,
       })
-      this.emit(OpCode.DEFINE_VARIABLE, {
-        name: stmt.localName,
-        kind: 'const',
-      })
+
+      if (stmt.namedImports && stmt.namedImports.length > 0) {
+        const moduleTempName = this.nextTempName('__importModule')
+        this.emit(OpCode.DEFINE_VARIABLE, {
+          name: moduleTempName,
+          kind: 'const',
+        })
+
+        for (const specifier of stmt.namedImports) {
+          this.emit(OpCode.LOAD_VARIABLE, moduleTempName)
+          this.emit(OpCode.GET_PROPERTY, specifier.imported)
+          this.emit(OpCode.DEFINE_VARIABLE, {
+            name: specifier.local,
+            kind: 'const',
+          })
+        }
+      } else {
+        this.emit(OpCode.DEFINE_VARIABLE, {
+          name: stmt.localName,
+          kind: 'const',
+        })
+      }
       return
     }
 
@@ -425,10 +429,26 @@ class Compiler {
       name: 'use',
       argc: 1,
     })
-    this.emit(OpCode.DEFINE_VARIABLE, {
-      name: stmt.localName,
-      kind: 'const',
-    })
+    if (stmt.namedImports && stmt.namedImports.length > 0) {
+      const packageTempName = this.nextTempName('__importPackage')
+      this.emit(OpCode.DEFINE_VARIABLE, {
+        name: packageTempName,
+        kind: 'const',
+      })
+      for (const specifier of stmt.namedImports) {
+        this.emit(OpCode.LOAD_VARIABLE, packageTempName)
+        this.emit(OpCode.GET_PROPERTY, specifier.imported)
+        this.emit(OpCode.DEFINE_VARIABLE, {
+          name: specifier.local,
+          kind: 'const',
+        })
+      }
+    } else {
+      this.emit(OpCode.DEFINE_VARIABLE, {
+        name: stmt.localName,
+        kind: 'const',
+      })
+    }
   }
 
   compileExportStatement(stmt) {
@@ -502,6 +522,8 @@ class Compiler {
   }
 
   compileClassDeclaration(stmt) {
+    this.assertConstructorSuperRules(stmt)
+
     const instanceMethods = stmt.methods
       .filter(method => !method.isStatic)
       .map(method => ({
@@ -847,6 +869,68 @@ class Compiler {
   nextTempName(prefix) {
     this.tempCounter++
     return `${prefix}_${this.tempCounter}`
+  }
+
+  serializeBindingPattern(pattern) {
+    if (!pattern) return null
+
+    if (pattern.type === 'Identifier') {
+      return {
+        type: 'Identifier',
+        name: pattern.name,
+      }
+    }
+
+    if (pattern.type === 'ArrayPattern') {
+      return {
+        type: 'ArrayPattern',
+        elements: pattern.elements.map(element => this.serializeBindingPattern(element)),
+      }
+    }
+
+    if (pattern.type === 'ObjectPattern') {
+      return {
+        type: 'ObjectPattern',
+        properties: pattern.properties.map(property => ({
+          key: property.key,
+          value: this.serializeBindingPattern(property.value),
+        })),
+      }
+    }
+
+    if (pattern.type === 'DefaultPattern') {
+      return {
+        type: 'DefaultPattern',
+        target: this.serializeBindingPattern(pattern.target),
+        defaultInstructions: this.compileInitializerThunk(pattern.defaultValue),
+      }
+    }
+
+    throw new Error(`Unsupported binding pattern type: ${pattern.type}`)
+  }
+
+  assertConstructorSuperRules(classDeclaration) {
+    if (!classDeclaration.superClass) return
+
+    const initMethod = classDeclaration.methods.find(
+      method => !method.isStatic && method.name.name === 'init',
+    )
+    if (!initMethod) return
+
+    const firstStatement = initMethod.body.statements[0]
+    const isParentConstructorCall =
+      firstStatement &&
+      firstStatement.type === 'ExpressionStatement' &&
+      firstStatement.expression &&
+      firstStatement.expression.type === 'CallExpression' &&
+      firstStatement.expression.callee &&
+      firstStatement.expression.callee.type === 'SuperExpression'
+
+    if (!isParentConstructorCall) {
+      throw new Error(
+        `Class "${classDeclaration.name.name}" must call priyoParent(...) as first statement in init`,
+      )
+    }
   }
 }
 

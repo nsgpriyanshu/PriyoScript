@@ -75,7 +75,7 @@ function classifyRuntimeFailure(message) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_PACKAGE, category: ErrorCategory.USER }
   }
   if (
-    /Unknown module path import|Module file not found|Imported modules must start with lisaaBox/i.test(
+    /Unknown module path import|Module file not found|Imported modules must start with lisaaBox|Cyclic module import detected/i.test(
       message,
     )
   ) {

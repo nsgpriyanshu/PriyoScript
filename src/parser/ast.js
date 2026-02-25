@@ -131,11 +131,12 @@ class ReturnStatement {
 }
 
 class ImportStatement {
-  constructor(source, localName = null, sourceType = 'identifier') {
+  constructor(source, localName = null, sourceType = 'identifier', namedImports = []) {
     this.type = 'ImportStatement'
     this.source = source
     this.localName = localName || source
     this.sourceType = sourceType
+    this.namedImports = namedImports
   }
 }
 class ExportStatement {
@@ -265,6 +266,26 @@ class ArrayPattern {
     this.elements = elements
   }
 }
+class ObjectPattern {
+  constructor(properties) {
+    this.type = 'ObjectPattern'
+    this.properties = properties
+  }
+}
+class ObjectPatternProperty {
+  constructor(key, value) {
+    this.type = 'ObjectPatternProperty'
+    this.key = key
+    this.value = value
+  }
+}
+class DefaultPattern {
+  constructor(target, defaultValue) {
+    this.type = 'DefaultPattern'
+    this.target = target
+    this.defaultValue = defaultValue
+  }
+}
 
 class StringLiteral {
   constructor(value) {
@@ -352,6 +373,9 @@ module.exports = {
   SliceExpression,
   Identifier,
   ArrayPattern,
+  ObjectPattern,
+  ObjectPatternProperty,
+  DefaultPattern,
   StringLiteral,
   NumberLiteral,
   BooleanLiteral,

@@ -348,6 +348,12 @@ class VM {
               break
             }
 
+            case OpCode.DESTRUCTURE_DEFINE: {
+              const source = stack.pop()
+              this.applyDestructurePattern(instr.operand.pattern, source, instr.operand.kind)
+              break
+            }
+
             case OpCode.CALL_NAMED: {
               const { name, argc } = instr.operand
               const args = argc === 0 ? [] : stack.splice(-argc)
@@ -369,9 +375,20 @@ class VM {
               const { name, argc } = instr.operand
               const args = argc === 0 ? [] : stack.splice(-argc)
               const receiver = this.environment.get('priyoSelf')
+              const currentMethod = this.environment.get('__priyoCurrentMethod')
               const currentOwner = this.environment.get('__priyoCurrentClass')
               if (!currentOwner || currentOwner.type !== 'class') {
                 throw new Error('priyoParent call outside class method')
+              }
+              if (name === 'init' && currentMethod !== 'init') {
+                throw new Error(
+                  'priyoParent(...) constructor call is only allowed inside init as the first statement',
+                )
+              }
+              if (receiver && receiver.type === 'class' && name === 'init') {
+                throw new Error(
+                  'priyoParent(...) constructor call is not allowed inside static methods',
+                )
               }
               const superClass = currentOwner.superClass
               if (!superClass) {
@@ -452,8 +469,8 @@ class VM {
             default:
               throw new Error(`Unknown opcode: ${instr.op}`)
           }
-        } catch (err) {
-          let pendingException = err
+        } catch (caughtError) {
+          let pendingException = caughtError
           let handled = false
 
           while (tryStack.length > 0) {
@@ -514,9 +531,7 @@ class VM {
           if (pendingException && pendingException.__priyoThrown) {
             throw new Error(
               `Unhandled throw value: ${this.formatThrownValue(pendingException.value)}`,
-              {
-                cause: pendingException,
-              },
+              { cause: caughtError },
             )
           }
 
@@ -737,6 +752,7 @@ class VM {
     const callEnv = new Environment(method.closure, { isFunctionScope: true })
     callEnv.define('priyoSelf', receiver, 'const')
     callEnv.define('__priyoCurrentClass', method.ownerClass, 'const')
+    callEnv.define('__priyoCurrentMethod', method.name, 'const')
     callEnv.define(
       '__priyoSuperMarker',
       {
@@ -774,6 +790,7 @@ class VM {
     const callEnv = new Environment(method.closure, { isFunctionScope: true })
     callEnv.define('priyoSelf', classRef, 'const')
     callEnv.define('__priyoCurrentClass', method.ownerClass, 'const')
+    callEnv.define('__priyoCurrentMethod', method.name, 'const')
     callEnv.define(
       '__priyoSuperMarker',
       {
@@ -1174,6 +1191,118 @@ class VM {
         // Ignore redeclare collisions in reused environments.
       }
     }
+  }
+
+  applyDestructurePattern(pattern, value, kind) {
+    if (!pattern) return
+
+    if (pattern.type === 'Identifier') {
+      this.environment.define(pattern.name, value == null ? null : value, kind)
+      return
+    }
+
+    if (pattern.type === 'DefaultPattern') {
+      let resolved = value
+      if (resolved == null) {
+        resolved = this.evaluateDefaultPatternValue(pattern.defaultInstructions)
+      }
+      this.applyDestructurePattern(pattern.target, resolved, kind)
+      return
+    }
+
+    if (pattern.type === 'ArrayPattern') {
+      if (!Array.isArray(value)) {
+        throw new Error('Array destructuring requires an array value')
+      }
+
+      for (let index = 0; index < pattern.elements.length; index++) {
+        const elementPattern = pattern.elements[index]
+        if (!elementPattern) continue
+        const itemValue = index < value.length ? value[index] : null
+        this.applyDestructurePattern(elementPattern, itemValue, kind)
+      }
+      return
+    }
+
+    if (pattern.type === 'ObjectPattern') {
+      if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
+        throw new Error('Object destructuring requires an object value')
+      }
+
+      for (const property of pattern.properties) {
+        const propertyValue = this.readDestructureProperty(value, property.key)
+        this.applyDestructurePattern(property.value, propertyValue, kind)
+      }
+      return
+    }
+
+    throw new Error(`Unsupported destructuring pattern type: ${pattern.type}`)
+  }
+
+  evaluateDefaultPatternValue(instructions) {
+    if (!instructions) return null
+    const defaultEnv = new Environment(this.environment, { isFunctionScope: true })
+    const previous = this.environment
+    this.environment = defaultEnv
+    try {
+      let stack = []
+      for (const instruction of instructions) {
+        if (instruction.op === OpCode.PUSH_STRING) stack.push(instruction.operand)
+        else if (instruction.op === OpCode.PUSH_NUMBER) stack.push(instruction.operand)
+        else if (instruction.op === OpCode.PUSH_BOOLEAN) stack.push(instruction.operand)
+        else if (instruction.op === OpCode.PUSH_NULL) stack.push(null)
+        else if (instruction.op === OpCode.LOAD_VARIABLE)
+          stack.push(this.environment.get(instruction.operand))
+        else if (instruction.op === OpCode.RETURN) return stack.pop()
+        else if (instruction.op === OpCode.ADD) {
+          const right = stack.pop()
+          const left = stack.pop()
+          stack.push(
+            typeof left === 'string' || typeof right === 'string'
+              ? String(left) + String(right)
+              : left + right,
+          )
+        } else if (instruction.op === OpCode.SUB) {
+          const right = stack.pop()
+          const left = stack.pop()
+          stack.push(left - right)
+        } else if (instruction.op === OpCode.MUL) {
+          const right = stack.pop()
+          const left = stack.pop()
+          stack.push(left * right)
+        } else if (instruction.op === OpCode.DIV) {
+          const right = stack.pop()
+          const left = stack.pop()
+          if (right === 0) throw new Error('Division by zero')
+          stack.push(left / right)
+        } else if (instruction.op === OpCode.MOD) {
+          const right = stack.pop()
+          const left = stack.pop()
+          if (right === 0) throw new Error('Modulo by zero')
+          stack.push(left % right)
+        } else {
+          throw new Error('Unsupported expression in destructuring default value')
+        }
+      }
+      return null
+    } finally {
+      this.environment = previous
+    }
+  }
+
+  readDestructureProperty(value, key) {
+    if (value && value.type === 'instance') {
+      if (value.fields.has(key)) return value.fields.get(key)
+      return null
+    }
+    if (value && value.type === 'class') {
+      const owner = this.findStaticFieldOwner(value, key)
+      return owner ? owner.staticFields.get(key) : null
+    }
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      return value[key]
+    }
+    return value[key] == null ? null : value[key]
   }
 }
 
