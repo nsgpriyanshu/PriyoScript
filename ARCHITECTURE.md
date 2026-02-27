@@ -126,6 +126,7 @@ tests/
 | Runtime      | REPL module cache invalidation on reset                                              | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
+| Errors       | Caret span highlighting + keyword typo suggestions + docs links per code             | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
@@ -273,6 +274,9 @@ We use **Vitest** for our unit testing framework, providing fast, modular test e
 - **Parser Tests** (\`tests/parser.test.js\`): Ensure AST structures are properly generated, validating expressions, bindings, and control flow nodes.
 - **Compiler Tests** (\`tests/compiler.test.js\`): Verify the AST is successfully lowered into expected linear bytecode instructions (\`OpCodes\`). Checks stack discipline and correct branch patching for \`JUMP\` instructions.
 - **VM/Runtime Tests** (\`tests/vm.test.js\`): End-to-end integration tests executing source code through the pipeline into the actual \`VM\`. Validates language features and output via \`priyoTell\` by spying on the host environment output logger.
+- **Diagnostics Tests** (\`tests/diagnostics.test.js\`): Verify span highlighting, typo suggestions, and docs links for syntax/compile/runtime error formatting.
+- **Golden Output Tests** (\`tests/golden-cli-repl.test.js\`): Validate stable CLI and REPL user-facing output for help/errors.
+- **Cycle Stress Tests** (\`tests/module-cycle-stress.test.js\`): Validate module loader behavior under deep cyclic dependency chains.
 
 ## 8. Current Limitations
 

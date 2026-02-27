@@ -21,6 +21,36 @@ function extractSourceLine(source, lineNumber) {
   return lines[lineNumber - 1] || null
 }
 
+function firstMeaningfulLocation(source) {
+  const lines = String(source || '').split('\n')
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const firstNonSpace = line.search(/\S/)
+    if (firstNonSpace >= 0) {
+      return {
+        line: i + 1,
+        column: firstNonSpace + 1,
+        endColumn: firstNonSpace + 1,
+      }
+    }
+  }
+  return {
+    line: 1,
+    column: 1,
+    endColumn: 1,
+  }
+}
+
+function extractLocationFromMessage(message) {
+  const text = String(message || '')
+  const match = /line\s+(\d+),\s*column\s+(\d+)/i.exec(text)
+  if (!match) return null
+  return {
+    line: Number(match[1]),
+    column: Number(match[2]),
+  }
+}
+
 function cleanStack(stack) {
   if (!stack) return []
   return String(stack)
@@ -42,6 +72,14 @@ function attachSourceContext(err, { source, filename } = {}) {
 
   if (filename) {
     err.metadata.file = filename
+  }
+
+  if ((!err.metadata.line || !err.metadata.column) && err.message) {
+    const extracted = extractLocationFromMessage(err.message)
+    if (extracted) {
+      err.metadata.line = err.metadata.line || extracted.line
+      err.metadata.column = err.metadata.column || extracted.column
+    }
   }
 
   if (err.metadata.line && !err.metadata.sourceLine) {
@@ -162,10 +200,12 @@ async function runSource(source, options = {}) {
     bytecode = compiler.compile(ast)
   } catch (err) {
     if (isPriyoError(err)) throw attachSourceContext(err, { source, filename })
-    throw createCompileError(err.message, {
-      metadata: { phase: 'compile', file: filename },
+    const fallback = firstMeaningfulLocation(source)
+    const compileErr = createCompileError(err.message, {
+      metadata: { phase: 'compile', file: filename, ...fallback },
       cause: err,
     })
+    throw attachSourceContext(compileErr, { source, filename })
   }
 
   if (printBytecode) {
@@ -197,12 +237,14 @@ async function runSource(source, options = {}) {
       })
     }
 
-    throw createRuntimeError(err.message, {
+    const fallback = firstMeaningfulLocation(source)
+    const runtimeErr = createRuntimeError(err.message, {
       code: classification.code,
       category: classification.category,
-      metadata: { phase: 'vm', file: filename, stack: cleanStack(err.stack) },
+      metadata: { phase: 'vm', file: filename, stack: cleanStack(err.stack), ...fallback },
       cause: err,
     })
+    throw attachSourceContext(runtimeErr, { source, filename })
   }
 
   return { ast, bytecode, exports: activeModuleContext ? activeModuleContext.exports : null }

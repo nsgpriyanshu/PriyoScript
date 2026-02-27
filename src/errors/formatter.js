@@ -1,4 +1,15 @@
 const { humanizeError } = require('../utils/user-errors')
+const { getDocsLink } = require('./docs')
+
+function renderCaretRange(sourceLine, column, endColumn) {
+  if (!sourceLine || !Number.isInteger(column) || column < 1) return null
+  const normalizedEnd = Number.isInteger(endColumn) && endColumn >= column ? endColumn : column
+  const pointerStart = Math.max(1, column)
+  const pointerWidth = Math.max(1, normalizedEnd - pointerStart + 1)
+  const padding = ' '.repeat(pointerStart - 1)
+  const carets = '^'.repeat(pointerWidth)
+  return `${padding}${carets}`
+}
 
 function formatErrorForUser(err) {
   const humanized = humanizeError(err)
@@ -14,12 +25,20 @@ function formatErrorForUser(err) {
     details.push(`Location: ${file}:${line}:${column}`)
   }
   if (metadata.sourceLine) {
-    details.push(`Source: ${metadata.sourceLine.trim()}`)
+    details.push(`Source: ${metadata.sourceLine}`)
+  }
+  const caretRange = renderCaretRange(metadata.sourceLine, metadata.column, metadata.endColumn)
+  if (caretRange) {
+    details.push(`Span:   ${caretRange}`)
+  }
+  if (metadata.suggestion) {
+    details.push(`Did you mean: ${metadata.suggestion}`)
   }
   if (humanized.detail) details.push(`Details: ${humanized.detail}`)
   if (Array.isArray(metadata.stack) && metadata.stack.length > 0) {
     details.push(`Stack: ${metadata.stack[0]}`)
   }
+  details.push(`Docs: ${getDocsLink(err.code)}`)
 
   return {
     message: humanized.message,

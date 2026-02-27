@@ -5,7 +5,7 @@ const path = require('path')
 const { runFile } = require('../src/core/run')
 const { startRepl } = require('../src/repl/repl')
 const { build, info, error } = require('../src/utils/logger')
-const { printPriyoError } = require('../src/errors')
+const { printPriyoError, getDocsLink } = require('../src/errors')
 const { ErrorCodes } = require('../src/errors/codes')
 
 const { version: VERSION } = require('../package.json')
@@ -100,6 +100,7 @@ function printErrorHelpList() {
   const codes = Object.keys(ERROR_CODE_HELP).sort()
   for (const code of codes) {
     info(`  ${code} - ${ERROR_CODE_HELP[code]}`)
+    info(`           Docs: ${getDocsLink(code)}`)
   }
 }
 
@@ -120,6 +121,7 @@ function printSingleErrorHelp(code) {
   }
 
   info(`${normalized} - ${explanation}`)
+  info(`Docs: ${getDocsLink(normalized)}`)
 }
 
 /* -------------------------

@@ -1,6 +1,7 @@
 const { TokenType } = require('./token')
 const { KEYWORDS } = require('./keywords')
 const { FORBIDDEN_WORDS } = require('./forbidden')
+const { findClosestKeyword } = require('../errors/suggestions')
 
 class Lexer {
   constructor(input) {
@@ -266,12 +267,14 @@ class Lexer {
           const literal = this.readIdentifier()
 
           if (FORBIDDEN_WORDS.has(literal)) {
+            const replacement = findClosestKeyword(literal)
+            const hint = replacement ? ` Did you mean "${replacement}"?` : ''
             return {
               type: TokenType.ILLEGAL,
               literal,
               line: this.line,
               column: this.column,
-              message: `Reserved word "${literal}" is not allowed. Use Monalisa keywords.`,
+              message: `Reserved word "${literal}" is not allowed. Use Monalisa keywords.${hint}`,
             }
           }
 

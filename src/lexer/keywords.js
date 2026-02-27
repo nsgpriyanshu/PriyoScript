@@ -85,6 +85,16 @@ const KEYWORDS = Object.entries(activeKeywordConfig).reduce((acc, [concept, lexe
   return acc
 }, {})
 
+const TOKEN_TO_KEYWORDS = Object.entries(KEYWORDS).reduce((acc, [lexeme, tokenType]) => {
+  if (!acc[tokenType]) acc[tokenType] = []
+  acc[tokenType].push(lexeme)
+  return acc
+}, {})
+
+const KEYWORD_LEXEMES = Object.keys(KEYWORDS)
+
 module.exports = {
   KEYWORDS,
+  TOKEN_TO_KEYWORDS,
+  KEYWORD_LEXEMES,
 }

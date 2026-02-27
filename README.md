@@ -33,7 +33,7 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 10. Array destructuring and higher-order helpers (`map/filter/reduce/find/some/every`).
 11. User module system with `lisaaBring`, `lisaaBox`, and `lisaaShare`.
 12. Module imports v2: alias and named imports with cycle guards.
-13. Source-aware diagnostics with file/line context and cleaner stack previews.
+13. Source-aware diagnostics with file/line context, caret span highlighting, typo suggestions, and cleaner stack previews.
 14. OOP hardening: stricter constructor-chain validation and declared-member assignment checks.
 
 > [!IMPORTANT]
@@ -134,6 +134,7 @@ PriyoScript is inspired by multiple mainstream languages but intentionally avoid
 ## Language Reference
 
 For the current implemented syntax, see [`SYNTAX.md`](SYNTAX.md).
+For error code reference and docs links used in CLI/REPL diagnostics, see [`ERRORS.md`](ERRORS.md).
 
 ## Developer
 

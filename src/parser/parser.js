@@ -1,6 +1,7 @@
 const { Lexer } = require('../lexer/lexer')
 const { TokenType } = require('../lexer/token')
 const { createSyntaxError, classifySyntaxCode } = require('../errors')
+const { suggestForExpectedToken, findClosestKeyword } = require('../errors/suggestions')
 const {
   Program,
   EntryBlock,
@@ -54,6 +55,7 @@ class Parser {
     this.curToken = null
     this.peekToken = null
     this.errors = []
+    this.errorDetails = []
     this.loopDepth = 0
     this.switchDepth = 0
     this.functionDepth = 0
@@ -69,17 +71,55 @@ class Parser {
   }
 
   error(message) {
-    const location = this.curToken
-      ? `line ${this.curToken.line}, column ${this.curToken.column}`
-      : 'unknown location'
+    const token = this.curToken
+    const line = token && token.line ? token.line : null
+    const column = token && token.column ? token.column : null
+    const literalLength = token && token.literal ? String(token.literal).length : 1
+    const endColumn = column == null ? null : column + Math.max(0, literalLength - 1)
+    const location =
+      line != null && column != null ? `line ${line}, column ${column}` : 'unknown location'
+
+    const detail = {
+      message,
+      line,
+      column,
+      endColumn,
+      token: token ? token.literal : null,
+      sourceLine: this.getSourceLine(line),
+      suggestion: this.getSuggestionForCurrentToken(),
+    }
+
+    this.errorDetails.push(detail)
     this.errors.push(`${message} (${location})`)
+  }
+
+  getSourceLine(lineNumber) {
+    if (!lineNumber || lineNumber < 1) return null
+    const lines = String(this.lexer && this.lexer.input ? this.lexer.input : '').split('\n')
+    return lines[lineNumber - 1] || null
+  }
+
+  getSuggestionForCurrentToken(expectedTokenType = null) {
+    if (!this.curToken || this.curToken.type !== TokenType.IDENTIFIER) return null
+    const value = this.curToken.literal
+    if (expectedTokenType) {
+      return suggestForExpectedToken(value, expectedTokenType)
+    }
+    return findClosestKeyword(value)
   }
 
   expectCurrent(type, message) {
     if (this.curToken.type === type) {
       return true
     }
-    this.error(message || `Expected ${type} but found ${this.curToken.type}`)
+    const withSuggestion =
+      this.curToken.type === TokenType.IDENTIFIER
+        ? this.withExpectedTokenSuggestion(
+            message || `Expected ${type} but found ${this.curToken.type}`,
+            type,
+          )
+        : message || `Expected ${type} but found ${this.curToken.type}`
+    this.error(withSuggestion)
     return false
   }
 
@@ -88,8 +128,21 @@ class Parser {
       this.nextToken()
       return true
     }
-    this.error(message || `Expected ${type} but found ${this.curToken.type}`)
+    const withSuggestion =
+      this.curToken.type === TokenType.IDENTIFIER
+        ? this.withExpectedTokenSuggestion(
+            message || `Expected ${type} but found ${this.curToken.type}`,
+            type,
+          )
+        : message || `Expected ${type} but found ${this.curToken.type}`
+    this.error(withSuggestion)
     return false
+  }
+
+  withExpectedTokenSuggestion(baseMessage, expectedTokenType) {
+    const suggestion = this.getSuggestionForCurrentToken(expectedTokenType)
+    if (!suggestion) return baseMessage
+    return `${baseMessage}. Did you mean "${suggestion}"?`
   }
 
   parseProgram() {
@@ -105,7 +158,11 @@ class Parser {
       return new Program(pkg, 'package')
     }
 
-    this.error('Program must start with "monalisa" or "lisaaBox"')
+    const suggestion = this.getSuggestionForCurrentToken()
+    const message = suggestion
+      ? `Program must start with "monalisa" or "lisaaBox". Did you mean "${suggestion}"?`
+      : 'Program must start with "monalisa" or "lisaaBox"'
+    this.error(message)
     return null
   }
 
@@ -1005,7 +1062,14 @@ class Parser {
         } else {
           const shown =
             this.curToken && this.curToken.literal ? this.curToken.literal : this.curToken.type
-          this.error(`Could not understand this part: "${shown}"`)
+          const keywordSuggestion = this.getSuggestionForCurrentToken()
+          if (keywordSuggestion) {
+            this.error(
+              `Could not understand this part: "${shown}". Did you mean "${keywordSuggestion}"?`,
+            )
+          } else {
+            this.error(`Could not understand this part: "${shown}"`)
+          }
         }
       }
       this.nextToken()
@@ -1391,17 +1455,21 @@ function parse(source) {
 
   if (parser.errors.length > 0) {
     const message = parser.errors.join('\n')
-    const firstError = parser.errors[0] || ''
-    const locationMatch = /line (\d+), column (\d+)/i.exec(firstError)
-    const line = locationMatch ? Number(locationMatch[1]) : null
-    const column = locationMatch ? Number(locationMatch[2]) : null
+    const firstDetail = parser.errorDetails[0] || null
+    const line = firstDetail ? firstDetail.line : null
+    const column = firstDetail ? firstDetail.column : null
+    const endColumn = firstDetail ? firstDetail.endColumn : null
 
     throw createSyntaxError(message, {
       code: classifySyntaxCode(message),
       metadata: {
         errors: parser.errors,
+        errorDetails: parser.errorDetails,
         line,
         column,
+        endColumn,
+        sourceLine: firstDetail ? firstDetail.sourceLine : null,
+        suggestion: firstDetail ? firstDetail.suggestion : null,
       },
     })
   }

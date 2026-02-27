@@ -17,6 +17,7 @@ const {
 } = require('./factories')
 const { formatErrorForUser, formatErrorForDeveloper } = require('./formatter')
 const { printPriyoError } = require('./printer')
+const { getDocsLink } = require('./docs')
 
 module.exports = {
   ErrorCodes,
@@ -37,4 +38,5 @@ module.exports = {
   formatErrorForUser,
   formatErrorForDeveloper,
   printPriyoError,
+  getDocsLink,
 }

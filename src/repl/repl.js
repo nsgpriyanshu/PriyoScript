@@ -93,7 +93,16 @@ async function startRepl(options = {}) {
       // To use default white/plain prompt instead, replace this with:
       // const prompt = buffer ? '... ' : 'priyo> '
       const prompt = buffer ? colorBuildPrompt('... ') : colorBuildPrompt('priyo> ')
-      const line = await rl.question(prompt)
+      let line
+      try {
+        line = await rl.question(prompt)
+      } catch (err) {
+        // Gracefully stop when input stream closes (non-interactive harness/tests).
+        if (err && /readline was closed/i.test(String(err.message || err))) {
+          break
+        }
+        throw err
+      }
       const trimmed = line.trim()
 
       if (!buffer && trimmed === '') continue
