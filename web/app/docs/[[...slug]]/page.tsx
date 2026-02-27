@@ -28,7 +28,7 @@ function getProjectName(slug?: string[]) {
   }
 
   const key = slug?.[0]
-  return (key && map[key]) || 'nsDocs'
+  return (key && map[key]) || 'PriyoScript'
 }
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
@@ -41,7 +41,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const lastModifiedTime = await getGithubLastEdit({
     owner: 'nsgpriyanshu',
-    repo: 'nsdocs',
+    repo: 'nsgpriyanshu.github.io', //change it later to priyoscript
     path: `content/docs/${page.path}`,
   })
 

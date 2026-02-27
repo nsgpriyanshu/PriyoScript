@@ -20,14 +20,18 @@
 }
 
 :root {
-  --priyo-stable: #FF2056;
+  --priyo-stable: #ff2056;
   --priyo-canary: #f10a0a;
+  --stable-color: var(--priyo-stable);
+  --canary-color: var(--priyo-canary);
 }
 
-.nscore {
+/* Stable docs theme: /docs/stable/... */
+.stable {
   --color-fd-primary: var(--priyo-stable);
 }
 
-.nstypocolors {
+/* Canary docs theme: /docs/canary/... */
+.canary {
   --color-fd-primary: var(--priyo-canary);
 }

@@ -16,8 +16,8 @@ const siteConfig = {
     twitter: '@nsgpriyanshu',
     github: 'https://github.com/nsgpriyanshu/PriyoScript',
     siteUrl: 'https://nsgpriyanshu.github.io/PriyoScript',
-    ogImage: '/assets/android-chrome-512x512.png',
-    twitterImage: '/assets/android-chrome-512x512.png',
+    ogImage: '/android-chrome-512x512.png',
+    twitterImage: '/android-chrome-512x512.png',
   },
   themeColors: {
     light: '#ffffff',
@@ -42,26 +42,33 @@ export const generateMetadata = ({
   title,
   description,
   images = [siteConfig.links.ogImage],
-  icons = [
-    { rel: 'apple-touch-icon', sizes: '180x180', url: '/assets/apple-touch-icon.png' },
-    { rel: 'icon', sizes: '32x32', url: '/assets/favicon-32x32.png' },
-    { rel: 'icon', sizes: '16x16', url: '/assets/favicon-16x16.png' },
-    { rel: 'shortcut icon', url: '/assets/favicon.ico' },
-  ],
+  icons = {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: [{ url: '/favicon.ico' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   noIndex = false,
   canonicalUrl,
 }: MetadataProps = {}): Metadata => {
   const baseUrl = siteConfig.links.siteUrl
+  const metadataBase = process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined
 
   const ogImages = Array.isArray(images)
     ? images.map(img => (img.startsWith('http') ? img : `${baseUrl}${img}`))
     : [`${baseUrl}${images}`]
 
   return {
-    metadataBase: new URL(baseUrl),
+    metadataBase,
     title: title || siteConfig.siteName,
     description: description || siteConfig.siteDescription,
     icons,
+    manifest: '/site.webmanifest',
     keywords: siteConfig.siteKeywords,
     authors: [{ name: siteConfig.author.name, url: siteConfig.author.url }],
     creator: siteConfig.author.name,
