@@ -1,0 +1,34 @@
+---
+title: Installation
+description: Install and verify PriyoScript on your system.
+---
+
+# Installation
+
+## Option 1: Run from source
+
+```bash
+npm install
+node bin/monalisa.js -h
+```
+
+## Option 2: Build Windows executable
+
+```bash
+npm run dist:win
+```
+
+Then run:
+
+```powershell
+.\dist\priyoscript.exe -h
+```
+
+## Verify setup
+
+```bash
+monalisa -h
+monalisa -repl
+```
+
+If `monalisa` is not found, add the install folder to `PATH` or run using full executable path.

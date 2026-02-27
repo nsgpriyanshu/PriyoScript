@@ -1,0 +1,7 @@
+{
+  "title": "PriyoScript Canary",
+  "description": "Upcoming docs for experimental PriyoScript features.",
+  "icon": "Package",
+  "root": true,
+  "pages": ["index"]
+}

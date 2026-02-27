@@ -1,0 +1,33 @@
+---
+title: Error Handling
+description: Try/catch/finally/throw and reading PriyoScript diagnostics.
+---
+
+# Error Handling
+
+## Try / Catch / Finally
+
+```txt
+prakritiTry {
+  priyoTell(10 / 0)
+} prakritiCatch (err) {
+  priyoTell.Error(err.message)
+} prakritiAtEnd {
+  priyoTell.Info("done")
+}
+```
+
+## Throw
+
+```txt
+prakritiThrow "custom failure"
+```
+
+## Diagnostics
+
+PriyoScript shows:
+
+- Error code (example `PSYN-002`)
+- Stage (`syntax`, `compile`, `runtime`)
+- Source line and span caret (`^^^^`)
+- Tips and docs links for faster fixes

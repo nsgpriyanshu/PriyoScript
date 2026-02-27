@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+}
+
+@layer base {
+  * {
+    font-family: var(--font-geist-san);
+    text-rendering: optimizeLegibility;
+
+    scrollbar-width: thin;
+  }
+}
+
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+:root {
+  --priyo-stable: #FF2056;
+  --priyo-canary: #f10a0a;
+}
+
+.nscore {
+  --color-fd-primary: var(--priyo-stable);
+}
+
+.nstypocolors {
+  --color-fd-primary: var(--priyo-canary);
+}

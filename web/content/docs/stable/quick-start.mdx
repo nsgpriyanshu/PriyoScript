@@ -1,0 +1,29 @@
+---
+title: Quick Start
+description: Write and run your first PriyoScript program.
+---
+
+# Quick Start
+
+Create a file `hello.priyo`:
+
+```txt
+monalisa {
+  priyoTell("Hello from PriyoScript")
+}
+```
+
+Run it:
+
+```bash
+monalisa hello.priyo
+```
+
+## Read input
+
+```txt
+monalisa {
+  priyoKeep name = priyoListenSentence("Your name: ")
+  priyoTell("Hi " + name)
+}
+```

@@ -1,0 +1,40 @@
+---
+title: Modules & Packages
+description: Use lisaaBring with built-in packages and user modules.
+---
+
+# Modules & Packages
+
+## Built-in package import
+
+```txt
+lisaaBring math
+priyoTell(math.cube(2))
+```
+
+## User module
+
+`college.priyo`
+
+```txt
+lisaaBox {
+  priyoKeep campus = "NSEC"
+  lisaaShare campus
+}
+```
+
+`main.priyo`
+
+```txt
+monalisa {
+  lisaaBring "./college.priyo"
+  priyoTell(college.campus)
+}
+```
+
+## Named and aliased imports
+
+```txt
+lisaaBring "./college.priyo": [campus, cgpaToGradePoint: gradeFn]
+lisaaBring "./college.priyo": collegeModule
+```

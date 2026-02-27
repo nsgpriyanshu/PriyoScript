@@ -1,0 +1,41 @@
+---
+title: Classes & OOP
+description: Classes, inheritance, priyoSelf, and priyoParent rules.
+---
+
+# Classes & OOP
+
+## Class and Constructor
+
+```txt
+lisaaFamily Student {
+  lisaaTask init(name) {
+    priyoSelf.name = name
+  }
+}
+```
+
+## Create Instance
+
+```txt
+priyoKeep s = priyoCreate Student("Priyo")
+```
+
+## Inheritance
+
+```txt
+lisaaFamily Person {
+  lisaaTask init(name) {
+    priyoSelf.name = name
+  }
+}
+
+lisaaFamily Teacher lisaaInherit Person {
+  lisaaTask init(name, subject) {
+    priyoParent(name)
+    priyoSelf.subject = subject
+  }
+}
+```
+
+`priyoParent(...)` in child `init` must be first and only once.

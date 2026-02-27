@@ -1,0 +1,22 @@
+{
+  "title": "PriyoScript - Stable",
+  "description": "Stable documentation for PriyoScript language users.",
+  "icon": "Package",
+  "root": true,
+  "pages": [
+    "index",
+    "installation",
+    "quick-start",
+    "---Language Guide---",
+    "syntax-basics",
+    "control-flow",
+    "functions",
+    "classes-oop",
+    "arrays",
+    "modules-packages",
+    "error-handling",
+    "---Tooling---",
+    "cli-repl",
+    "faq"
+  ]
+}

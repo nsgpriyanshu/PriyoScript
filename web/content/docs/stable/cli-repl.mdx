@@ -1,0 +1,25 @@
+---
+title: CLI & REPL
+description: Use monalisa commands and interactive REPL workflow.
+---
+
+# CLI & REPL
+
+## Common commands
+
+```bash
+monalisa -h
+monalisa -syntax
+monalisa -errors
+monalisa -explain PSYN-002
+monalisa file.priyo
+monalisa -repl
+```
+
+## REPL commands
+
+- `.help` show REPL commands
+- `.clear` clear multiline buffer
+- `.reset` reset runtime and module cache
+- `.load <file.priyo>` execute a file in current REPL context
+- `.exit` quit REPL
