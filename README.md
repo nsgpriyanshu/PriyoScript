@@ -98,6 +98,49 @@ npm install
 npm start
 ```
 
+### Web docs app (Next.js + Fumadocs)
+
+```bash
+npm --prefix web install
+npm --prefix web run dev
+```
+
+Then open `http://localhost:3000`.
+
+Build docs app:
+
+```bash
+npm --prefix web run build
+npm --prefix web run start
+```
+
+## Release Flows
+
+### CLI/runtime release (root package)
+
+```bash
+npm run release
+```
+
+### Web docs release (separate versioning/changelog)
+
+Dry run:
+
+```bash
+npm run release:web:dry
+```
+
+Actual release:
+
+```bash
+npm run release:web
+```
+
+Web release config and changelog:
+
+- `web/.cliff-jumperrc.json`
+- `web/CHANGELOG.md`
+
 ## Inspiration
 
 PriyoScript is inspired by multiple mainstream languages but intentionally avoids some of their complexity.
@@ -135,6 +178,7 @@ PriyoScript is inspired by multiple mainstream languages but intentionally avoid
 
 For the current implemented syntax, see [`SYNTAX.md`](SYNTAX.md).
 For error code reference and docs links used in CLI/REPL diagnostics, see [`ERRORS.md`](ERRORS.md).
+For docs-site setup/versioning, see [`web/README.md`](web/README.md).
 
 ## Developer
 

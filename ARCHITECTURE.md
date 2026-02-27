@@ -2,15 +2,15 @@
 
 ## Current Version Snapshot
 
-- Version: `v1.7.0`
+- Version: `v1.9.0`
 - CI baseline:
   - `npm run lint` passes
   - `npm run test:run` passes
 - Major additions in this version:
-  - module imports v2 (`alias`, `named imports`, cycle guard)
-  - destructuring v3 (nested + default patterns for array/object declarations)
-  - stricter inherited constructor rule (`priyoParent(...)` first in child `init(...)`)
-  - REPL `.reset` now clears runtime state and module cache
+  - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
+  - golden CLI/REPL tests and deep module-cycle stress tests
+  - web docs app (Next.js + Fumadocs) with stable/canary docs structure
+  - separate web versioning/changelog flow via Cliff-Jumper
 
 ## 1. Purpose
 
@@ -70,6 +70,13 @@ bin/
 scripts/
   build-windows-exe.ps1     # Build standalone Windows executable (pkg)
   install-windows.ps1       # Install CLI executable for current user (PATH setup)
+web/
+  app/                      # Next.js app router pages/layout/routes
+  content/docs/             # Fumadocs content (stable + canary)
+  lib/                      # Docs source/layout/metadata helpers
+  package.json              # Web package with its own version
+  .cliff-jumperrc.json      # Separate web release config/tag template
+  CHANGELOG.md              # Separate web changelog
 packages/
   math/
     index.js                # Built-in math package (phase-1 package system)
@@ -130,6 +137,8 @@ tests/
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
+| Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
+| Release      | Separate web versioning/changelog flow (`web-v*` tags)                               | 100%   |
 
 ### 4.1 Core syntax
 
@@ -309,3 +318,5 @@ Planned development sequence:
    - staged support for `async/await` and future concurrency primitives.
 2. Add native distribution channels:
    - standalone binaries/installers for Windows/macOS/Linux (beyond npm global install).
+3. Expand docs automation:
+   - CI-based docs preview deploys and release-note sync between root/web changelogs.

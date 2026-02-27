@@ -1,0 +1,40 @@
+# Safety net for npm publishing.
+# Note: package.json "files" allowlist is primary; this is extra protection.
+
+# Monorepo/web app and docs site
+web/
+
+# Development and QA assets
+tests/
+examples/
+scripts/
+installer/
+
+# CI / repo metadata
+.github/
+AGENT.md
+CHANGELOG.md
+cliff.toml
+.cliff-jumperrc.json
+.commitlintrc.json
+
+# Local/editor/runtime noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+.env
+.env.*
+
+# Build artifacts
+dist/
+build/
+coverage/
+.next/
+
+# Dependency folders
+node_modules/
+

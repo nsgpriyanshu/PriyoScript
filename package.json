@@ -32,7 +32,9 @@
     "format:fix": "prettier . --write",
     "test": "vitest",
     "test:run": "vitest run",
-    "release": "cliff-jumper"
+    "release": "cliff-jumper",
+    "release:web": "npm --prefix web run release",
+    "release:web:dry": "npm --prefix web run release:dry"
   },
   "keywords": [
     "priyoscript",
