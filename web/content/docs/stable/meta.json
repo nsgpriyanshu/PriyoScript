@@ -15,6 +15,7 @@
     "arrays",
     "modules-packages",
     "error-handling",
+    "errors-reference",
     "---Tooling---",
     "cli-repl",
     "faq"

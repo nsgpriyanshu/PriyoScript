@@ -7,7 +7,7 @@ description: Use lisaaBring with built-in packages and user modules.
 
 ## Built-in package import
 
-```txt
+```js
 lisaaBring math
 priyoTell(math.cube(2))
 ```
@@ -16,25 +16,35 @@ priyoTell(math.cube(2))
 
 `college.priyo`
 
-```txt
+```js
 lisaaBox {
+  lisaaTask square(x) {
+    priyoGiveBack x * x
+  }
+
   priyoKeep campus = "NSEC"
+  lisaaShare square
   lisaaShare campus
 }
 ```
 
 `main.priyo`
 
-```txt
+```js
 monalisa {
-  lisaaBring "./college.priyo"
+  lisaaBring "./college.priyo": college
   priyoTell(college.campus)
+  priyoTell(college.square(5))
 }
 ```
 
 ## Named and aliased imports
 
-```txt
+```js
 lisaaBring "./college.priyo": [campus, cgpaToGradePoint: gradeFn]
 lisaaBring "./college.priyo": collegeModule
 ```
+
+<Callout title="Title" type="warn">
+Path imports must point to modules that start with `lisaaBox { ... }`.
+</Callout>

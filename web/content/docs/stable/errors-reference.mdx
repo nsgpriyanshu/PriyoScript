@@ -1,0 +1,81 @@
+---
+title: Error Codes Reference
+description: Complete PriyoScript error code reference for syntax, compile, runtime, and engine errors.
+---
+
+# Error Codes Reference
+
+Use this page with CLI command:
+
+```bash
+monalisa -errors
+monalisa -explain <ERROR_CODE>
+```
+
+<Callout title="Title" type="idea">
+  Every PriyoScript diagnostic includes a code, stage, location, and docs link.
+</Callout>
+
+## PSYN-001
+
+Generic syntax parsing failure. Check block boundaries, brackets, and statement shape.
+
+## PSYN-002
+
+Unexpected token or keyword. Check spelling and syntax around the shown location.
+
+## PSYN-003
+
+Reserved or blocked word was used. Replace with PriyoScript vocabulary.
+
+## PCMP-001
+
+Compilation failed after parse stage. Usually indicates unsupported compiler path or invalid AST constraints.
+
+## PRUN-000
+
+Generic runtime failure. Check details for source context and stack preview.
+
+## PRUN-101
+
+Variable used before declaration or outside visible scope.
+
+## PRUN-102
+
+Attempted to reassign `priyoPromise` (const).
+
+## PRUN-103
+
+Division or modulo by zero is not allowed.
+
+## PRUN-104
+
+Class name referenced but not declared.
+
+## PRUN-105
+
+Function or method reference was not found.
+
+## PRUN-106
+
+Invalid property read/write or missing property on object/class.
+
+## PRUN-107
+
+Invalid number or type of arguments for function/method call.
+
+## PRUN-108
+
+Input did not match required format (for example number input).
+
+## PRUN-109
+
+Package name was not found in built-in package registry.
+
+## PRUN-110
+
+Module path import failed. Check `lisaaBring` path and ensure module starts with `lisaaBox`.
+
+## PENG-001
+
+Engine/internal fault. Usually a runtime/compiler bug, not a user-code mistake.

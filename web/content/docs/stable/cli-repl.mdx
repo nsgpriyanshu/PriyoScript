@@ -23,3 +23,16 @@ monalisa -repl
 - `.reset` reset runtime and module cache
 - `.load <file.priyo>` execute a file in current REPL context
 - `.exit` quit REPL
+
+## Example REPL session
+
+```text
+priyo> priyoKeep x = 12
+priyo> priyoTell(x * 2)
+24
+priyo> .help
+```
+
+<Callout title="Title" type="idea">
+  Use REPL for fast prototyping, then move working snippets into `.priyo` files.
+</Callout>

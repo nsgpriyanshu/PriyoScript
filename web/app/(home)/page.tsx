@@ -57,20 +57,17 @@ export default function HomePage() {
       <div className="pointer-events-none absolute -left-32 top-10 size-80 rounded-full bg-rose-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 bottom-10 size-80 rounded-full bg-rose-400/10 blur-3xl" />
 
-      <section className="relative mx-auto grid w-full max-w-7xl gap-8 px-6 py-14 md:grid-cols-2 md:gap-12 md:px-10 md:py-20">
+      <section className="relative mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 md:gap-12 md:px-10 md:py-20">
         <div>
-          <p
-            className="inline-flex rounded-full border bg-rose-50 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
-            style={{ borderColor: BRAND }}
-          >
+          <p className="inline-flex rounded-full border border-fd-border bg-fd-card px-3 py-1 text-xs font-semibold tracking-[0.12em] text-fd-muted-foreground">
             v 1.10.0
           </p>
-          <h1 className="mt-5 text-4xl font-bold leading-tight md:text-6xl">
+          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
             An Emotional
             <br />
             bytecode interpreted programming language
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-fd-muted-foreground">
+          <p className="mt-5 max-w-xl text-base leading-7 text-fd-muted-foreground sm:text-lg sm:leading-8">
             PriyoScript is a human-first interpreted language with readable keywords, first-class
             arrays, OOP, modules, and production-focused diagnostics.
           </p>
@@ -78,10 +75,10 @@ export default function HomePage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/docs/stable/installation"
-              className="rounded-xl px-6 py-3 text-center text-base font-semibold text-neutral-100 transition hover:brightness-110"
-              style={{ backgroundColor: BRAND }}
+              className="rounded-xl border border-white/30 bg-white/15 px-6 py-3 text-center text-base font-semibold text-fd-foreground backdrop-blur-xl transition hover:bg-white/25 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
+              style={{ boxShadow: `inset 0 0 0 1px ${BRAND}22` }}
             >
-              Get PriyoScript
+              Get Started
             </Link>
             <Link
               href="/docs/stable/quick-start"
@@ -102,7 +99,7 @@ export default function HomePage() {
         </div>
 
         <div className="rounded-2xl border border-fd-border bg-fd-card shadow-sm">
-          <div className="flex flex-wrap items-center gap-2 border-b border-fd-border px-4 py-3 text-sm font-medium md:px-5">
+          <div className="flex items-center gap-2 overflow-x-auto border-b border-fd-border px-3 py-3 text-sm font-medium md:px-5">
             {tabs.map(tab => {
               const active = activeTab === tab.id
               return (
@@ -110,7 +107,7 @@ export default function HomePage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className="rounded-md px-3 py-1.5 transition"
+                  className="whitespace-nowrap rounded-md px-3 py-1.5 transition"
                   style={active ? { color: BRAND, backgroundColor: `${BRAND}14` } : undefined}
                 >
                   {tab.label}
@@ -118,7 +115,7 @@ export default function HomePage() {
               )
             })}
           </div>
-          <pre className="overflow-x-auto px-5 py-6 text-[15px] leading-8 text-fd-foreground">
+          <pre className="overflow-x-auto px-4 py-5 text-[13px] leading-7 text-fd-foreground sm:px-5 sm:py-6 sm:text-[15px] sm:leading-8">
             <code>{current.code}</code>
           </pre>
           <div className="flex items-center justify-between border-t border-fd-border px-5 py-3 text-sm text-fd-muted-foreground">

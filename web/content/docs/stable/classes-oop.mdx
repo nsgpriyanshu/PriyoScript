@@ -7,7 +7,7 @@ description: Classes, inheritance, priyoSelf, and priyoParent rules.
 
 ## Class and Constructor
 
-```txt
+```js
 lisaaFamily Student {
   lisaaTask init(name) {
     priyoSelf.name = name
@@ -17,13 +17,13 @@ lisaaFamily Student {
 
 ## Create Instance
 
-```txt
+```js
 priyoKeep s = priyoCreate Student("Priyo")
 ```
 
 ## Inheritance
 
-```txt
+```js
 lisaaFamily Person {
   lisaaTask init(name) {
     priyoSelf.name = name
@@ -39,3 +39,21 @@ lisaaFamily Teacher lisaaInherit Person {
 ```
 
 `priyoParent(...)` in child `init` must be first and only once.
+
+## Static methods and fields
+
+```js
+lisaaFamily MathUtil {
+  lisaaStable priyoPromise PI = 3.14159
+
+  lisaaStable lisaaTask square(n) {
+    priyoGiveBack n * n
+  }
+}
+
+priyoTell(MathUtil.square(4))
+```
+
+<Callout title="Title" type="error">
+  If child `init` does not call `priyoParent(...)` as first statement, compilation fails.
+</Callout>

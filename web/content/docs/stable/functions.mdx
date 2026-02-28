@@ -7,7 +7,7 @@ description: Declare functions, return values, recursion, and closures.
 
 ## Declare and Return
 
-```txt
+```js
 lisaaTask add(a, b) {
   priyoGiveBack a + b
 }
@@ -17,7 +17,7 @@ priyoTell(add(3, 4))
 
 ## Recursion
 
-```txt
+```js
 lisaaTask factorial(n) {
   prakritiIf (n <= 1) {
     priyoGiveBack 1
@@ -30,3 +30,18 @@ lisaaTask factorial(n) {
 ## Closures
 
 Functions can capture outer variables through lexical scope.
+
+```js
+lisaaTask makeCounter() {
+  priyoChange count = 0
+  lisaaTask next() {
+    count = count + 1
+    priyoGiveBack count
+  }
+  priyoGiveBack next
+}
+```
+
+<Callout title="Title" type="warn">
+  `priyoGiveBack` is valid only inside function bodies.
+</Callout>

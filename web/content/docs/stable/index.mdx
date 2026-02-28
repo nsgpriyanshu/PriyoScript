@@ -1,20 +1,40 @@
 ---
 title: Overview
-description: Start here to learn PriyoScript in a practical, production-focused way.
+description: Start here to learn PriyoScript with production-style documentation and complete examples.
 ---
 
 # PriyoScript Stable Docs
 
-PriyoScript is an interpreted language with readable custom keywords, a bytecode VM runtime, module support, OOP, arrays, and human-friendly diagnostics.
+PriyoScript is an interpreted programming language with readable custom keywords, a bytecode VM, first-class arrays, modules/packages, OOP, and human-focused diagnostics.
 
-Use this section for stable features only.
+This section documents **stable features only**.
 
-## What You Can Learn Here
+<Callout title="Version Scope" type="warn">
+  This section tracks stable behavior. Canary/experimental behavior may differ.
+</Callout>
 
-- How to install and run PriyoScript
-- Core syntax and language constructs
-- Modules/packages and project structure
-- CLI, REPL, and error debugging
+## First Program
+
+```js title="hello.priyo"
+monalisa {
+  priyoTell("Hello, PriyoScript!")
+}
+```
+
+Run it:
+
+```bash
+monalisa hello.priyo
+```
+
+## What This Documentation Covers
+
+- Installation and execution workflows
+- Language syntax and semantics
+- Control flow, functions, OOP, arrays
+- Modules, packages, and project structure
+- Error handling and diagnostics
+- CLI and REPL usage
 
 ## Suggested Path
 
@@ -24,3 +44,7 @@ Use this section for stable features only.
 4. [Control Flow](./control-flow)
 5. [Functions](./functions)
 6. [Classes & OOP](./classes-oop)
+7. [Arrays](./arrays)
+8. [Modules & Packages](./modules-packages)
+9. [Error Handling](./error-handling)
+10. [CLI & REPL](./cli-repl)

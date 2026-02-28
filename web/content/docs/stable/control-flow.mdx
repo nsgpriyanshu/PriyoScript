@@ -7,7 +7,7 @@ description: Conditions, loops, switch, and loop control keywords.
 
 ## If / Else
 
-```txt
+```js
 prakritiIf (score > 80) {
   priyoTell("Great")
 } prakritiElse {
@@ -17,7 +17,7 @@ prakritiIf (score > 80) {
 
 ## While
 
-```txt
+```js
 priyoKeep i = 0
 prakritiAsLongAs (i < 3) {
   priyoTell(i)
@@ -27,15 +27,24 @@ prakritiAsLongAs (i < 3) {
 
 ## For
 
-```txt
+```js
 prakritiCount (priyoChange i = 0; i < 5; i = i + 1) {
   priyoTell(i)
 }
 ```
 
+## Foreach
+
+```js
+priyoKeep items = ["A", "B", "C"]
+prakritiCount (item priyoInside items) {
+  priyoTell(item)
+}
+```
+
 ## Switch
 
-```txt
+```js
 prakritiChoose (role) {
   prakritiCase ("admin") { priyoTell("Full access") }
   prakritiOtherwise { priyoTell("Limited access") }
@@ -46,3 +55,7 @@ prakritiChoose (role) {
 
 - `prakritiStop` breaks loop or switch
 - `prakritiGoOn` continues current loop
+
+<Callout title="Title" type="idea">
+  Use `switch` when you compare one value against many constant cases.
+</Callout>

@@ -7,7 +7,7 @@ description: Try/catch/finally/throw and reading PriyoScript diagnostics.
 
 ## Try / Catch / Finally
 
-```txt
+```js
 prakritiTry {
   priyoTell(10 / 0)
 } prakritiCatch (err) {
@@ -19,7 +19,7 @@ prakritiTry {
 
 ## Throw
 
-```txt
+```js
 prakritiThrow "custom failure"
 ```
 
@@ -31,3 +31,18 @@ PriyoScript shows:
 - Stage (`syntax`, `compile`, `runtime`)
 - Source line and span caret (`^^^^`)
 - Tips and docs links for faster fixes
+
+Example:
+
+```text
+Code: PSYN-002
+Stage: syntax
+Location: file.priyo:3:10
+Source: prakritiIff (x > 0) {
+Span:          ^^^^^^^^^^
+Docs: .../ERRORS.md#psyn-002
+```
+
+<Callout title="Title" type="error">
+  Engine/internal errors indicate implementation issues, not user syntax mistakes.
+</Callout>

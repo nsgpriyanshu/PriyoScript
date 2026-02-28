@@ -1,21 +1,31 @@
 ---
 title: Syntax Basics
-description: 'Core building blocks: entry block, variables, literals, and expressions.'
+description: 'Core building blocks: entry block, variables, literals, expressions, and comments.'
 ---
 
 # Syntax Basics
 
 ## Entry Block
 
-Every executable program starts with `monalisa { ... }`.
+Every executable PriyoScript program starts with:
+
+```js
+monalisa {
+  // statements
+}
+```
 
 ## Variables
 
-```txt
+```js
 priyoKeep a = 10      // var-style, function-scoped
 priyoChange b = 20    // let-style, block-scoped
 priyoPromise c = 30   // const-style, block-scoped
 ```
+
+<Callout title="Title" type="warn">
+  Use `priyoPromise` only for values that must not be reassigned.
+</Callout>
 
 ## Literals
 
@@ -26,7 +36,25 @@ priyoPromise c = 30   // const-style, block-scoped
 
 ## Expressions
 
-```txt
+```js
 priyoKeep total = 5 + 10 * 2
 priyoKeep ok = total >= 20 && priyoTrue
+```
+
+## Comments
+
+```js
+// single-line comment
+/*
+multi-line comment
+*/
+```
+
+## Assignment targets
+
+```js
+monalisa {
+  priyoKeep profile = priyoCreate Person()
+  profile.name = "Priyo"
+}
 ```

@@ -5,9 +5,9 @@ description: Write and run your first PriyoScript program.
 
 # Quick Start
 
-Create a file `hello.priyo`:
+Create `hello.priyo`:
 
-```txt
+```js title="hello.priyo"
 monalisa {
   priyoTell("Hello from PriyoScript")
 }
@@ -19,11 +19,27 @@ Run it:
 monalisa hello.priyo
 ```
 
-## Read input
+## Input + output example
 
-```txt
+```js title="input.priyo"
 monalisa {
   priyoKeep name = priyoListenSentence("Your name: ")
-  priyoTell("Hi " + name)
+  priyoKeep age = priyoListenNumber("Your age: ")
+  priyoTell.Success("Hi " + name + ", age " + age)
 }
 ```
+
+## Variables and expressions
+
+```js title="variables.priyo"
+monalisa {
+  priyoKeep x = 10
+  priyoChange y = 5
+  priyoPromise z = x * y
+  priyoTell(z)
+}
+```
+
+<Callout title="Title" type="warn">
+  Use `priyoPromise` only when value should never be reassigned.
+</Callout>
