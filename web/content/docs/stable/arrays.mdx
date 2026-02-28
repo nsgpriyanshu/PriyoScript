@@ -1,13 +1,13 @@
 ﻿---
 title: Arrays
-description: Use first-class arrays with indexing, slicing, destructuring, and helpers.
+description: Work with ordered collections using indexing, slicing, and helpers.
 ---
 
 ## Theory
 
-Arrays store ordered collections. PriyoScript arrays are first-class values and support practical operations for reading, transforming, and iterating.
+An array stores many values in order. Each value has a position (index).
 
-## Example 1: Create, read, update
+## Example 1: Create + read + update
 
 ```priyo
 monalisa {
@@ -29,38 +29,37 @@ monalisa {
 }
 ```
 
-## Example 3: Destructuring with defaults
+## Example 3: Destructuring
 
 ```priyo
 monalisa {
   priyoKeep values = [7, 8]
   priyoChange[(first, second, third = 99)] = values
-  priyoTell(first)
-  priyoTell(second)
   priyoTell(third)
 }
 ```
 
-## Example 4: `priyoArray` helpers
+## Example 4: Helpers
 
 ```priyo
 monalisa {
   lisaaTask isEven(x) {
     priyoGiveBack x % 2 == 0
   }
-
   priyoKeep values = [1, 2, 3, 4, 5]
   priyoKeep evens = priyoArray.filter(values, isEven)
   priyoTell(priyoArray.length(evens))
 }
 ```
 
-Comparison:
+## How execution works (like a child)
 
-- C: fixed-size arrays, manual memory patterns
-- Java: arrays plus rich collection frameworks
-- JavaScript/Python: dynamic arrays/lists with high-level helpers
+Imagine toy boxes in a line:
 
-<Callout title="Recommendation" type="idea">
-  Prefer `priyoArray` callbacks for transformation logic instead of manual index loops.
+- Box 0, box 1, box 2...
+- `nums[1]` means open second box
+- slice means take a group of nearby boxes
+
+<Callout title="Tip" type="idea">
+  Use `priyoArray` helpers for cleaner transform logic.
 </Callout>

@@ -1,19 +1,11 @@
 ﻿---
 title: Functions
-description: Reuse logic with parameters, return values, recursion, and closures.
+description: Reuse logic with function blocks, recursion, and closures.
 ---
 
 ## Theory
 
-Functions are reusable units of behavior. They improve readability, testability, and separation of concerns.
-
-## Syntax
-
-```priyo
-lisaaTask name(param1, param2) {
-  priyoGiveBack value
-}
-```
+Functions are reusable instruction groups. They reduce duplication and make code easier to test.
 
 ## Example 1: Basic function
 
@@ -22,7 +14,6 @@ monalisa {
   lisaaTask add(a, b) {
     priyoGiveBack a + b
   }
-
   priyoTell(add(10, 5))
 }
 ```
@@ -37,7 +28,6 @@ monalisa {
     }
     priyoGiveBack n * factorial(n - 1)
   }
-
   priyoTell(factorial(5))
 }
 ```
@@ -48,39 +38,37 @@ monalisa {
 monalisa {
   lisaaTask makeCounter() {
     priyoChange count = 0
-
     lisaaTask next() {
       count = count + 1
       priyoGiveBack count
     }
-
     priyoGiveBack next
   }
-
-  priyoKeep counter = makeCounter()
-  priyoTell(counter())
-  priyoTell(counter())
+  priyoKeep c = makeCounter()
+  priyoTell(c())
 }
 ```
 
-## Example 4: Function as reusable business rule
+## Example 4: Business rule helper
 
 ```priyo
 monalisa {
   lisaaTask isAdult(age) {
     priyoGiveBack age >= 18
   }
-
   priyoTell(isAdult(21))
 }
 ```
 
-Comparison:
+## How execution works (simple)
 
-- C: function pointers are explicit and low-level
-- Java: methods inside classes are dominant
-- JavaScript/Python: first-class functions and closures (similar mental model)
+Think of function like a toy box:
 
-<Callout title="Important" type="warn">
-  `priyoGiveBack` is valid only inside a function body.
+1. Put steps in box (`lisaaTask`)
+2. Call box by name
+3. Box runs steps
+4. Gives result back (`priyoGiveBack`)
+
+<Callout title="Rule" type="warn">
+  `priyoGiveBack` can be used only inside function blocks.
 </Callout>

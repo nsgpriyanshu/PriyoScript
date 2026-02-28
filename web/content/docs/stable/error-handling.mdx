@@ -1,18 +1,17 @@
 ﻿---
 title: Error Handling
-description: Handle failures with try/catch/finally/throw and read diagnostics correctly.
+description: Understand why errors happen and how to recover safely.
 ---
 
 ## Theory
 
-Error handling prevents silent failures and makes programs predictable in failure scenarios.
+Errors happen when program assumptions are broken.
 
-PriyoScript supports structured exception flow:
+Good error handling means:
 
-- `prakritiTry`
-- `prakritiCatch`
-- `prakritiAtEnd`
-- `prakritiThrow`
+- Detect early
+- Explain clearly
+- Recover when possible
 
 ## Example 1: try/catch/finally
 
@@ -28,7 +27,7 @@ monalisa {
 }
 ```
 
-## Example 2: Validation + throw
+## Example 2: Validation throw
 
 ```priyo
 monalisa {
@@ -38,50 +37,29 @@ monalisa {
     }
     priyoGiveBack a / b
   }
-
-  priyoTell(divide(10, 2))
 }
 ```
 
-## Example 3: User-friendly domain checks
+## Example 3: User-friendly flow
 
 ```priyo
 monalisa {
-  lisaaTask validateAge(age) {
-    prakritiIf (age < 0) {
-      prakritiThrow "Age cannot be negative"
-    }
-  }
-
   prakritiTry {
-    validateAge(-1)
+    prakritiThrow "Invalid input"
   } prakritiCatch (err) {
     priyoTell.Warn(err.message)
   }
 }
 ```
 
-## Reading diagnostics
+## How execution works (like a child)
 
-Each diagnostic includes:
+Imagine carrying water in a glass:
 
-- Error code (example: `PSYN-002`)
-- Stage (`syntax`, `compile`, `runtime`, or `engine`)
-- File location and source span
-- Human-readable tip
-- Docs link
+- `try` = carry carefully
+- if falls, `catch` = clean spill
+- `finally` = always wash hands
 
-```text
-Code: PSYN-002
-Stage: syntax
-Location: file.priyo:3:10
-Source: prakritiIff (x > 0) {
-Span:          ^^^^^^^^^^
-Tip: Use `prakritiIf` for conditional branches.
-Docs: https://priyyoscript.vercel.app/docs/stable/errors-reference#psyn-002
-```
-
-<Callout title="Engine vs user errors" type="error">
-  Engine errors usually indicate language implementation issues. Syntax/compile/runtime errors are
-  generally user-code mistakes.
+<Callout title="Diagnostics" type="idea">
+  PriyoScript errors include code, stage, location, tip, and docs link.
 </Callout>

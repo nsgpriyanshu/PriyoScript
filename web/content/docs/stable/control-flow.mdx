@@ -1,18 +1,21 @@
 ﻿---
 title: Control Flow
-description: Branching and loops with practical selection guidelines.
+description: Understand how programs choose paths and repeat actions.
 ---
 
 ## Theory
 
-Control flow decides which statements run, how many times, and under what conditions.
+Control flow is how your program decides:
+
+- Which block to run (`if`, `switch`)
+- How long to run (`while`, `for`)
+- When to stop (`break`, `continue`)
 
 ## Example 1: If / else-if / else
 
 ```priyo
 monalisa {
   priyoKeep score = 82
-
   prakritiIf (score >= 90) {
     priyoTell("A")
   } prakritiElseIf (score >= 80) {
@@ -22,9 +25,6 @@ monalisa {
   }
 }
 ```
-
-Equivalent (JavaScript): `if / else if / else`
-Equivalent (Python): `if / elif / else`
 
 ## Example 2: While loop
 
@@ -48,17 +48,11 @@ monalisa {
 }
 ```
 
-Comparable forms:
-
-- C / Java / JavaScript: `for (init; cond; step)`
-- Python: usually `for i in range(...)`
-
 ## Example 4: For-each + switch
 
 ```priyo
 monalisa {
-  priyoKeep tags = ["news", "sports", "music"]
-
+  priyoKeep tags = ["news", "music"]
   prakritiCount (tag priyoInside tags) {
     prakritiChoose (tag) {
       prakritiCase ("music") { priyoTell("Audio") }
@@ -68,6 +62,15 @@ monalisa {
 }
 ```
 
-<Callout title="Loop control" type="idea">
-  Use `prakritiStop` to break and `prakritiGoOn` to skip the current loop iteration.
-</Callout>
+## How execution works (like a child)
+
+Imagine traffic lights:
+
+- Green (`if true`) -> go this way
+- Red (`else`) -> go other way
+- Round track (`loop`) -> keep going until condition says stop
+
+Language mapping:
+
+- JS/Java/C: similar `if/for/while/switch`
+- Python: `elif` and `for in range(...)`

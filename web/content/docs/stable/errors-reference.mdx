@@ -1,55 +1,155 @@
 ﻿---
 title: Error Codes Reference
-description: Stable reference for PriyoScript syntax, compile, runtime, and engine error codes.
+description: Understand each error by cause, wrong code, and corrected code.
 ---
 
-Use with CLI helpers:
+## Theory
+
+Error codes make debugging fast because each code maps to one problem family.
+
+## How to use
 
 ```bash
 monalisa -errors
 monalisa -explain <ERROR_CODE>
 ```
 
-<Callout title="How to use this page" type="idea">
-  Find the code from CLI/REPL output, then open the matching section below.
-</Callout>
+## `PSYN-002` Unexpected token/keyword
 
-## Syntax stage
+Why:
+- Keyword typo or invalid token order.
 
-| Code       | Meaning                                |
-| ---------- | -------------------------------------- |
-| `PSYN-001` | Generic syntax parsing failure         |
-| `PSYN-002` | Unexpected token/keyword or typo       |
-| `PSYN-003` | Reserved/blocked word used incorrectly |
+Wrong:
 
-## Compile stage
+```priyo
+monalisa {
+  prakritiIff (priyoTrue) {
+    priyoTell("ok")
+  }
+}
+```
 
-| Code       | Meaning                                   |
-| ---------- | ----------------------------------------- |
-| `PCMP-001` | Compile pipeline failed after parse stage |
+Correct:
 
-## Runtime stage
+```priyo
+monalisa {
+  prakritiIf (priyoTrue) {
+    priyoTell("ok")
+  }
+}
+```
 
-| Code       | Meaning                                         |
-| ---------- | ----------------------------------------------- |
-| `PRUN-000` | Generic runtime failure                         |
-| `PRUN-101` | Variable used before declaration / out of scope |
-| `PRUN-102` | Reassignment of `priyoPromise`                  |
-| `PRUN-103` | Division or modulo by zero                      |
-| `PRUN-104` | Unknown class reference                         |
-| `PRUN-105` | Unknown function/method reference               |
-| `PRUN-106` | Invalid/missing property access                 |
-| `PRUN-107` | Invalid call argument count/type                |
-| `PRUN-108` | Input type mismatch                             |
-| `PRUN-109` | Unknown built-in package                        |
-| `PRUN-110` | Module import path failure                      |
+## `PRUN-101` Variable scope error
 
-## Engine stage
+Why:
+- Variable used before declaration or outside scope.
 
-| Code       | Meaning                        |
-| ---------- | ------------------------------ |
-| `PENG-001` | Internal engine/compiler fault |
+Wrong:
 
-<Callout title="Need details?" type="warn">
-  Run `monalisa -explain <ERROR_CODE>` to get longer CLI help for the same code.
+```priyo
+monalisa {
+  priyoTell(total)
+  priyoKeep total = 10
+}
+```
+
+Correct:
+
+```priyo
+monalisa {
+  priyoKeep total = 10
+  priyoTell(total)
+}
+```
+
+## `PRUN-102` Cannot reassign `priyoPromise`
+
+Wrong:
+
+```priyo
+monalisa {
+  priyoPromise x = 1
+  x = 2
+}
+```
+
+Correct:
+
+```priyo
+monalisa {
+  priyoChange x = 1
+  x = 2
+}
+```
+
+## `PRUN-103` Division by zero
+
+Wrong:
+
+```priyo
+monalisa {
+  priyoTell(10 / 0)
+}
+```
+
+Correct:
+
+```priyo
+monalisa {
+  lisaaTask safeDivide(a, b) {
+    prakritiIf (b == 0) {
+      priyoGiveBack priyoEmpty
+    }
+    priyoGiveBack a / b
+  }
+}
+```
+
+## `PRUN-109` Unknown package
+
+Wrong:
+
+```priyo
+monalisa {
+  lisaaBring maths
+}
+```
+
+Correct:
+
+```priyo
+monalisa {
+  lisaaBring math
+}
+```
+
+## `PRUN-110` Module path failed
+
+Wrong:
+
+```priyo
+monalisa {
+  lisaaBring "./college.priyoo": college
+}
+```
+
+Correct:
+
+```priyo
+monalisa {
+  lisaaBring "./college.priyo": college
+}
+```
+
+## How execution works (simple)
+
+When error occurs:
+
+1. Engine adds error code
+2. Adds where it happened (line/column)
+3. Adds tip and docs link
+4. Stops unsafe execution
+
+<Callout title="Need full details?" type="warn">
+  Use `monalisa -explain <ERROR_CODE>` for CLI explanation.
 </Callout>

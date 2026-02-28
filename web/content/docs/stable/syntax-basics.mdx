@@ -1,23 +1,21 @@
 ﻿---
 title: Syntax Basics
-description: Core syntax model entry block, values, operators, and assignment targets.
+description: Learn the grammar rules that make PriyoScript code valid.
 ---
 
 ## Theory
 
-Syntax is the structural grammar that makes source code valid. PriyoScript keeps this grammar small and explicit so beginners can reason about programs quickly.
+Syntax is the rulebook of a language. If words are correct but order is wrong, parser errors happen.
 
-## 1. Entry block
-
-All executable scripts start with `monalisa { ... }`.
+## Entry block
 
 ```priyo
 monalisa {
-  priyoTell("Program starts here")
+  priyoTell("Program starts")
 }
 ```
 
-## 2. Variables and scope model
+## Variables
 
 ```priyo
 monalisa {
@@ -27,52 +25,47 @@ monalisa {
 }
 ```
 
-- `priyoKeep`: function-style mutable binding
-- `priyoChange`: block mutable binding
-- `priyoPromise`: non-reassignable binding
-
-Comparison:
-
-- C: closest to `int` variables (manual mutability discipline)
-- JavaScript: `var` / `let` / `const`
-- Python: single binding keyword style (no const keyword)
-
-## 3. Literals and operators
+## Literals and expressions
 
 ```priyo
 monalisa {
   priyoKeep n = 42
   priyoKeep s = "hello"
-  priyoKeep b = priyoTrue
-  priyoKeep e = priyoEmpty
-
+  priyoKeep ok = priyoTrue
+  priyoKeep empty = priyoEmpty
   priyoTell((n + 8) * 2)
-  priyoTell(n >= 10 && b)
 }
 ```
 
-## 4. Comments
+## Comments
 
 ```priyo
 // single-line
-
-/*
-multi-line
-*/
+/* multi-line */
 ```
 
-## 5. Valid assignment targets
+## Assignment targets
 
 ```priyo
 monalisa {
   priyoKeep arr = [10, 20]
   arr[0] = 99
-
-  priyoKeep obj = priyoCreate Person()
-  obj.name = "Priyo"
 }
 ```
 
-<Callout title="Common syntax mistake" type="error">
-  Left side of `=` must be assignable (variable, index, or property).
+## How execution works (simple)
+
+Parser checks each statement shape first:
+
+- If shape is valid -> compile and run
+- If shape is invalid -> stop with syntax error location
+
+Comparison:
+
+- JavaScript: `var/let/const`
+- Python: no `const` keyword
+- C/Java: typed declarations, stricter upfront type model
+
+<Callout title="Common mistake" type="error">
+  Left side of `=` must be assignable (variable/index/property).
 </Callout>

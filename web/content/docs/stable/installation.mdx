@@ -1,52 +1,44 @@
 ﻿---
 title: Installation
-description: Install PriyoScript, verify setup, and choose the right workflow.
+description: Install PriyoScript, verify setup, and understand what each step does.
 ---
 
-## Installation models
+## Theory
 
-PriyoScript supports two common workflows:
+Installation means preparing two things:
 
-- Source workflow (best for contributors)
-- Windows binary workflow (best for end users)
-
-## Prerequisites
-
-- Node.js 18+
-- npm
+- The PriyoScript executable/CLI
+- The environment path so terminal can find it
 
 ## Option A: Run from source
 
-```bash title="from repository root"
+```bash
 npm install
 node bin/monalisa.js -h
 ```
 
-You can run files directly:
-
-```bash
-node bin/monalisa.js examples/main.priyo
-```
-
-## Option B: Build Windows executable
+## Option B: Windows executable
 
 ```bash
 npm run dist:win
 ```
 
-Then verify:
+Then:
 
 ```powershell
 .\dist\priyoscript.exe -h
 ```
 
-Optional PATH install for current user:
+## How execution works (very simple)
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1
-```
+Think of `monalisa` like a remote control button:
 
-## Verify CLI + REPL
+1. You press command in terminal
+2. CLI opens your `.priyo` file
+3. PriyoScript pipeline runs (read -> parse -> compile -> execute)
+4. Output appears in terminal
+
+## Verify
 
 ```bash
 monalisa -h
@@ -54,10 +46,5 @@ monalisa -repl
 ```
 
 <Callout title="Troubleshooting" type="error">
-  If `monalisa` is not recognized, restart terminal and verify PATH includes the install directory.
+  If `monalisa` is not recognized, restart terminal and check PATH.
 </Callout>
-
-## Which option should you choose?
-
-- Choose source mode if you are editing language/runtime code
-- Choose exe mode if you only need to run `.priyo` programs

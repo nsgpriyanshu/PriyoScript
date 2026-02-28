@@ -1,16 +1,19 @@
 ﻿---
 title: Modules & Packages
-description: Organize code with built-in packages and user-defined modules.
+description: Split code into reusable files and import them safely.
 ---
 
 ## Theory
 
-Modules separate code by responsibility. PriyoScript supports:
+Modules let you break large programs into small focused files.
 
-- Built-in package imports (`lisaaBring math`)
-- File-based module imports (`lisaaBring "./module.priyo": alias`)
+Benefits:
 
-## Example 1: Built-in package import
+- Better organization
+- Reuse code across files
+- Easier maintenance and testing
+
+## Example 1: Built-in package
 
 ```priyo
 monalisa {
@@ -19,28 +22,22 @@ monalisa {
 }
 ```
 
-## Example 2: Create a user module
+## Example 2: Create module
 
-`college.priyo`
-
-```priyo
+```priyo title="college.priyo"
 lisaaBox {
   lisaaTask square(x) {
     priyoGiveBack x * x
   }
-
   priyoKeep campus = "NSEC"
-
   lisaaShare square
   lisaaShare campus
 }
 ```
 
-## Example 3: Import module as namespace
+## Example 3: Import module
 
-`main.priyo`
-
-```priyo
+```priyo title="main.priyo"
 monalisa {
   lisaaBring "./college.priyo": college
   priyoTell(college.campus)
@@ -48,22 +45,23 @@ monalisa {
 }
 ```
 
-## Example 4: Named + aliased imports
+## Example 4: Named import alias
 
 ```priyo
 monalisa {
   lisaaBring "./college.priyo": [campus, square: squareFn]
-  priyoTell(campus)
   priyoTell(squareFn(6))
 }
 ```
 
-Comparison:
+## How execution works (simple)
 
-- JavaScript: `import { x } from './m.js'`
-- Python: `from module import x as y`
-- Java/C: package systems are compile/link oriented
+Think of modules like notebooks:
 
-<Callout title="Module requirement" type="warn">
-  File imports must target modules that expose `lisaaBox { ... }`.
+1. `lisaaBox` is notebook boundary
+2. `lisaaShare` marks pages visible to others
+3. `lisaaBring` opens notebook and imports shared pages
+
+<Callout title="Rule" type="warn">
+  File imports must target valid `lisaaBox` module files.
 </Callout>

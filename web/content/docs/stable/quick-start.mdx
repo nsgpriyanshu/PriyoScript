@@ -1,47 +1,26 @@
 ﻿---
 title: Quick Start
-description: Build your first PriyoScript programs in small, practical steps.
+description: Build your first PriyoScript programs with clear step-by-step understanding.
 ---
 
-## Goal
+## Theory
 
-By the end of this page, you will be able to:
-
-- Write and run a `.priyo` file
-- Read user input and print output
-- Use variables and expressions correctly
+A program is just instructions executed top to bottom unless control-flow changes the order.
 
 ## Example 1: Hello World
 
-```priyo title="hello.priyo"
+```priyo
 monalisa {
   priyoTell("Hello from PriyoScript")
 }
 ```
 
-```bash
-monalisa hello.priyo
-```
-
-Equivalent (JavaScript):
-
-```js
-console.log('Hello from JavaScript')
-```
-
-Equivalent (Python):
-
-```python
-print("Hello from Python")
-```
-
 ## Example 2: Input + output
 
-```priyo title="input.priyo"
+```priyo
 monalisa {
   priyoKeep name = priyoListenSentence("Your name: ")
   priyoKeep age = priyoListenNumber("Your age: ")
-
   priyoTell.Success("Hi " + name)
   priyoTell.Info("Age: " + age)
 }
@@ -49,32 +28,41 @@ monalisa {
 
 ## Example 3: Variables + math
 
-```priyo title="variables.priyo"
+```priyo
 monalisa {
   priyoKeep base = 12
   priyoChange tax = 3
   priyoPromise total = base + tax
-
   priyoTell(total)
 }
 ```
 
 ## Example 4: Small function
 
-```priyo title="function.priyo"
+```priyo
 monalisa {
   lisaaTask areaSquare(side) {
     priyoGiveBack side * side
   }
-
   priyoTell(areaSquare(5))
 }
 ```
 
-<Callout title="Variable rule" type="idea">
-  Use `priyoPromise` only when you do not want reassignment.
-</Callout>
+## How execution works (like a 5-year-old)
 
-## Next step
+Imagine robot steps:
 
-Move to [Syntax Basics](./syntax-basics) for core grammar and assignment rules.
+1. Robot enters `monalisa { ... }`
+2. Robot reads line 1, does it
+3. Reads next line, does it
+4. When robot sees function call, it jumps into function and comes back with answer
+
+Equivalent hello world:
+
+```js
+console.log('Hello from JavaScript')
+```
+
+```python
+print('Hello from Python')
+```

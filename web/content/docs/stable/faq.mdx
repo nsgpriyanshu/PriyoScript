@@ -1,38 +1,40 @@
 ﻿---
 title: FAQ
-description: Common PriyoScript usage and architecture questions.
+description: Common beginner and advanced questions about PriyoScript.
 ---
 
 ## Is PriyoScript production-ready?
 
-Core language/runtime features are stable, but the project is still actively evolving.
+Core runtime/language is stable, but ecosystem tooling is still evolving.
 
-## Does PriyoScript support modules?
+## Why does PriyoScript look different from JS/Python?
 
-Yes. Use `lisaaBring` with built-in packages and file-based modules.
+Because it intentionally uses human-readable custom keywords while preserving programming rigor.
 
-## Is there an interactive shell?
+## Is there a REPL?
 
 Yes. Run `monalisa -repl`.
 
-## How do I read error details quickly?
+## How should beginners learn fast?
 
-Use:
+1. Quick Start
+2. Syntax Basics
+3. Control Flow
+4. Functions
+
+## How do I debug faster?
+
+Use error codes and docs:
 
 ```bash
 monalisa -errors
 monalisa -explain <ERROR_CODE>
 ```
 
-## Is syntax highlighting in docs native PriyoScript?
+## Simple execution idea for beginners
 
-Yes. Stable docs use PriyoScript-aware highlighting in code fences.
+Think of code as recipe instructions. Computer follows each step in order. If one step is unclear, it stops and tells you exactly where.
 
-## Where should beginners start?
-
-Start with [Quick Start](./quick-start), then [Syntax Basics](./syntax-basics), then [Control Flow](./control-flow).
-
-<Callout title="Learning order" type="idea">
-  Do not jump directly to modules/OOP if fundamentals are unclear. PriyoScript is easiest when
-  learned in sequence.
+<Callout title="Learning tip" type="idea">
+  Write tiny programs first, run often, and read every error message fully.
 </Callout>

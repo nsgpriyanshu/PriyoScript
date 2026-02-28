@@ -1,15 +1,17 @@
 ﻿---
 title: Classes & OOP
-description: Learn object-oriented programming with PriyoScript class semantics.
+description: Understand OOP ideas and apply them in PriyoScript.
 ---
 
 ## What is OOP?
 
-Object-Oriented Programming (OOP) models software as objects (state + behavior). Common goals:
+OOP (Object-Oriented Programming) means grouping data and behavior together in objects.
 
-- Encapsulation: keep related data and behavior together
-- Reuse: avoid duplicating logic
-- Extensibility: add new behavior by inheritance/composition
+Core ideas:
+
+- Object = state + behavior
+- Class = blueprint for objects
+- Inheritance = reuse parent behavior
 
 ## Example 1: Basic class
 
@@ -19,12 +21,10 @@ monalisa {
     lisaaTask init(name) {
       priyoSelf.name = name
     }
-
     lisaaTask intro() {
       priyoTell("I am " + priyoSelf.name)
     }
   }
-
   priyoKeep s = priyoCreate Student("Priyo")
   s.intro()
 }
@@ -39,7 +39,6 @@ monalisa {
       priyoSelf.name = name
     }
   }
-
   lisaaFamily Teacher lisaaInherit Person {
     lisaaTask init(name, subject) {
       priyoParent(name)
@@ -54,18 +53,15 @@ monalisa {
 ```priyo
 monalisa {
   lisaaFamily MathUtil {
-    lisaaStable priyoPromise PI = 3.14159
-
     lisaaStable lisaaTask square(n) {
       priyoGiveBack n * n
     }
   }
-
   priyoTell(MathUtil.square(4))
 }
 ```
 
-## Example 4: Domain-style object model
+## Example 4: Real model
 
 ```priyo
 monalisa {
@@ -75,19 +71,27 @@ monalisa {
       priyoSelf.credits = credits
     }
   }
-
-  priyoKeep c = priyoCreate Course("Compiler Design", 4)
+  priyoKeep c = priyoCreate Course("Compiler", 4)
   priyoTell(c.title)
 }
 ```
 
-Language mapping:
+## How execution works (like a child)
 
-- Java: closest conceptual match (classes + constructors + inheritance)
-- JavaScript: class syntax exists but prototype-based underneath
-- Python: class model with explicit `self`
-- C: not OOP by default (struct + function patterns)
+Class is cookie cutter. Object is cookie.
+
+- `lisaaFamily` makes cutter
+- `priyoCreate` makes cookie
+- `init` puts details in cookie
+- methods read/use those details
+
+Comparison:
+
+- Java: closest class model
+- JS: class syntax, prototype internals
+- Python: class with `self`
+- C: manual struct + functions
 
 <Callout title="Constructor rule" type="error">
-  In child `init`, `priyoParent(...)` must be called first and only once.
+  In child `init`, `priyoParent(...)` must be first and only once.
 </Callout>
