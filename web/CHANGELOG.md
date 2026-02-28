@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.4.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.3.0...web-v0.4.0) - (2026-02-28)
+
+## Bug Fixes
+
+- Release automation issue ([7ae386c](https://github.com/nsgpriyanshu/PriyoScript/commit/7ae386cd8311bb921b4fe593e27d21e2ef95a48b))
+
 # [web-v0.3.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.9.0...web-v0.3.0) - (2026-02-28)
 
 ## Bug Fixes
