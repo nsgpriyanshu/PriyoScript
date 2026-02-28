@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.5.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.4.0...web-v0.5.0) - (2026-02-28)
+
+## Bug Fixes
+
+- Remove lang history ([4f56aa2](https://github.com/nsgpriyanshu/PriyoScript/commit/4f56aa24fc9bfd688c44584ecb9ac0f6677fa26e))
+
 # [web-v0.4.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.3.0...web-v0.4.0) - (2026-02-28)
 
 ## Bug Fixes
