@@ -1,21 +1,21 @@
----
+﻿---
 title: Overview
-description: Start here to learn PriyoScript with production-style documentation and complete examples.
+description: The PriyoScript handbook for end users, from first program to production usage.
 ---
 
-# PriyoScript Stable Docs
+# PriyoScript Handbook (Stable)
 
-PriyoScript is an interpreted programming language with readable custom keywords, a bytecode VM, first-class arrays, modules/packages, OOP, and human-focused diagnostics.
+PriyoScript is a readable programming language with English-like keywords, a bytecode VM runtime, first-class arrays, modules, OOP, and humanized errors.
 
-This section documents **stable features only**.
+This documentation covers stable behavior only.
 
 <Callout title="Version Scope" type="warn">
-  This section tracks stable behavior. Canary/experimental behavior may differ.
+  Canary docs can change at any time. Use stable docs for real projects.
 </Callout>
 
 ## First Program
 
-```js title="hello.priyo"
+```priyo title="hello.priyo"
 monalisa {
   priyoTell("Hello, PriyoScript!")
 }
@@ -27,16 +27,14 @@ Run it:
 monalisa hello.priyo
 ```
 
-## What This Documentation Covers
+## What You Will Learn
 
-- Installation and execution workflows
-- Language syntax and semantics
-- Control flow, functions, OOP, arrays
-- Modules, packages, and project structure
-- Error handling and diagnostics
-- CLI and REPL usage
+- How to install and run PriyoScript
+- Core syntax and language mental model
+- Functions, classes, arrays, modules, and error handling
+- CLI and REPL workflows used in real projects
 
-## Suggested Path
+## Suggested Learning Path
 
 1. [Installation](./installation)
 2. [Quick Start](./quick-start)
@@ -48,3 +46,7 @@ monalisa hello.priyo
 8. [Modules & Packages](./modules-packages)
 9. [Error Handling](./error-handling)
 10. [CLI & REPL](./cli-repl)
+
+<Callout title="How to read this handbook" type="idea">
+  Each page follows the same format: concept, runnable example, and practical rules.
+</Callout>

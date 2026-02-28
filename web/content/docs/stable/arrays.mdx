@@ -1,43 +1,53 @@
----
+﻿---
 title: Arrays
-description: First-class arrays, indexing, slicing, destructuring, and helper APIs.
+description: First-class arrays, indexing, slicing, destructuring, and callback helpers.
 ---
 
 # Arrays
 
-## Literals and Indexing
+## Create and access
 
-```js
-priyoKeep nums = [10, 20, 30]
-priyoTell(nums[0])
-nums[1] = 25
+```priyo
+monalisa {
+  priyoKeep nums = [10, 20, 30]
+  priyoTell(nums[0])
+  nums[1] = 25
+  priyoTell(nums)
+}
 ```
 
 ## Slicing
 
-```js
-priyoTell(nums[0:2])
-priyoTell(nums[:2])
-priyoTell(nums[1:])
+```priyo
+monalisa {
+  priyoKeep nums = [10, 20, 30, 40]
+
+  priyoTell(nums[0:2])
+  priyoTell(nums[:2])
+  priyoTell(nums[1:])
+}
 ```
 
 ## Destructuring
 
-```js
-priyoChange[(first, (second = 99))] = nums
+```priyo
+monalisa {
+  priyoKeep values = [7, 8, 9]
+  priyoChange[(first, second = 99, third)] = values
+
+  priyoTell(first)
+  priyoTell(second)
+  priyoTell(third)
+}
 ```
 
-## Helpers
+## Helper API (`priyoArray`)
 
-`priyoArray` provides helpers like:
+- Query helpers: `length`, `includes`, `indexOf`
+- Mutation helpers: `push`, `pop`, `slice`
+- Callback helpers: `map`, `filter`, `reduce`, `find`, `some`, `every`
 
-- `length`, `push`, `pop`
-- `slice`, `includes`, `indexOf`
-- `map`, `filter`, `reduce`, `find`, `some`, `every`
-
-## Complete example
-
-```js
+```priyo
 monalisa {
   lisaaTask isEven(x) {
     priyoGiveBack x % 2 == 0
@@ -49,6 +59,6 @@ monalisa {
 }
 ```
 
-<Callout title="Title" type="idea">
-  Use `priyoArray.*` helpers for cleaner code when transforming collections.
+<Callout title="Recommendation" type="idea">
+  Prefer `priyoArray` helpers for transformations. They make intent clearer than manual loops.
 </Callout>

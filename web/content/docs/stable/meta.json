@@ -7,7 +7,7 @@
     "index",
     "installation",
     "quick-start",
-    "---Language Guide---",
+    "---Handbook---",
     "syntax-basics",
     "control-flow",
     "functions",
@@ -16,7 +16,7 @@
     "modules-packages",
     "error-handling",
     "errors-reference",
-    "---Tooling---",
+    "---Tools---",
     "cli-repl",
     "faq"
   ]

@@ -1,38 +1,49 @@
----
+﻿---
 title: Error Handling
-description: Try/catch/finally/throw and reading PriyoScript diagnostics.
+description: Use try/catch/finally/throw and understand PriyoScript diagnostics.
 ---
 
 # Error Handling
 
-## Try / Catch / Finally
+## Try / catch / finally
 
-```js
-prakritiTry {
-  priyoTell(10 / 0)
-} prakritiCatch (err) {
-  priyoTell.Error(err.message)
-} prakritiAtEnd {
-  priyoTell.Info("done")
+```priyo
+monalisa {
+  prakritiTry {
+    prakritiThrow "Something failed"
+  } prakritiCatch (err) {
+    priyoTell.Error("Caught: " + err.message)
+  } prakritiAtEnd {
+    priyoTell.Info("Cleanup done")
+  }
 }
 ```
 
-## Throw
+## Throw custom errors
 
-```js
-prakritiThrow "custom failure"
+```priyo
+monalisa {
+  lisaaTask divide(a, b) {
+    prakritiIf (b == 0) {
+      prakritiThrow "Division by zero is not allowed"
+    }
+
+    priyoGiveBack a / b
+  }
+
+  priyoTell(divide(10, 2))
+}
 ```
 
-## Diagnostics
+## Reading diagnostics
 
-PriyoScript shows:
+PriyoScript diagnostics include:
 
-- Error code (example `PSYN-002`)
-- Stage (`syntax`, `compile`, `runtime`)
-- Source line and span caret (`^^^^`)
-- Tips and docs links for faster fixes
-
-Example:
+- Error code (example: `PSYN-002`)
+- Stage (`syntax`, `compile`, `runtime`, or internal engine)
+- File location and source span
+- Human-readable message and tip
+- Docs link for the specific error code
 
 ```text
 Code: PSYN-002
@@ -40,9 +51,11 @@ Stage: syntax
 Location: file.priyo:3:10
 Source: prakritiIff (x > 0) {
 Span:          ^^^^^^^^^^
-Docs: .../ERRORS.md#psyn-002
+Tip: Use `prakritiIf` for conditional branches.
+Docs: https://priyyoscript.vercel.app/docs/stable/errors-reference#psyn-002
 ```
 
-<Callout title="Title" type="error">
-  Engine/internal errors indicate implementation issues, not user syntax mistakes.
+<Callout title="Engine vs user errors" type="error">
+  Engine/internal errors point to language implementation issues. Syntax/compile/runtime errors
+  usually come from user code.
 </Callout>

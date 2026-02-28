@@ -1,50 +1,59 @@
----
+﻿---
 title: Syntax Basics
-description: 'Core building blocks: entry block, variables, literals, expressions, and comments.'
+description: Entry block, variables, literals, expressions, comments, and assignment targets.
 ---
 
 # Syntax Basics
 
-## Entry Block
+## Entry block
 
-Every executable PriyoScript program starts with:
+Every executable PriyoScript program starts with `monalisa { ... }`.
 
-```js
+```priyo
 monalisa {
   // statements
 }
 ```
 
+<Callout title="Required" type="warn">
+  Top-level executable scripts must use one `monalisa` block.
+</Callout>
+
 ## Variables
 
-```js
-priyoKeep a = 10      // var-style, function-scoped
-priyoChange b = 20    // let-style, block-scoped
-priyoPromise c = 30   // const-style, block-scoped
+```priyo
+priyoKeep a = 10
+priyoChange b = 20
+priyoPromise c = 30
 ```
 
-<Callout title="Title" type="warn">
-  Use `priyoPromise` only for values that must not be reassigned.
-</Callout>
+- `priyoKeep`: function scope, mutable
+- `priyoChange`: block scope, mutable
+- `priyoPromise`: block scope, immutable reference
 
 ## Literals
 
-- Number: `42`
+- Number: `42`, `3.14`
 - String: `"hello"`
 - Boolean: `priyoTrue`, `priyoFalse`
-- Null: `priyoNull`
+- Empty value: `priyoEmpty`
 
 ## Expressions
 
-```js
-priyoKeep total = 5 + 10 * 2
-priyoKeep ok = total >= 20 && priyoTrue
+```priyo
+monalisa {
+  priyoKeep total = 5 + 10 * 2
+  priyoKeep ok = total >= 20 && priyoTrue
+  priyoTell(total)
+  priyoTell(ok)
+}
 ```
 
 ## Comments
 
-```js
+```priyo
 // single-line comment
+
 /*
 multi-line comment
 */
@@ -52,9 +61,14 @@ multi-line comment
 
 ## Assignment targets
 
-```js
+```priyo
 monalisa {
   priyoKeep profile = priyoCreate Person()
   profile.name = "Priyo"
 }
 ```
+
+<Callout title="Rule" type="error">
+  The left side of `=` must be a valid assignable target like a variable, object field, or array
+  index.
+</Callout>

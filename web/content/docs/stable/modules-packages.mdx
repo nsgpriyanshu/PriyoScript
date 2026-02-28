@@ -1,28 +1,31 @@
----
+﻿---
 title: Modules & Packages
-description: Use lisaaBring with built-in packages and user modules.
+description: Import built-in packages and user modules with lisaaBring.
 ---
 
 # Modules & Packages
 
 ## Built-in package import
 
-```js
-lisaaBring math
-priyoTell(math.cube(2))
+```priyo
+monalisa {
+  lisaaBring math
+  priyoTell(math.cube(2))
+}
 ```
 
-## User module
+## User module export
 
 `college.priyo`
 
-```js
+```priyo
 lisaaBox {
   lisaaTask square(x) {
     priyoGiveBack x * x
   }
 
   priyoKeep campus = "NSEC"
+
   lisaaShare square
   lisaaShare campus
 }
@@ -30,9 +33,10 @@ lisaaBox {
 
 `main.priyo`
 
-```js
+```priyo
 monalisa {
   lisaaBring "./college.priyo": college
+
   priyoTell(college.campus)
   priyoTell(college.square(5))
 }
@@ -40,11 +44,14 @@ monalisa {
 
 ## Named and aliased imports
 
-```js
-lisaaBring "./college.priyo": [campus, cgpaToGradePoint: gradeFn]
-lisaaBring "./college.priyo": collegeModule
+```priyo
+monalisa {
+  lisaaBring "./college.priyo": [campus, square: squareFn]
+  priyoTell(campus)
+  priyoTell(squareFn(6))
+}
 ```
 
-<Callout title="Title" type="warn">
-Path imports must point to modules that start with `lisaaBox { ... }`.
+<Callout title="Module rule" type="warn">
+  Path imports must target files that expose a `lisaaBox { ... }` module body.
 </Callout>

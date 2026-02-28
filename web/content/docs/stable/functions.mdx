@@ -1,47 +1,59 @@
----
+﻿---
 title: Functions
-description: Declare functions, return values, recursion, and closures.
+description: Function declaration, parameters, return values, recursion, and closures.
 ---
 
 # Functions
 
-## Declare and Return
+## Declare and call
 
-```js
-lisaaTask add(a, b) {
-  priyoGiveBack a + b
+```priyo
+monalisa {
+  lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+
+  priyoTell(add(3, 4))
 }
-
-priyoTell(add(3, 4))
 ```
 
 ## Recursion
 
-```js
-lisaaTask factorial(n) {
-  prakritiIf (n <= 1) {
-    priyoGiveBack 1
-  } prakritiElse {
-    priyoGiveBack n * factorial(n - 1)
+```priyo
+monalisa {
+  lisaaTask factorial(n) {
+    prakritiIf (n <= 1) {
+      priyoGiveBack 1
+    } prakritiElse {
+      priyoGiveBack n * factorial(n - 1)
+    }
   }
+
+  priyoTell(factorial(5))
 }
 ```
 
-## Closures
+## Closures (capturing outer scope)
 
-Functions can capture outer variables through lexical scope.
+```priyo
+monalisa {
+  lisaaTask makeCounter() {
+    priyoChange count = 0
 
-```js
-lisaaTask makeCounter() {
-  priyoChange count = 0
-  lisaaTask next() {
-    count = count + 1
-    priyoGiveBack count
+    lisaaTask next() {
+      count = count + 1
+      priyoGiveBack count
+    }
+
+    priyoGiveBack next
   }
-  priyoGiveBack next
+
+  priyoKeep counter = makeCounter()
+  priyoTell(counter())
+  priyoTell(counter())
 }
 ```
 
-<Callout title="Title" type="warn">
+<Callout title="Function rule" type="warn">
   `priyoGiveBack` is valid only inside function bodies.
 </Callout>

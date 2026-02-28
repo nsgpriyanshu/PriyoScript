@@ -1,59 +1,66 @@
----
+﻿---
 title: Classes & OOP
-description: Classes, inheritance, priyoSelf, and priyoParent rules.
+description: Classes, inheritance, constructors, static members, and parent rules.
 ---
 
 # Classes & OOP
 
-## Class and Constructor
+## Class and constructor
 
-```js
-lisaaFamily Student {
-  lisaaTask init(name) {
-    priyoSelf.name = name
+```priyo
+monalisa {
+  lisaaFamily Student {
+    lisaaTask init(name) {
+      priyoSelf.name = name
+    }
+
+    lisaaTask intro() {
+      priyoTell("Hi, I am " + priyoSelf.name)
+    }
   }
+
+  priyoKeep s = priyoCreate Student("Priyo")
+  s.intro()
 }
-```
-
-## Create Instance
-
-```js
-priyoKeep s = priyoCreate Student("Priyo")
 ```
 
 ## Inheritance
 
-```js
-lisaaFamily Person {
-  lisaaTask init(name) {
-    priyoSelf.name = name
+```priyo
+monalisa {
+  lisaaFamily Person {
+    lisaaTask init(name) {
+      priyoSelf.name = name
+    }
   }
-}
 
-lisaaFamily Teacher lisaaInherit Person {
-  lisaaTask init(name, subject) {
-    priyoParent(name)
-    priyoSelf.subject = subject
+  lisaaFamily Teacher lisaaInherit Person {
+    lisaaTask init(name, subject) {
+      priyoParent(name)
+      priyoSelf.subject = subject
+    }
   }
 }
 ```
 
-`priyoParent(...)` in child `init` must be first and only once.
+`priyoParent(...)` inside child `init` must be called first, and called only once.
 
-## Static methods and fields
+## Static fields and methods
 
-```js
-lisaaFamily MathUtil {
-  lisaaStable priyoPromise PI = 3.14159
+```priyo
+monalisa {
+  lisaaFamily MathUtil {
+    lisaaStable priyoPromise PI = 3.14159
 
-  lisaaStable lisaaTask square(n) {
-    priyoGiveBack n * n
+    lisaaStable lisaaTask square(n) {
+      priyoGiveBack n * n
+    }
   }
-}
 
-priyoTell(MathUtil.square(4))
+  priyoTell(MathUtil.square(4))
+}
 ```
 
-<Callout title="Title" type="error">
-  If child `init` does not call `priyoParent(...)` as first statement, compilation fails.
+<Callout title="Constructor safety" type="error">
+  If a child constructor violates `priyoParent(...)` rules, PriyoScript raises a compile-time error.
 </Callout>

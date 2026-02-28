@@ -1,13 +1,17 @@
----
+﻿---
 title: Quick Start
-description: Write and run your first PriyoScript program.
+description: Create, run, and understand your first PriyoScript programs.
 ---
 
 # Quick Start
 
+This page gets you from zero to a working PriyoScript program in a few minutes.
+
+## 1. Hello World
+
 Create `hello.priyo`:
 
-```js title="hello.priyo"
+```priyo title="hello.priyo"
 monalisa {
   priyoTell("Hello from PriyoScript")
 }
@@ -19,27 +23,35 @@ Run it:
 monalisa hello.priyo
 ```
 
-## Input + output example
+## 2. Read input and print output
 
-```js title="input.priyo"
+```priyo title="input.priyo"
 monalisa {
   priyoKeep name = priyoListenSentence("Your name: ")
   priyoKeep age = priyoListenNumber("Your age: ")
-  priyoTell.Success("Hi " + name + ", age " + age)
+
+  priyoTell.Success("Hi " + name)
+  priyoTell.Info("Age: " + age)
 }
 ```
 
-## Variables and expressions
+## 3. Variables and expressions
 
-```js title="variables.priyo"
+```priyo title="variables.priyo"
 monalisa {
   priyoKeep x = 10
   priyoChange y = 5
-  priyoPromise z = x * y
-  priyoTell(z)
+  priyoPromise result = x * y
+
+  priyoTell(result)
 }
 ```
 
-<Callout title="Title" type="warn">
-  Use `priyoPromise` only when value should never be reassigned.
+<Callout title="When to use each variable type" type="idea">
+  Use `priyoKeep` for function-scoped mutable values, `priyoChange` for block-scoped mutable values,
+  and `priyoPromise` for values that must not be reassigned.
 </Callout>
+
+## 4. Next step
+
+Continue with [Syntax Basics](./syntax-basics) to learn literals, operators, and assignment rules.

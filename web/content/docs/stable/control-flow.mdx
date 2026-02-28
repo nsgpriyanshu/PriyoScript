@@ -1,61 +1,76 @@
----
+﻿---
 title: Control Flow
-description: Conditions, loops, switch, and loop control keywords.
+description: Decision making and loops with PriyoScript stable keywords.
 ---
 
 # Control Flow
 
-## If / Else
+## Conditional branches
 
-```js
-prakritiIf (score > 80) {
-  priyoTell("Great")
-} prakritiElse {
-  priyoTell("Keep going")
+```priyo
+monalisa {
+  priyoKeep score = 85
+
+  prakritiIf (score >= 90) {
+    priyoTell.Success("Excellent")
+  } prakritiElseIf (score >= 75) {
+    priyoTell.Info("Good")
+  } prakritiElse {
+    priyoTell("Keep practicing")
+  }
 }
 ```
 
-## While
+## While loop
 
-```js
-priyoKeep i = 0
-prakritiAsLongAs (i < 3) {
-  priyoTell(i)
-  i = i + 1
+```priyo
+monalisa {
+  priyoKeep i = 0
+
+  prakritiAsLongAs (i < 3) {
+    priyoTell(i)
+    i = i + 1
+  }
 }
 ```
 
-## For
+## Counted loop
 
-```js
-prakritiCount (priyoChange i = 0; i < 5; i = i + 1) {
-  priyoTell(i)
+```priyo
+monalisa {
+  prakritiCount (priyoChange i = 0; i < 5; i = i + 1) {
+    priyoTell(i)
+  }
 }
 ```
 
-## Foreach
+## For-each over arrays
 
-```js
-priyoKeep items = ["A", "B", "C"]
-prakritiCount (item priyoInside items) {
-  priyoTell(item)
+```priyo
+monalisa {
+  priyoKeep items = ["A", "B", "C"]
+
+  prakritiCount (item priyoInside items) {
+    priyoTell(item)
+  }
 }
 ```
 
-## Switch
+## Switch style branching
 
-```js
-prakritiChoose (role) {
-  prakritiCase ("admin") { priyoTell("Full access") }
-  prakritiOtherwise { priyoTell("Limited access") }
+```priyo
+monalisa {
+  priyoKeep role = "admin"
+
+  prakritiChoose (role) {
+    prakritiCase ("admin") { priyoTell("Full access") }
+    prakritiCase ("editor") { priyoTell("Edit access") }
+    prakritiOtherwise { priyoTell("Read only") }
+  }
 }
 ```
 
-## Break / Continue
+## Loop control
 
-- `prakritiStop` breaks loop or switch
-- `prakritiGoOn` continues current loop
-
-<Callout title="Title" type="idea">
-  Use `switch` when you compare one value against many constant cases.
-</Callout>
+- `prakritiStop` exits current loop or switch
+- `prakritiGoOn` skips current iteration and continues loop
