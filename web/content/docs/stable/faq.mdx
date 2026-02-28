@@ -1,23 +1,21 @@
----
+﻿---
 title: FAQ
-description: Common questions from PriyoScript users.
+description: Common PriyoScript usage and architecture questions.
 ---
-
-# FAQ
 
 ## Is PriyoScript production-ready?
 
-Core language/runtime features are stable, but PriyoScript is still evolving.
+Core language/runtime features are stable, but the project is still actively evolving.
 
-## Does it support modules?
+## Does PriyoScript support modules?
 
-Yes. Use `lisaaBring` with built-in packages and local module paths.
+Yes. Use `lisaaBring` with built-in packages and file-based modules.
 
-## Is there a REPL?
+## Is there an interactive shell?
 
 Yes. Run `monalisa -repl`.
 
-## Where do I find error explanations?
+## How do I read error details quickly?
 
 Use:
 
@@ -26,11 +24,15 @@ monalisa -errors
 monalisa -explain <ERROR_CODE>
 ```
 
-## Why are PriyoScript code blocks highlighted as JS here?
+## Is syntax highlighting in docs native PriyoScript?
 
-For now, docs use JavaScript lexer mode to provide colorized reading.
-A dedicated PriyoScript syntax-highlighting grammar can be added later.
+Yes. Stable docs use PriyoScript-aware highlighting in code fences.
 
-<Callout title="Title" type="warn">
-  Syntax highlighting style does not change actual PriyoScript semantics.
+## Where should beginners start?
+
+Start with [Quick Start](./quick-start), then [Syntax Basics](./syntax-basics), then [Control Flow](./control-flow).
+
+<Callout title="Learning order" type="idea">
+  Do not jump directly to modules/OOP if fundamentals are unclear. PriyoScript is easiest when
+  learned in sequence.
 </Callout>

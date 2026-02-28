@@ -1,11 +1,17 @@
 ﻿---
 title: Classes & OOP
-description: Classes, inheritance, constructors, static members, and parent rules.
+description: Learn object-oriented programming with PriyoScript class semantics.
 ---
 
-# Classes & OOP
+## What is OOP?
 
-## Class and constructor
+Object-Oriented Programming (OOP) models software as objects (state + behavior). Common goals:
+
+- Encapsulation: keep related data and behavior together
+- Reuse: avoid duplicating logic
+- Extensibility: add new behavior by inheritance/composition
+
+## Example 1: Basic class
 
 ```priyo
 monalisa {
@@ -15,7 +21,7 @@ monalisa {
     }
 
     lisaaTask intro() {
-      priyoTell("Hi, I am " + priyoSelf.name)
+      priyoTell("I am " + priyoSelf.name)
     }
   }
 
@@ -24,7 +30,7 @@ monalisa {
 }
 ```
 
-## Inheritance
+## Example 2: Inheritance
 
 ```priyo
 monalisa {
@@ -43,9 +49,7 @@ monalisa {
 }
 ```
 
-`priyoParent(...)` inside child `init` must be called first, and called only once.
-
-## Static fields and methods
+## Example 3: Static members
 
 ```priyo
 monalisa {
@@ -61,6 +65,29 @@ monalisa {
 }
 ```
 
-<Callout title="Constructor safety" type="error">
-  If a child constructor violates `priyoParent(...)` rules, PriyoScript raises a compile-time error.
+## Example 4: Domain-style object model
+
+```priyo
+monalisa {
+  lisaaFamily Course {
+    lisaaTask init(title, credits) {
+      priyoSelf.title = title
+      priyoSelf.credits = credits
+    }
+  }
+
+  priyoKeep c = priyoCreate Course("Compiler Design", 4)
+  priyoTell(c.title)
+}
+```
+
+Language mapping:
+
+- Java: closest conceptual match (classes + constructors + inheritance)
+- JavaScript: class syntax exists but prototype-based underneath
+- Python: class model with explicit `self`
+- C: not OOP by default (struct + function patterns)
+
+<Callout title="Constructor rule" type="error">
+  In child `init`, `priyoParent(...)` must be called first and only once.
 </Callout>

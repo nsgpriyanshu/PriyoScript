@@ -1,11 +1,13 @@
 ﻿---
 title: Arrays
-description: First-class arrays, indexing, slicing, destructuring, and callback helpers.
+description: Use first-class arrays with indexing, slicing, destructuring, and helpers.
 ---
 
-# Arrays
+## Theory
 
-## Create and access
+Arrays store ordered collections. PriyoScript arrays are first-class values and support practical operations for reading, transforming, and iterating.
+
+## Example 1: Create, read, update
 
 ```priyo
 monalisa {
@@ -16,36 +18,30 @@ monalisa {
 }
 ```
 
-## Slicing
+## Example 2: Slicing
 
 ```priyo
 monalisa {
   priyoKeep nums = [10, 20, 30, 40]
-
   priyoTell(nums[0:2])
   priyoTell(nums[:2])
   priyoTell(nums[1:])
 }
 ```
 
-## Destructuring
+## Example 3: Destructuring with defaults
 
 ```priyo
 monalisa {
-  priyoKeep values = [7, 8, 9]
-  priyoChange[(first, second = 99, third)] = values
-
+  priyoKeep values = [7, 8]
+  priyoChange[(first, second, third = 99)] = values
   priyoTell(first)
   priyoTell(second)
   priyoTell(third)
 }
 ```
 
-## Helper API (`priyoArray`)
-
-- Query helpers: `length`, `includes`, `indexOf`
-- Mutation helpers: `push`, `pop`, `slice`
-- Callback helpers: `map`, `filter`, `reduce`, `find`, `some`, `every`
+## Example 4: `priyoArray` helpers
 
 ```priyo
 monalisa {
@@ -59,6 +55,12 @@ monalisa {
 }
 ```
 
+Comparison:
+
+- C: fixed-size arrays, manual memory patterns
+- Java: arrays plus rich collection frameworks
+- JavaScript/Python: dynamic arrays/lists with high-level helpers
+
 <Callout title="Recommendation" type="idea">
-  Prefer `priyoArray` helpers for transformations. They make intent clearer than manual loops.
+  Prefer `priyoArray` callbacks for transformation logic instead of manual index loops.
 </Callout>

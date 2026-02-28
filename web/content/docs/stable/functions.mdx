@@ -1,11 +1,21 @@
 ﻿---
 title: Functions
-description: Function declaration, parameters, return values, recursion, and closures.
+description: Reuse logic with parameters, return values, recursion, and closures.
 ---
 
-# Functions
+## Theory
 
-## Declare and call
+Functions are reusable units of behavior. They improve readability, testability, and separation of concerns.
+
+## Syntax
+
+```priyo
+lisaaTask name(param1, param2) {
+  priyoGiveBack value
+}
+```
+
+## Example 1: Basic function
 
 ```priyo
 monalisa {
@@ -13,27 +23,26 @@ monalisa {
     priyoGiveBack a + b
   }
 
-  priyoTell(add(3, 4))
+  priyoTell(add(10, 5))
 }
 ```
 
-## Recursion
+## Example 2: Recursion
 
 ```priyo
 monalisa {
   lisaaTask factorial(n) {
     prakritiIf (n <= 1) {
       priyoGiveBack 1
-    } prakritiElse {
-      priyoGiveBack n * factorial(n - 1)
     }
+    priyoGiveBack n * factorial(n - 1)
   }
 
   priyoTell(factorial(5))
 }
 ```
 
-## Closures (capturing outer scope)
+## Example 3: Closure
 
 ```priyo
 monalisa {
@@ -54,6 +63,24 @@ monalisa {
 }
 ```
 
-<Callout title="Function rule" type="warn">
-  `priyoGiveBack` is valid only inside function bodies.
+## Example 4: Function as reusable business rule
+
+```priyo
+monalisa {
+  lisaaTask isAdult(age) {
+    priyoGiveBack age >= 18
+  }
+
+  priyoTell(isAdult(21))
+}
+```
+
+Comparison:
+
+- C: function pointers are explicit and low-level
+- Java: methods inside classes are dominant
+- JavaScript/Python: first-class functions and closures (similar mental model)
+
+<Callout title="Important" type="warn">
+  `priyoGiveBack` is valid only inside a function body.
 </Callout>

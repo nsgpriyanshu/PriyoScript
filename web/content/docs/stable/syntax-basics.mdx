@@ -1,74 +1,78 @@
 ﻿---
 title: Syntax Basics
-description: Entry block, variables, literals, expressions, comments, and assignment targets.
+description: Core syntax model entry block, values, operators, and assignment targets.
 ---
 
-# Syntax Basics
+## Theory
 
-## Entry block
+Syntax is the structural grammar that makes source code valid. PriyoScript keeps this grammar small and explicit so beginners can reason about programs quickly.
 
-Every executable PriyoScript program starts with `monalisa { ... }`.
+## 1. Entry block
 
-```priyo
-monalisa {
-  // statements
-}
-```
-
-<Callout title="Required" type="warn">
-  Top-level executable scripts must use one `monalisa` block.
-</Callout>
-
-## Variables
-
-```priyo
-priyoKeep a = 10
-priyoChange b = 20
-priyoPromise c = 30
-```
-
-- `priyoKeep`: function scope, mutable
-- `priyoChange`: block scope, mutable
-- `priyoPromise`: block scope, immutable reference
-
-## Literals
-
-- Number: `42`, `3.14`
-- String: `"hello"`
-- Boolean: `priyoTrue`, `priyoFalse`
-- Empty value: `priyoEmpty`
-
-## Expressions
+All executable scripts start with `monalisa { ... }`.
 
 ```priyo
 monalisa {
-  priyoKeep total = 5 + 10 * 2
-  priyoKeep ok = total >= 20 && priyoTrue
-  priyoTell(total)
-  priyoTell(ok)
+  priyoTell("Program starts here")
 }
 ```
 
-## Comments
+## 2. Variables and scope model
 
 ```priyo
-// single-line comment
+monalisa {
+  priyoKeep a = 10
+  priyoChange b = 20
+  priyoPromise c = 30
+}
+```
+
+- `priyoKeep`: function-style mutable binding
+- `priyoChange`: block mutable binding
+- `priyoPromise`: non-reassignable binding
+
+Comparison:
+
+- C: closest to `int` variables (manual mutability discipline)
+- JavaScript: `var` / `let` / `const`
+- Python: single binding keyword style (no const keyword)
+
+## 3. Literals and operators
+
+```priyo
+monalisa {
+  priyoKeep n = 42
+  priyoKeep s = "hello"
+  priyoKeep b = priyoTrue
+  priyoKeep e = priyoEmpty
+
+  priyoTell((n + 8) * 2)
+  priyoTell(n >= 10 && b)
+}
+```
+
+## 4. Comments
+
+```priyo
+// single-line
 
 /*
-multi-line comment
+multi-line
 */
 ```
 
-## Assignment targets
+## 5. Valid assignment targets
 
 ```priyo
 monalisa {
-  priyoKeep profile = priyoCreate Person()
-  profile.name = "Priyo"
+  priyoKeep arr = [10, 20]
+  arr[0] = 99
+
+  priyoKeep obj = priyoCreate Person()
+  obj.name = "Priyo"
 }
 ```
 
-<Callout title="Rule" type="error">
-  The left side of `=` must be a valid assignable target like a variable, object field, or array
-  index.
+<Callout title="Common syntax mistake" type="error">
+  Left side of `=` must be assignable (variable, index, or property).
 </Callout>

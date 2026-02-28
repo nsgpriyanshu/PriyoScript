@@ -1,11 +1,16 @@
 ﻿---
 title: Modules & Packages
-description: Import built-in packages and user modules with lisaaBring.
+description: Organize code with built-in packages and user-defined modules.
 ---
 
-# Modules & Packages
+## Theory
 
-## Built-in package import
+Modules separate code by responsibility. PriyoScript supports:
+
+- Built-in package imports (`lisaaBring math`)
+- File-based module imports (`lisaaBring "./module.priyo": alias`)
+
+## Example 1: Built-in package import
 
 ```priyo
 monalisa {
@@ -14,7 +19,7 @@ monalisa {
 }
 ```
 
-## User module export
+## Example 2: Create a user module
 
 `college.priyo`
 
@@ -31,18 +36,19 @@ lisaaBox {
 }
 ```
 
+## Example 3: Import module as namespace
+
 `main.priyo`
 
 ```priyo
 monalisa {
   lisaaBring "./college.priyo": college
-
   priyoTell(college.campus)
   priyoTell(college.square(5))
 }
 ```
 
-## Named and aliased imports
+## Example 4: Named + aliased imports
 
 ```priyo
 monalisa {
@@ -52,6 +58,12 @@ monalisa {
 }
 ```
 
-<Callout title="Module rule" type="warn">
-  Path imports must target files that expose a `lisaaBox { ... }` module body.
+Comparison:
+
+- JavaScript: `import { x } from './m.js'`
+- Python: `from module import x as y`
+- Java/C: package systems are compile/link oriented
+
+<Callout title="Module requirement" type="warn">
+  File imports must target modules that expose `lisaaBox { ... }`.
 </Callout>

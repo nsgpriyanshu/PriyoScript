@@ -1,32 +1,36 @@
 ﻿---
 title: Control Flow
-description: Decision making and loops with PriyoScript stable keywords.
+description: Branching and loops with practical selection guidelines.
 ---
 
-# Control Flow
+## Theory
 
-## Conditional branches
+Control flow decides which statements run, how many times, and under what conditions.
+
+## Example 1: If / else-if / else
 
 ```priyo
 monalisa {
-  priyoKeep score = 85
+  priyoKeep score = 82
 
   prakritiIf (score >= 90) {
-    priyoTell.Success("Excellent")
-  } prakritiElseIf (score >= 75) {
-    priyoTell.Info("Good")
+    priyoTell("A")
+  } prakritiElseIf (score >= 80) {
+    priyoTell("B")
   } prakritiElse {
-    priyoTell("Keep practicing")
+    priyoTell("C")
   }
 }
 ```
 
-## While loop
+Equivalent (JavaScript): `if / else if / else`
+Equivalent (Python): `if / elif / else`
+
+## Example 2: While loop
 
 ```priyo
 monalisa {
   priyoKeep i = 0
-
   prakritiAsLongAs (i < 3) {
     priyoTell(i)
     i = i + 1
@@ -34,43 +38,36 @@ monalisa {
 }
 ```
 
-## Counted loop
+## Example 3: Counted loop
 
 ```priyo
 monalisa {
-  prakritiCount (priyoChange i = 0; i < 5; i = i + 1) {
+  prakritiCount (priyoChange i = 1; i <= 5; i = i + 1) {
     priyoTell(i)
   }
 }
 ```
 
-## For-each over arrays
+Comparable forms:
+
+- C / Java / JavaScript: `for (init; cond; step)`
+- Python: usually `for i in range(...)`
+
+## Example 4: For-each + switch
 
 ```priyo
 monalisa {
-  priyoKeep items = ["A", "B", "C"]
+  priyoKeep tags = ["news", "sports", "music"]
 
-  prakritiCount (item priyoInside items) {
-    priyoTell(item)
+  prakritiCount (tag priyoInside tags) {
+    prakritiChoose (tag) {
+      prakritiCase ("music") { priyoTell("Audio") }
+      prakritiOtherwise { priyoTell("General") }
+    }
   }
 }
 ```
 
-## Switch style branching
-
-```priyo
-monalisa {
-  priyoKeep role = "admin"
-
-  prakritiChoose (role) {
-    prakritiCase ("admin") { priyoTell("Full access") }
-    prakritiCase ("editor") { priyoTell("Edit access") }
-    prakritiOtherwise { priyoTell("Read only") }
-  }
-}
-```
-
-## Loop control
-
-- `prakritiStop` exits current loop or switch
-- `prakritiGoOn` skips current iteration and continues loop
+<Callout title="Loop control" type="idea">
+  Use `prakritiStop` to break and `prakritiGoOn` to skip the current loop iteration.
+</Callout>

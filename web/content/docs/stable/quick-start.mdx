@@ -1,15 +1,17 @@
 ﻿---
 title: Quick Start
-description: Create, run, and understand your first PriyoScript programs.
+description: Build your first PriyoScript programs in small, practical steps.
 ---
 
-# Quick Start
+## Goal
 
-This page gets you from zero to a working PriyoScript program in a few minutes.
+By the end of this page, you will be able to:
 
-## 1. Hello World
+- Write and run a `.priyo` file
+- Read user input and print output
+- Use variables and expressions correctly
 
-Create `hello.priyo`:
+## Example 1: Hello World
 
 ```priyo title="hello.priyo"
 monalisa {
@@ -17,13 +19,23 @@ monalisa {
 }
 ```
 
-Run it:
-
 ```bash
 monalisa hello.priyo
 ```
 
-## 2. Read input and print output
+Equivalent (JavaScript):
+
+```js
+console.log('Hello from JavaScript')
+```
+
+Equivalent (Python):
+
+```python
+print("Hello from Python")
+```
+
+## Example 2: Input + output
 
 ```priyo title="input.priyo"
 monalisa {
@@ -35,23 +47,34 @@ monalisa {
 }
 ```
 
-## 3. Variables and expressions
+## Example 3: Variables + math
 
 ```priyo title="variables.priyo"
 monalisa {
-  priyoKeep x = 10
-  priyoChange y = 5
-  priyoPromise result = x * y
+  priyoKeep base = 12
+  priyoChange tax = 3
+  priyoPromise total = base + tax
 
-  priyoTell(result)
+  priyoTell(total)
 }
 ```
 
-<Callout title="When to use each variable type" type="idea">
-  Use `priyoKeep` for function-scoped mutable values, `priyoChange` for block-scoped mutable values,
-  and `priyoPromise` for values that must not be reassigned.
+## Example 4: Small function
+
+```priyo title="function.priyo"
+monalisa {
+  lisaaTask areaSquare(side) {
+    priyoGiveBack side * side
+  }
+
+  priyoTell(areaSquare(5))
+}
+```
+
+<Callout title="Variable rule" type="idea">
+  Use `priyoPromise` only when you do not want reassignment.
 </Callout>
 
-## 4. Next step
+## Next step
 
-Continue with [Syntax Basics](./syntax-basics) to learn literals, operators, and assignment rules.
+Move to [Syntax Basics](./syntax-basics) for core grammar and assignment rules.

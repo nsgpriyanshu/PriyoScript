@@ -1,11 +1,9 @@
----
+﻿---
 title: CLI & REPL
-description: Use monalisa commands and interactive REPL workflow.
+description: Operate PriyoScript from terminal with repeatable development workflows.
 ---
 
-# CLI & REPL
-
-## Common commands
+## CLI essentials
 
 ```bash
 monalisa -h
@@ -16,15 +14,15 @@ monalisa file.priyo
 monalisa -repl
 ```
 
-## REPL commands
+## REPL command set
 
-- `.help` show REPL commands
+- `.help` show command list
 - `.clear` clear multiline buffer
-- `.reset` reset runtime and module cache
-- `.load <file.priyo>` execute a file in current REPL context
+- `.reset` reset runtime state and module cache
+- `.load <file.priyo>` run file in current REPL scope
 - `.exit` quit REPL
 
-## Example REPL session
+## Example session
 
 ```text
 priyo> priyoKeep x = 12
@@ -33,6 +31,13 @@ priyo> priyoTell(x * 2)
 priyo> .help
 ```
 
-<Callout title="Title" type="idea">
-  Use REPL for fast prototyping, then move working snippets into `.priyo` files.
+## Suggested workflow
+
+1. Prototype expressions in REPL
+2. Move stable logic into `.priyo` files
+3. Run from CLI for repeatable behavior
+4. Use error codes + docs when failures occur
+
+<Callout title="Pro tip" type="idea">
+  Keep REPL for experiments and CLI files for source-controlled project code.
 </Callout>

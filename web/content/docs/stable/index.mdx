@@ -1,40 +1,46 @@
 ﻿---
 title: Overview
-description: The PriyoScript handbook for end users, from first program to production usage.
+description: PriyoScript stable handbook, from setup to advanced patterns.
 ---
 
-# PriyoScript Handbook (Stable)
+PriyoScript is a human-first interpreted language with readable keywords, bytecode VM execution, first-class arrays, modules, OOP, and structured diagnostics.
 
-PriyoScript is a readable programming language with English-like keywords, a bytecode VM runtime, first-class arrays, modules, OOP, and humanized errors.
-
-This documentation covers stable behavior only.
-
-<Callout title="Version Scope" type="warn">
-  Canary docs can change at any time. Use stable docs for real projects.
+<Callout title="Stable Scope" type="warn">
+  This handbook documents stable features only. Canary docs may include incomplete or changing
+  behavior.
 </Callout>
 
-## First Program
+## History of PriyoScript
 
-```priyo title="hello.priyo"
-monalisa {
-  priyoTell("Hello, PriyoScript!")
-}
-```
+PriyoScript started as a language-learning and language-design project focused on one core question:
 
-Run it:
+**Can programming syntax feel closer to natural human reading while still remaining precise for real software?**
 
-```bash
-monalisa hello.priyo
-```
+The project evolved from a small interpreter prototype into a full pipeline with lexer, parser, compiler, VM, CLI, REPL, modules, OOP, arrays, and structured error diagnostics.
 
-## What You Will Learn
+## Why PriyoScript was made
 
-- How to install and run PriyoScript
-- Core syntax and language mental model
-- Functions, classes, arrays, modules, and error handling
-- CLI and REPL workflows used in real projects
+PriyoScript was created to reduce fear and friction for beginners while still staying useful for serious developers.
 
-## Suggested Learning Path
+Key motivation:
+
+- Make language constructs feel readable and intention-driven
+- Keep errors humanized so users can recover fast
+- Provide a predictable runtime model for real project workflows
+- Bridge learning from common ecosystems (JavaScript/Python/C/Java)
+
+<Callout title="Design principle" type="idea">
+  PriyoScript aims to be as close to plain-English intent as possible without sacrificing
+  compiler/runtime clarity.
+</Callout>
+
+## Who this handbook is for
+
+- New users who want to write and run `.priyo` programs
+- Learners moving from JavaScript/Python/C/Java concepts
+- Contributors who need precise language semantics
+
+## Learning path (base to advanced)
 
 1. [Installation](./installation)
 2. [Quick Start](./quick-start)
@@ -46,7 +52,61 @@ monalisa hello.priyo
 8. [Modules & Packages](./modules-packages)
 9. [Error Handling](./error-handling)
 10. [CLI & REPL](./cli-repl)
+11. [Error Codes Reference](./errors-reference)
 
-<Callout title="How to read this handbook" type="idea">
-  Each page follows the same format: concept, runnable example, and practical rules.
+## First runnable program
+
+```priyo title="hello.priyo"
+monalisa {
+  priyoTell("Hello, PriyoScript!")
+}
+```
+
+```bash
+monalisa hello.priyo
+```
+
+## PriyoScript at a glance
+
+- Entry block: `monalisa { ... }`
+- Variables: `priyoKeep`, `priyoChange`, `priyoPromise`
+- Functions: `lisaaTask ... priyoGiveBack ...`
+- Classes: `lisaaFamily`, `priyoSelf`, `priyoParent`
+- Imports: `lisaaBring`
+- Errors: code + stage + location + tip + docs link
+
+## Current limitations
+
+<Callout title="Ecosystem maturity" type="warn">
+  PriyoScript core language features are stable, but ecosystem tooling and third-party package
+  availability are still growing.
+</Callout>
+
+<Callout title="Compatibility scope" type="warn">
+  PriyoScript is its own language/runtime, so it does not directly execute JavaScript/Python
+  libraries without adapters.
+</Callout>
+
+<Callout title="Roadmap reality" type="idea">
+  Some planned features may appear first in canary docs before they are stabilized in this handbook.
+</Callout>
+
+## Contributors are welcome
+
+Community contributions are strongly encouraged.
+
+You can contribute by:
+
+- Improving docs, examples, and tutorials
+- Reporting bugs and diagnostics edge cases
+- Adding tests for lexer/parser/compiler/vm behavior
+- Proposing language/runtime improvements with clear examples
+
+<Callout title="Contributing" type="idea">
+  If you find ambiguity, open an issue with: expected behavior, actual behavior, sample `.priyo`
+  code, and environment details.
+</Callout>
+
+<Callout title="Read this efficiently" type="idea">
+  Every page follows: concept, syntax, 3-4 examples, and practical rules.
 </Callout>

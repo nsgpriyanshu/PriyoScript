@@ -1,11 +1,20 @@
 ﻿---
 title: Error Handling
-description: Use try/catch/finally/throw and understand PriyoScript diagnostics.
+description: Handle failures with try/catch/finally/throw and read diagnostics correctly.
 ---
 
-# Error Handling
+## Theory
 
-## Try / catch / finally
+Error handling prevents silent failures and makes programs predictable in failure scenarios.
+
+PriyoScript supports structured exception flow:
+
+- `prakritiTry`
+- `prakritiCatch`
+- `prakritiAtEnd`
+- `prakritiThrow`
+
+## Example 1: try/catch/finally
 
 ```priyo
 monalisa {
@@ -19,7 +28,7 @@ monalisa {
 }
 ```
 
-## Throw custom errors
+## Example 2: Validation + throw
 
 ```priyo
 monalisa {
@@ -27,7 +36,6 @@ monalisa {
     prakritiIf (b == 0) {
       prakritiThrow "Division by zero is not allowed"
     }
-
     priyoGiveBack a / b
   }
 
@@ -35,15 +43,33 @@ monalisa {
 }
 ```
 
+## Example 3: User-friendly domain checks
+
+```priyo
+monalisa {
+  lisaaTask validateAge(age) {
+    prakritiIf (age < 0) {
+      prakritiThrow "Age cannot be negative"
+    }
+  }
+
+  prakritiTry {
+    validateAge(-1)
+  } prakritiCatch (err) {
+    priyoTell.Warn(err.message)
+  }
+}
+```
+
 ## Reading diagnostics
 
-PriyoScript diagnostics include:
+Each diagnostic includes:
 
 - Error code (example: `PSYN-002`)
-- Stage (`syntax`, `compile`, `runtime`, or internal engine)
+- Stage (`syntax`, `compile`, `runtime`, or `engine`)
 - File location and source span
-- Human-readable message and tip
-- Docs link for the specific error code
+- Human-readable tip
+- Docs link
 
 ```text
 Code: PSYN-002
@@ -56,6 +82,6 @@ Docs: https://priyyoscript.vercel.app/docs/stable/errors-reference#psyn-002
 ```
 
 <Callout title="Engine vs user errors" type="error">
-  Engine/internal errors point to language implementation issues. Syntax/compile/runtime errors
-  usually come from user code.
+  Engine errors usually indicate language implementation issues. Syntax/compile/runtime errors are
+  generally user-code mistakes.
 </Callout>

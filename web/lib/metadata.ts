@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 const siteConfig = {
-  siteName: 'PriyoScript',
+  siteName: 'PriyoScript - An emotional interpreted programming language',
   siteDescription:
     'Official documentation for PriyoScript: language syntax, runtime architecture, modules, diagnostics, and examples.',
   siteKeywords: [
