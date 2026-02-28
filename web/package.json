@@ -1,6 +1,6 @@
 {
   "name": "priyoscript-web",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -8,8 +8,8 @@
     "start": "next start",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
-    "release": "cliff-jumper --config .cliff-jumperrc.json",
-    "release:dry": "cliff-jumper --config .cliff-jumperrc.json --dry-run"
+    "release": "cliff-jumper",
+    "release:dry": "cliff-jumper --dry-run"
   },
   "dependencies": {
     "fumadocs-core": "16.2.5",
