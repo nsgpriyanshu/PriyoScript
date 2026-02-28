@@ -1,4 +1,4 @@
-const DOCS_BASE = 'https://github.com/nsgpriyanshu/PriyoScript/blob/main/ERRORS.md'
+const DOCS_BASE = 'https://priyyoscript.vercel.app/docs/stable/errors-reference'
 
 function docsSlugFromCode(code) {
   return String(code || '')
