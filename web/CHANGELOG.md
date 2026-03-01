@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.6.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.5.0...web-v0.6.0) - (2026-03-01)
+
+## Bug Fixes
+
+- Navbar add docs link ([8fc81c5](https://github.com/nsgpriyanshu/PriyoScript/commit/8fc81c53e7236870777883609b348d90d1c10b14))
+- **web:** Expand theory and also add simple execution process ([0729b12](https://github.com/nsgpriyanshu/PriyoScript/commit/0729b12933afd63e2cff62115e770d1b17ea4762))
+
+## Documentation
+
+- Add docs for module v3 and trace ([158e91d](https://github.com/nsgpriyanshu/PriyoScript/commit/158e91d3d7e5781acf72ec7ddac5bd0d32fb64f9))
+- Improve dcumentations ([79b3649](https://github.com/nsgpriyanshu/PriyoScript/commit/79b3649b669e5247a0529a720ee445889624a4b2))
+- Improve templates ([1069d6a](https://github.com/nsgpriyanshu/PriyoScript/commit/1069d6a64f9de730cdfab6b4326b977ab94aedd3))
+
+## Features
+
+- Add trace mode for better debuging and module system v3 ([9a964c5](https://github.com/nsgpriyanshu/PriyoScript/commit/9a964c591db22f9387e0152cea9ff2f1c0d60a46))
+
+## Non Code changes
+
+- Add matrix-multiplication example ([bf8e60d](https://github.com/nsgpriyanshu/PriyoScript/commit/bf8e60dfaa75383f66d5a94dd502cacde8ce2749))
+
 # [web-v0.5.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.4.0...web-v0.5.0) - (2026-02-28)
 
 ## Bug Fixes
