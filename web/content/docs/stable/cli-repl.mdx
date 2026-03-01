@@ -1,32 +1,59 @@
 ﻿---
-title: CLI & REPL
-description: Use command-line and REPL efficiently with mental model and examples.
+title: CLI and REPL
+description: Use PriyoScript from terminal effectively, and know when to choose CLI vs REPL.
 ---
 
-## Theory
+## 1. Theory
 
-CLI is best for running files. REPL is best for quick experiments.
+CLI means Command Line Interface: run full files from terminal.  
+REPL means Read-Eval-Print Loop: run one snippet at a time interactively.  
+Use CLI for repeatable project execution.  
+Use REPL for fast experiments and quick checks.  
+Both are important in daily development.  
+PriyoScript provides commands for help, syntax, errors, and explanations.  
+REPL keeps runtime memory between lines, which is useful for testing ideas.  
+For production scripts, prefer CLI-based `.priyo` files in version control.
 
-## Common CLI commands
+## 2. Program Examples
+
+### Example 1: Show Help
 
 ```bash
 monalisa -h
-monalisa -syntax
-monalisa -errors
-monalisa -explain PSYN-002
-monalisa file.priyo
+```
+
+Output (short):
+
+```text
+PriyoScript CLI help...
+```
+
+### Example 2: Run a File
+
+```bash
+monalisa hello.priyo
+```
+
+Output:
+
+```text
+Hello, PriyoScript!
+```
+
+### Example 3: Start REPL
+
+```bash
 monalisa -repl
 ```
 
-## REPL commands
+Output (short):
 
-- `.help`
-- `.clear`
-- `.reset`
-- `.load <file.priyo>`
-- `.exit`
+```text
+Hey, this is PriyoScript REPL...
+priyo>
+```
 
-## Example REPL session
+### Example 4: REPL Session
 
 ```text
 priyo> priyoKeep x = 12
@@ -34,11 +61,84 @@ priyo> priyoTell(x * 2)
 24
 ```
 
-## How execution works (simple)
+Output:
 
-- CLI mode: run full file once
-- REPL mode: run one snippet at a time, keep memory between inputs
+```text
+24
+```
 
-<Callout title="Workflow tip" type="idea">
-  Prototype in REPL, then move stable code to `.priyo` files.
+### Example 5: Error Discovery Commands
+
+```bash
+monalisa -errors
+monalisa -explain PSYN-002
+```
+
+Output (short):
+
+```text
+List of error codes...
+Explanation for PSYN-002...
+```
+
+## 3. Execution Flow
+
+CLI flow:
+
+1. You pass file path.
+2. CLI loads full source.
+3. Parser/compiler/VM run once.
+4. Program exits with output or error.
+
+REPL flow:
+
+1. You type one line/snippet.
+2. REPL evaluates it immediately.
+3. State stays in memory for next line.
+4. You repeat until `.exit`.
+
+## 4. Comparison With Other Languages
+
+Node.js CLI/REPL:
+
+- `node file.js`
+- `node` (interactive REPL)
+
+Python CLI/REPL:
+
+- `python script.py`
+- `python` (interactive shell)
+
+Java:
+
+- Compile + run model (`javac`, `java`) and optional JShell for REPL-like experience.
+
+C:
+
+- Compile then execute binary (`gcc`, `./a.out`), no default built-in REPL.
+
+PriyoScript:
+
+- `monalisa file.priyo`
+- `monalisa -repl`
+
+Difference summary:
+
+- PriyoScript behaves like modern interpreted workflows (Node/Python) with dedicated language diagnostics.
+
+## 5. Inspiration and Official References
+
+- Node.js CLI and REPL concepts:  
+  https://nodejs.org/api/cli.html  
+  https://nodejs.org/api/repl.html
+- Python interpreter and command line:  
+  https://docs.python.org/3/tutorial/interpreter.html
+- Java JShell:  
+  https://docs.oracle.com/en/java/javase/21/jshell/introduction-jshell.html
+- C compile-run workflow (GCC docs):  
+  https://gcc.gnu.org/onlinedocs/
+
+<Callout title="Limitations" type="warn">
+  REPL is ideal for learning and prototyping, but long programs should be stored in `.priyo` files
+  and executed via CLI.
 </Callout>

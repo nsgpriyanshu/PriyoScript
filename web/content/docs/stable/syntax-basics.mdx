@@ -1,71 +1,199 @@
 ﻿---
 title: Syntax Basics
-description: Learn the grammar rules that make PriyoScript code valid.
+description: Core PriyoScript syntax explained from first principles with examples, outputs, and language comparisons.
 ---
 
-## Theory
+## 1. Theory
 
-Syntax is the rulebook of a language. If words are correct but order is wrong, parser errors happen.
+Syntax is the grammar of a programming language.  
+If grammar is correct, the computer can understand your instructions.  
+PriyoScript keeps syntax explicit so beginners can read code like a story.  
+A valid program starts in a `monalisa { ... }` block.  
+Variables store values and expressions compute new values.  
+Conditions choose paths, and loops repeat work.  
+Functions group reusable logic.  
+Comments explain code for humans without affecting execution.  
+Learning syntax first makes every advanced topic easier.
 
-## Entry block
+<Callout title="Beginner Rule" type="idea">
+  Write small, valid programs first. Correct syntax gives you clear confidence.
+</Callout>
+
+## 2. Program Examples
+
+### Example 1: Hello World
 
 ```priyo
 monalisa {
-  priyoTell("Program starts")
+  priyoTell("Hello, PriyoScript!")
 }
 ```
 
-## Variables
+Output:
+
+```text
+Hello, PriyoScript!
+```
+
+### Example 2: Variables and Math
 
 ```priyo
 monalisa {
   priyoKeep a = 10
-  priyoChange b = 20
-  priyoPromise c = 30
+  priyoChange b = 5
+  priyoPromise sum = a + b
+  priyoTell(sum)
 }
 ```
 
-## Literals and expressions
+Output:
+
+```text
+15
+```
+
+### Example 3: Condition
 
 ```priyo
 monalisa {
-  priyoKeep n = 42
-  priyoKeep s = "hello"
-  priyoKeep ok = priyoTrue
-  priyoKeep empty = priyoEmpty
-  priyoTell((n + 8) * 2)
+  priyoKeep marks = 82
+
+  prakritiIf (marks >= 80) {
+    priyoTell("Pass with distinction")
+  } prakritiElse {
+    priyoTell("Pass")
+  }
 }
 ```
 
-## Comments
+Output:
 
-```priyo
-// single-line
-/* multi-line */
+```text
+Pass with distinction
 ```
 
-## Assignment targets
+### Example 4: Loop
 
 ```priyo
 monalisa {
-  priyoKeep arr = [10, 20]
-  arr[0] = 99
+  prakritiCount (priyoChange i = 1; i <= 3; i = i + 1) {
+    priyoTell(i)
+  }
 }
 ```
 
-## How execution works (simple)
+Output:
 
-Parser checks each statement shape first:
+```text
+1
+2
+3
+```
 
-- If shape is valid -> compile and run
-- If shape is invalid -> stop with syntax error location
+### Example 5: Function
 
-Comparison:
+```priyo
+monalisa {
+  lisaaTask square(x) {
+    priyoGiveBack x * x
+  }
 
-- JavaScript: `var/let/const`
-- Python: no `const` keyword
-- C/Java: typed declarations, stricter upfront type model
+  priyoTell(square(4))
+}
+```
 
-<Callout title="Common mistake" type="error">
-  Left side of `=` must be assignable (variable/index/property).
-</Callout>
+Output:
+
+```text
+16
+```
+
+## 3. Execution Flow
+
+1. `monalisa` block starts program execution.
+2. Statements run top to bottom.
+3. Variable lines store values in memory.
+4. Expressions are evaluated left to right by precedence rules.
+5. `if` checks condition and chooses one block.
+6. Loop repeats block while condition allows.
+7. Function call jumps into function body and returns using `priyoGiveBack`.
+8. `priyoTell` prints result to output.
+
+## 4. Comparison With Other Languages
+
+### Hello World Equivalent
+
+C:
+
+```c
+#include <stdio.h>
+int main() {
+  printf("Hello, PriyoScript!\n");
+  return 0;
+}
+```
+
+Java:
+
+```java
+class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello, PriyoScript!");
+  }
+}
+```
+
+JavaScript:
+
+```javascript
+console.log('Hello, PriyoScript!')
+```
+
+Python:
+
+```python
+print("Hello, PriyoScript!")
+```
+
+PriyoScript:
+
+```priyo
+monalisa {
+  priyoTell("Hello, PriyoScript!")
+}
+```
+
+Difference summary:
+
+- C/Java need extra boilerplate (`main`, class declarations, includes).
+- JavaScript/Python are concise.
+- PriyoScript uses an explicit entry block (`monalisa`) for clarity.
+
+## 5. Inspiration and Official References
+
+- C program entry and structured syntax inspiration: ISO C overview  
+  https://www.iso.org/standard/74528.html
+- Java block-based syntax and explicit structure influence:  
+  https://docs.oracle.com/javase/tutorial/java/nutsandbolts/
+- JavaScript expression/operator model influence:  
+  https://tc39.es/ecma262/
+- Python readability and beginner-first philosophy influence:  
+  https://docs.python.org/3/tutorial/
+
+---
+
+### Available Core Syntax Keywords (Current Stable)
+
+- Entry: `monalisa`
+- Output/Input: `priyoTell`, `priyoListen`, `priyoListenSentence`, `priyoListenNumber`
+- Values: `priyoTrue`, `priyoFalse`, `priyoEmpty`
+- Variables: `priyoKeep`, `priyoChange`, `priyoPromise`
+- Object/Class context: `priyoSelf`, `priyoParent`, `priyoCreate`
+- Functions: `lisaaTask`, `priyoGiveBack`
+- Conditionals: `prakritiIf`, `prakritiElseIf`, `prakritiElse`
+- Switch: `prakritiChoose`, `prakritiCase`, `prakritiOtherwise`
+- Loops: `prakritiCount`, `prakritiAsLongAs`, `priyoInside`
+- Loop control: `prakritiStop`, `prakritiGoOn`
+- Errors: `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
+- Modules: `lisaaBring`, `lisaaShare`, `lisaaBox`
+- OOP: `lisaaFamily`, `lisaaInherit`, `lisaaStable`

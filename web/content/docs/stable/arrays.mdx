@@ -1,24 +1,40 @@
 ﻿---
 title: Arrays
-description: Work with ordered collections using indexing, slicing, and helpers.
+description: Complete beginner-to-practical guide to arrays in PriyoScript.
 ---
 
-## Theory
+## 1. Theory
 
-An array stores many values in order. Each value has a position (index).
+An array stores multiple values in one variable.  
+Each value has a numeric position called index.  
+Use arrays when you have a list of related items.  
+PriyoScript arrays are first-class values.  
+You can read, update, slice, loop, destructure, and transform arrays.  
+Helpers like `map`, `filter`, and `reduce` make collection work clean.  
+Learning arrays is essential for real applications and data handling.  
+Arrays also build the base for matrix-style programs.
 
-## Example 1: Create + read + update
+## 2. Program Examples
+
+### Example 1: Indexing and Update
 
 ```priyo
 monalisa {
   priyoKeep nums = [10, 20, 30]
   priyoTell(nums[0])
   nums[1] = 25
-  priyoTell(nums)
+  priyoTell(nums[1])
 }
 ```
 
-## Example 2: Slicing
+Output:
+
+```text
+10
+25
+```
+
+### Example 2: Slicing
 
 ```priyo
 monalisa {
@@ -29,37 +45,148 @@ monalisa {
 }
 ```
 
-## Example 3: Destructuring
+Output:
+
+```text
+[10, 20]
+[10, 20]
+[20, 30, 40]
+```
+
+### Example 3: Destructuring With Default
 
 ```priyo
 monalisa {
   priyoKeep values = [7, 8]
   priyoChange[(first, second, third = 99)] = values
+  priyoTell(first)
+  priyoTell(second)
   priyoTell(third)
 }
 ```
 
-## Example 4: Helpers
+Output:
+
+```text
+7
+8
+99
+```
+
+### Example 4: Iteration
+
+```priyo
+monalisa {
+  priyoKeep items = ["A", "B", "C"]
+  prakritiCount (item priyoInside items) {
+    priyoTell(item)
+  }
+}
+```
+
+Output:
+
+```text
+A
+B
+C
+```
+
+### Example 5: map / filter / reduce
 
 ```priyo
 monalisa {
   lisaaTask isEven(x) {
     priyoGiveBack x % 2 == 0
   }
+
+  lisaaTask add(acc, x) {
+    priyoGiveBack acc + x
+  }
+
   priyoKeep values = [1, 2, 3, 4, 5]
   priyoKeep evens = priyoArray.filter(values, isEven)
-  priyoTell(priyoArray.length(evens))
+  priyoKeep sum = priyoArray.reduce(evens, add, 0)
+
+  priyoTell(evens)
+  priyoTell(sum)
 }
 ```
 
-## How execution works (like a child)
+Output:
 
-Imagine toy boxes in a line:
+```text
+[2, 4]
+6
+```
 
-- Box 0, box 1, box 2...
-- `nums[1]` means open second box
-- slice means take a group of nearby boxes
+## 3. Execution Flow
 
-<Callout title="Tip" type="idea">
-  Use `priyoArray` helpers for cleaner transform logic.
+1. Array literal allocates ordered storage.
+2. `arr[i]` reads value at index `i`.
+3. `arr[i] = value` updates one slot.
+4. Slice builds a new array from range.
+5. For-each loop reads each item one by one.
+6. `filter` keeps matching items.
+7. `reduce` combines array into one final value.
+
+## 4. Comparison With Other Languages
+
+C arrays:
+
+```c
+int nums[3] = {10, 20, 30};
+printf("%d\n", nums[0]);
+```
+
+Java arrays:
+
+```java
+int[] nums = {10, 20, 30};
+System.out.println(nums[0]);
+```
+
+JavaScript arrays:
+
+```javascript
+const nums = [10, 20, 30]
+console.log(nums[0])
+```
+
+Python lists:
+
+```python
+nums = [10, 20, 30]
+print(nums[0])
+```
+
+PriyoScript:
+
+```priyo
+monalisa {
+  priyoKeep nums = [10, 20, 30]
+  priyoTell(nums[0])
+}
+```
+
+Difference summary:
+
+- C arrays are low-level and fixed-size.
+- Java arrays are typed and fixed-size.
+- JavaScript/Python/PriyoScript arrays are dynamic and ergonomic.
+- PriyoScript adds readable helper APIs through `priyoArray`.
+
+## 5. Inspiration and Official References
+
+- JavaScript Array methods (`map/filter/reduce`) inspiration:  
+  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+- Python list behavior inspiration:  
+  https://docs.python.org/3/tutorial/datastructures.html
+- Java arrays reference:  
+  https://docs.oracle.com/javase/tutorial/java/nutsandbolts/arrays.html
+- C arrays reference:  
+  https://en.cppreference.com/w/c/language/array
+
+<Callout title="Best Practice" type="idea">
+  Use direct indexing for simple reads/writes, and `priyoArray` helpers for transformations.
 </Callout>

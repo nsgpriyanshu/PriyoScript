@@ -11,6 +11,16 @@
     "release": "cliff-jumper",
     "release:dry": "cliff-jumper --dry-run"
   },
+  "author": "nsgpriyanshu",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nsgpriyanshu/PriyoScript/web"
+  },
+  "bugs": {
+    "url": "https://github.com/nsgpriyanshu/PriyoScript/issues"
+  },
+  "homepage": "https://nsgpriyanshu.github.io/PriyoScript/web",
   "dependencies": {
     "fumadocs-core": "16.2.5",
     "fumadocs-mdx": "14.1.1",

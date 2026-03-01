@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 
 ## Bug Fixes
 
-- Error docs  path ([fd484c6](https://github.com/nsgpriyanshu/PriyoScript/commit/fd484c63792c1c46af198a174544b3b0ca498853))
+- Error docs path ([fd484c6](https://github.com/nsgpriyanshu/PriyoScript/commit/fd484c63792c1c46af198a174544b3b0ca498853))
 - Docs of priyo script ([cbc2e23](https://github.com/nsgpriyanshu/PriyoScript/commit/cbc2e23415b4796d209392dc449f091ac066abd3))
 
 ## Features

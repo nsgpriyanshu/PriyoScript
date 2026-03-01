@@ -1,59 +1,97 @@
-# PriyoScript Web Docs
+﻿# PriyoScript Web Docs
 
-Next.js + Fumadocs web documentation app for PriyoScript.
+Next.js + Fumadocs documentation application for PriyoScript.
 
-## Development
+## Overview
+
+[![Deployment](https://img.shields.io/badge/Deployment-Vercel-black?logo=vercel)](https://priyyoscript.vercel.app)
+![Web Version](https://img.shields.io/github/package-json/v/nsgpriyanshu/PriyoScript?filename=web%2Fpackage.json&color=ff2056&label=web-version)
+
+This package contains the official PriyoScript docs website (`web/`) with:
+
+- Home page and docs portal
+- Stable and Canary docs structure
+- MDX content with Shiki highlighting
+- Independent web release/changelog flow
+
+## Technology Used
+
+- Next.js 16
+- TypeScript
+- Fumadocs
+- Tailwind CSS v4
+- Shiki (code highlighting)
+- Cliff-jumper (web-only versioning and changelog)
+
+## How to Use as Developer
+
+From repository root:
+
+### 1. Install dependencies
 
 ```bash
 npm --prefix web install
+```
+
+### 2. Run dev server
+
+```bash
 npm --prefix web run dev
 ```
 
 Open: `http://localhost:3000`
 
-## Build
+### 3. Build for production
 
 ```bash
 npm --prefix web run build
 npm --prefix web run start
 ```
 
-## Type Check
+### 4. Type check
 
 ```bash
 npm --prefix web run types:check
 ```
 
-## Separate Web Versioning (Cliff-Jumper)
+### 5. Web release (separate versioning)
 
-Yes, web versioning is maintained separately from root package versioning.
-
-- Config: `web/.cliff-jumperrc.json`
-- Tag format: `web-v<version>`
-- Package version file: `web/package.json`
-- Changelog file: `web/CHANGELOG.md`
-- Monorepo mode: enabled (web package path-scoped release detection)
-
-Preview next web release (no file/tag changes):
+Dry run:
 
 ```bash
 npm --prefix web run release:dry
 ```
 
-Or from root:
-
-```bash
-npm run release:web:dry
-```
-
-Release web only:
+Actual release:
 
 ```bash
 npm --prefix web run release
 ```
 
-Or from root:
+Also available from root package scripts:
 
 ```bash
+npm run release:web:dry
 npm run release:web
 ```
+
+Web release files:
+
+- `web/.cliff-jumperrc.json`
+- `web/cliff.toml`
+- `web/CHANGELOG.md`
+
+## Contact
+
+- Issues: https://github.com/nsgpriyanshu/PriyoScript/issues
+- Repository: https://github.com/nsgpriyanshu/PriyoScript
+- Docs site: https://priyyoscript.vercel.app
+
+## Developer
+
+<div>
+  <br>
+  <a href="https://nsgpriyanshu.github.io">
+    <img src="https://img.shields.io/badge/Developer-nsgpriyanshu-author.svg?color=f10a0a" alt="nsgpriyanshu" />
+  </a>
+</div>

@@ -1,19 +1,27 @@
 ﻿---
-title: Classes & OOP
-description: Understand OOP ideas and apply them in PriyoScript.
+title: Classes and OOP
+description: Practical OOP in PriyoScript with constructor flow, static members, inheritance, and comparisons.
 ---
 
-## What is OOP?
+## 1. Theory
 
-OOP (Object-Oriented Programming) means grouping data and behavior together in objects.
+OOP means organizing code using objects.  
+An object combines data (state) and methods (behavior).  
+A class is a blueprint used to create objects.  
+Use OOP when multiple things share a common structure.  
+It improves readability and reuse in real applications.  
+Inheritance lets a child class reuse parent behavior.  
+Static members belong to the class, not an object instance.  
+In PriyoScript, constructor-like setup is usually done in `init(...)`.  
+`priyoSelf` refers to the current object, and `priyoParent` calls parent constructor logic.
 
-Core ideas:
+<Callout title="When to Use OOP" type="idea">
+  Use OOP for real entities: students, accounts, courses, invoices, products.
+</Callout>
 
-- Object = state + behavior
-- Class = blueprint for objects
-- Inheritance = reuse parent behavior
+## 2. Program Examples
 
-## Example 1: Basic class
+### Example 1: Basic Class + Instance Method
 
 ```priyo
 monalisa {
@@ -21,16 +29,51 @@ monalisa {
     lisaaTask init(name) {
       priyoSelf.name = name
     }
+
     lisaaTask intro() {
       priyoTell("I am " + priyoSelf.name)
     }
   }
-  priyoKeep s = priyoCreate Student("Priyo")
+
+  priyoKeep s = priyoCreate Student("mona")
   s.intro()
 }
 ```
 
-## Example 2: Inheritance
+Output:
+
+```text
+I am Mona
+```
+
+### Example 2: Instance vs Static
+
+```priyo
+monalisa {
+  lisaaFamily MathUtil {
+    lisaaStable lisaaTask square(x) {
+      priyoGiveBack x * x
+    }
+
+    lisaaTask cube(x) {
+      priyoGiveBack x * x * x
+    }
+  }
+
+  priyoTell(MathUtil.square(5))
+  priyoKeep m = priyoCreate MathUtil()
+  priyoTell(m.cube(3))
+}
+```
+
+Output:
+
+```text
+25
+27
+```
+
+### Example 3: Inheritance + Parent Call
 
 ```priyo
 monalisa {
@@ -39,29 +82,60 @@ monalisa {
       priyoSelf.name = name
     }
   }
+
   lisaaFamily Teacher lisaaInherit Person {
     lisaaTask init(name, subject) {
       priyoParent(name)
       priyoSelf.subject = subject
     }
+
+    lisaaTask profile() {
+      priyoTell(priyoSelf.name + " teaches " + priyoSelf.subject)
+    }
   }
+
+  priyoKeep t = priyoCreate Teacher("Piue", "Math")
+  t.profile()
 }
 ```
 
-## Example 3: Static members
+Output:
+
+```text
+Piue teaches Math
+```
+
+### Example 4: Encapsulation Style (Controlled Update)
 
 ```priyo
 monalisa {
-  lisaaFamily MathUtil {
-    lisaaStable lisaaTask square(n) {
-      priyoGiveBack n * n
+  lisaaFamily Wallet {
+    lisaaTask init(balance) {
+      priyoSelf.balance = balance
+    }
+
+    lisaaTask deposit(amount) {
+      priyoSelf.balance = priyoSelf.balance + amount
+    }
+
+    lisaaTask show() {
+      priyoTell(priyoSelf.balance)
     }
   }
-  priyoTell(MathUtil.square(4))
+
+  priyoKeep w = priyoCreate Wallet(100)
+  w.deposit(50)
+  w.show()
 }
 ```
 
-## Example 4: Real model
+Output:
+
+```text
+150
+```
+
+### Example 5: Real-World Mini Model
 
 ```priyo
 monalisa {
@@ -71,27 +145,90 @@ monalisa {
       priyoSelf.credits = credits
     }
   }
-  priyoKeep c = priyoCreate Course("Compiler", 4)
+
+  priyoKeep c = priyoCreate Course("Compiler Design", 4)
   priyoTell(c.title)
+  priyoTell(c.credits)
 }
 ```
 
-## How execution works (like a child)
+Output:
 
-Class is cookie cutter. Object is cookie.
+```text
+Compiler Design
+4
+```
 
-- `lisaaFamily` makes cutter
-- `priyoCreate` makes cookie
-- `init` puts details in cookie
-- methods read/use those details
+## 3. Execution Flow
 
-Comparison:
+1. Class definition is registered first.
+2. `priyoCreate ClassName(...)` allocates a new object.
+3. `init(...)` runs to initialize fields.
+4. `priyoSelf` points to that current object.
+5. Method calls run in object context.
+6. Static methods run directly on class without creating object.
+7. In child class constructors, `priyoParent(...)` initializes parent part first.
 
-- Java: closest class model
-- JS: class syntax, prototype internals
-- Python: class with `self`
-- C: manual struct + functions
+## 4. Comparison With Other Languages
 
-<Callout title="Constructor rule" type="error">
-  In child `init`, `priyoParent(...)` must be first and only once.
+Java (very close conceptually):
+
+```java
+class Student {
+  String name;
+  Student(String name) { this.name = name; }
+  void intro() { System.out.println("I am " + name); }
+}
+```
+
+JavaScript:
+
+```javascript
+class Student {
+  constructor(name) {
+    this.name = name
+  }
+  intro() {
+    console.log('I am ' + this.name)
+  }
+}
+```
+
+Python:
+
+```python
+class Student:
+    def __init__(self, name):
+        self.name = name
+    def intro(self):
+        print("I am " + self.name)
+```
+
+C (manual OOP style):
+
+```c
+typedef struct {
+  char* name;
+} Student;
+```
+
+Difference summary:
+
+- Java/PriyoScript use class-centric explicit OOP.
+- JavaScript/Python are flexible but still class-capable.
+- C has no native class model; patterns are manual.
+
+## 5. Inspiration and Official References
+
+- Java classes, inheritance, static members (primary inspiration):  
+  https://docs.oracle.com/javase/tutorial/java/javaOO/
+- JavaScript classes:  
+  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+- Python classes:  
+  https://docs.python.org/3/tutorial/classes.html
+- C data modeling with `struct`:  
+  https://en.cppreference.com/w/c/language/struct
+
+<Callout title="Important Constructor Rule" type="error">
+  In a child `init`, call `priyoParent(...)` first and only once.
 </Callout>

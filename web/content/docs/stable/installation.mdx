@@ -1,50 +1,70 @@
 ﻿---
 title: Installation
-description: Install PriyoScript, verify setup, and understand what each step does.
+description: End-user installation guide for PriyoScript using npm global install.
 ---
 
 ## Theory
 
-Installation means preparing two things:
+For end users, installation should be one simple command.  
+Global install makes the `monalisa` command available in your terminal.  
+After install, you can run `.priyo` files from any folder.  
+This is the official user-facing install method right now.
 
-- The PriyoScript executable/CLI
-- The environment path so terminal can find it
+<Callout title="Current install path" type="idea">
+  Use npm global install. Standalone installer/binary flow is not the official stable user path yet.
+</Callout>
 
-## Option A: Run from source
+## Prerequisite
+
+- Node.js 18+ with npm
+
+## Install PriyoScript globally
 
 ```bash
-npm install
-node bin/monalisa.js -h
+npm i -g priyoscript
 ```
 
-## Option B: Windows executable
-
-```bash
-npm run dist:win
-```
-
-Then:
-
-```powershell
-.\dist\priyoscript.exe -h
-```
-
-## How execution works (very simple)
-
-Think of `monalisa` like a remote control button:
-
-1. You press command in terminal
-2. CLI opens your `.priyo` file
-3. PriyoScript pipeline runs (read -> parse -> compile -> execute)
-4. Output appears in terminal
-
-## Verify
+## Verify installation
 
 ```bash
 monalisa -h
 monalisa -repl
 ```
 
+## Run your first file
+
+Create `hello.priyo`:
+
+```priyo
+monalisa {
+  priyoTell("Hello, PriyoScript!")
+}
+```
+
+Run:
+
+```bash
+monalisa hello.priyo
+```
+
+Expected output:
+
+```text
+Hello, PriyoScript!
+```
+
+## Update PriyoScript
+
+```bash
+npm i -g priyoscript@latest
+```
+
+## Uninstall PriyoScript
+
+```bash
+npm uninstall -g priyoscript
+```
+
 <Callout title="Troubleshooting" type="error">
-  If `monalisa` is not recognized, restart terminal and check PATH.
+  If `monalisa` is not recognized, restart terminal and ensure your npm global bin path is in PATH.
 </Callout>

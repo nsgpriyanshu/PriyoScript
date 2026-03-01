@@ -1,19 +1,23 @@
 ﻿---
 title: Error Handling
-description: Understand why errors happen and how to recover safely.
+description: Handle failures safely with try/catch/finally/throw and read diagnostics clearly.
 ---
 
-## Theory
+## 1. Theory
 
-Errors happen when program assumptions are broken.
+Errors are normal in programming.  
+Good software does not ignore them; it handles them clearly.  
+PriyoScript gives structured error handling keywords.  
+`prakritiTry` protects risky code.  
+`prakritiCatch` handles failures.  
+`prakritiAtEnd` runs cleanup code always.  
+`prakritiThrow` creates explicit custom failures.  
+Diagnostics include code, stage, location, and tip for fast recovery.  
+This design helps beginners understand both mistake and fix.
 
-Good error handling means:
+## 2. Program Examples
 
-- Detect early
-- Explain clearly
-- Recover when possible
-
-## Example 1: try/catch/finally
+### Example 1: Basic try/catch/finally
 
 ```priyo
 monalisa {
@@ -27,7 +31,14 @@ monalisa {
 }
 ```
 
-## Example 2: Validation throw
+Output:
+
+```text
+Caught: Something failed
+Cleanup done
+```
+
+### Example 2: Validate Input Before Operation
 
 ```priyo
 monalisa {
@@ -37,29 +48,160 @@ monalisa {
     }
     priyoGiveBack a / b
   }
-}
-```
 
-## Example 3: User-friendly flow
-
-```priyo
-monalisa {
   prakritiTry {
-    prakritiThrow "Invalid input"
+    priyoTell(divide(10, 0))
   } prakritiCatch (err) {
     priyoTell.Warn(err.message)
   }
 }
 ```
 
-## How execution works (like a child)
+Output:
 
-Imagine carrying water in a glass:
+```text
+Division by zero is not allowed
+```
 
-- `try` = carry carefully
-- if falls, `catch` = clean spill
-- `finally` = always wash hands
+### Example 3: Manual Business Rule Error
 
-<Callout title="Diagnostics" type="idea">
-  PriyoScript errors include code, stage, location, tip, and docs link.
+```priyo
+monalisa {
+  lisaaTask enroll(age) {
+    prakritiIf (age < 18) {
+      prakritiThrow "Minimum age is 18"
+    }
+    priyoGiveBack "Enrolled"
+  }
+
+  prakritiTry {
+    priyoTell(enroll(16))
+  } prakritiCatch (err) {
+    priyoTell.Error(err.message)
+  }
+}
+```
+
+Output:
+
+```text
+Minimum age is 18
+```
+
+### Example 4: Continue Program After Catch
+
+```priyo
+monalisa {
+  prakritiTry {
+    prakritiThrow "Network timeout"
+  } prakritiCatch (err) {
+    priyoTell.Warn("Retry later")
+  }
+
+  priyoTell("Program still running")
+}
+```
+
+Output:
+
+```text
+Retry later
+Program still running
+```
+
+### Example 5: Inspect Error Metadata
+
+```priyo
+monalisa {
+  prakritiTry {
+    prakritiThrow "Custom failure"
+  } prakritiCatch (err) {
+    priyoTell(err.message)
+    priyoTell(err.code)
+  }
+}
+```
+
+Output:
+
+```text
+Custom failure
+(implementation-specific code)
+```
+
+## 3. Execution Flow
+
+1. Code inside `prakritiTry` starts.
+2. If no error occurs, `catch` is skipped.
+3. If error occurs, control jumps to `prakritiCatch`.
+4. `err` object carries details like message/code.
+5. `prakritiAtEnd` runs whether error happened or not.
+6. Program continues after handling unless explicitly stopped.
+
+## 4. Comparison With Other Languages
+
+Java:
+
+```java
+try {
+  risky();
+} catch (Exception e) {
+  System.out.println(e.getMessage());
+} finally {
+  cleanup();
+}
+```
+
+JavaScript:
+
+```javascript
+try {
+  risky()
+} catch (e) {
+  console.log(e.message)
+} finally {
+  cleanup()
+}
+```
+
+Python:
+
+```python
+try:
+    risky()
+except Exception as e:
+    print(str(e))
+finally:
+    cleanup()
+```
+
+C:
+
+- C has no native `try/catch`; errors are handled via return codes, `errno`, or `goto` cleanup patterns.
+
+PriyoScript:
+
+```priyo
+prakritiTry { ... } prakritiCatch (err) { ... } prakritiAtEnd { ... }
+```
+
+Difference summary:
+
+- PriyoScript, Java, JS, Python use structured exception flow.
+- C uses manual error handling patterns.
+
+## 5. Inspiration and Official References
+
+- Java exceptions:  
+  https://docs.oracle.com/javase/tutorial/essential/exceptions/
+- JavaScript `try...catch`:  
+  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch
+- Python exceptions:  
+  https://docs.python.org/3/tutorial/errors.html
+- C error handling basics (`errno`):  
+  https://en.cppreference.com/w/c/error/errno
+
+<Callout title="Best Practice" type="idea">
+  Throw clear messages, catch close to the failure boundary, and always keep cleanup in
+  `prakritiAtEnd`.
 </Callout>

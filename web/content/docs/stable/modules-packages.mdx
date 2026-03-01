@@ -1,19 +1,22 @@
 ﻿---
-title: Modules & Packages
-description: Split code into reusable files and import them safely.
+title: Modules and Packages
+description: Practical modular programming in PriyoScript using lisaaBox, lisaaShare, and lisaaBring.
 ---
 
-## Theory
+## 1. Theory
 
-Modules let you break large programs into small focused files.
+Modular programming means splitting large code into small focused files.  
+This improves readability, maintainability, and reuse.  
+In PriyoScript, modules are created with `lisaaBox`.  
+Exports use `lisaaShare`, and imports use `lisaaBring`.  
+Built-in packages (like `math`) are imported directly.  
+Local modules are imported by path.  
+This structure helps teams work on separate files safely.  
+It also reduces copy-paste coding.
 
-Benefits:
+## 2. Program Examples
 
-- Better organization
-- Reuse code across files
-- Easier maintenance and testing
-
-## Example 1: Built-in package
+### Example 1: Built-in Package Import
 
 ```priyo
 monalisa {
@@ -22,22 +25,40 @@ monalisa {
 }
 ```
 
-## Example 2: Create module
+Output:
 
-```priyo title="college.priyo"
+```text
+8
+```
+
+### Example 2: Create a Local Module
+
+`college.priyo`:
+
+```priyo
 lisaaBox {
   lisaaTask square(x) {
     priyoGiveBack x * x
   }
+
   priyoKeep campus = "NSEC"
+
   lisaaShare square
   lisaaShare campus
 }
 ```
 
-## Example 3: Import module
+Output:
 
-```priyo title="main.priyo"
+```text
+(No direct output; this file defines exports)
+```
+
+### Example 3: Import as Namespace
+
+`main.priyo`:
+
+```priyo
 monalisa {
   lisaaBring "./college.priyo": college
   priyoTell(college.campus)
@@ -45,23 +66,111 @@ monalisa {
 }
 ```
 
-## Example 4: Named import alias
+Output:
+
+```text
+NSEC
+25
+```
+
+### Example 4: Named + Alias Import
 
 ```priyo
 monalisa {
-  lisaaBring "./college.priyo": [campus, square: squareFn]
-  priyoTell(squareFn(6))
+  lisaaBring "./college.priyo": [campus, square: sq]
+  priyoTell(campus)
+  priyoTell(sq(6))
 }
 ```
 
-## How execution works (simple)
+Output:
 
-Think of modules like notebooks:
+```text
+NSEC
+36
+```
 
-1. `lisaaBox` is notebook boundary
-2. `lisaaShare` marks pages visible to others
-3. `lisaaBring` opens notebook and imports shared pages
+### Example 5: Multi-Module Project Pattern
 
-<Callout title="Rule" type="warn">
-  File imports must target valid `lisaaBox` module files.
+```priyo
+monalisa {
+  lisaaBring math
+  lisaaBring "./college.priyo": college
+
+  priyoTell(math.areaCircle(2))
+  priyoTell(college.square(4))
+}
+```
+
+Output:
+
+```text
+12.56636
+16
+```
+
+## 3. Execution Flow
+
+1. Interpreter reads import statements early.
+2. Built-in package names resolve from package registry.
+3. File path imports load target file.
+4. `lisaaBox` defines module boundary.
+5. Only symbols marked by `lisaaShare` are exposed.
+6. Import alias maps module exports into current file scope.
+7. Program continues normal execution using imported values.
+
+## 4. Comparison With Other Languages
+
+Java:
+
+```java
+import java.util.ArrayList;
+```
+
+Python:
+
+```python
+import math
+from module import square as sq
+```
+
+Node.js (ESM):
+
+```javascript
+import { readFile } from 'node:fs/promises'
+```
+
+Node.js (CommonJS):
+
+```javascript
+const fs = require('fs')
+```
+
+PriyoScript:
+
+```priyo
+monalisa {
+  lisaaBring math
+  lisaaBring "./college.priyo": college
+}
+```
+
+Difference summary:
+
+- PriyoScript module syntax is explicit and beginner-readable.
+- Similar goal to Java/Python/Node imports: reuse code cleanly.
+- `lisaaBox` + `lisaaShare` gives clear export boundaries.
+
+## 5. Inspiration and Official References
+
+- Java imports/packages inspiration:  
+  https://docs.oracle.com/javase/tutorial/java/package/
+- Python import system inspiration:  
+  https://docs.python.org/3/reference/import.html
+- Node.js modules inspiration:  
+  https://nodejs.org/api/modules.html  
+  https://nodejs.org/api/esm.html
+
+<Callout title="About priyoPackage" type="idea">
+  In PriyoScript docs, “package/module boundary” is implemented through `lisaaBox`.
 </Callout>

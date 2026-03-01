@@ -1,0 +1,170 @@
+﻿---
+title: Advanced Concepts
+description: End-to-end matrix multiplication example that combines loops, arrays, functions, and control flow.
+---
+
+## 1. Theory
+
+Matrix multiplication is a strong foundational problem for learning programming deeply.  
+It combines arrays, loops, indexing, variable updates, and function decomposition.  
+If you understand this program, you understand core algorithmic thinking.  
+You will read input-like data structures, apply deterministic rules, and produce structured output.  
+This is also how many real systems process numeric data internally.  
+The example below intentionally uses clear loops so beginners can follow every step.  
+After this, you can confidently solve many table-based and list-based problems.
+
+## 2. Program Examples
+
+### Example 1: Matrix Multiplication (2x2) with User Input
+
+```priyo
+monalisa {
+  lisaaTask readMatrix2x2(label) {
+    priyoTell.Info("Enter values for " + label)
+    priyoKeep m = [[0, 0], [0, 0]]
+
+    prakritiCount (priyoChange i = 0; i < 2; i = i + 1) {
+      prakritiCount (priyoChange j = 0; j < 2; j = j + 1) {
+        m[i][j] = priyoListenNumber("Value at [" + i + "][" + j + "]: ")
+      }
+    }
+
+    priyoGiveBack m
+  }
+
+  lisaaTask multiply2x2(a, b) {
+    priyoKeep result = [[0, 0], [0, 0]]
+
+    prakritiCount (priyoChange i = 0; i < 2; i = i + 1) {
+      prakritiCount (priyoChange j = 0; j < 2; j = j + 1) {
+        priyoKeep sum = 0
+        prakritiCount (priyoChange k = 0; k < 2; k = k + 1) {
+          sum = sum + a[i][k] * b[k][j]
+        }
+        result[i][j] = sum
+      }
+    }
+
+    priyoGiveBack result
+  }
+
+  priyoKeep m1 = readMatrix2x2("Matrix A")
+  priyoKeep m2 = readMatrix2x2("Matrix B")
+
+  priyoKeep out = multiply2x2(m1, m2)
+  priyoTell.Success("Result matrix:")
+  priyoTell(out)
+}
+```
+
+Output:
+
+```text
+Enter values for Matrix A
+Enter values for Matrix B
+Result matrix:
+[[19, 22], [43, 50]]
+```
+
+### Example 2: Print Matrix Row by Row
+
+```priyo
+monalisa {
+  priyoKeep matrix = [[19, 22], [43, 50]]
+  prakritiCount (row priyoInside matrix) {
+    priyoTell(row)
+  }
+}
+```
+
+Output:
+
+```text
+[19, 22]
+[43, 50]
+```
+
+### Example 3: Validate Matrix Dimensions
+
+```priyo
+monalisa {
+  lisaaTask canMultiply(colsA, rowsB) {
+    priyoGiveBack colsA == rowsB
+  }
+
+  priyoTell(canMultiply(2, 2))
+  priyoTell(canMultiply(3, 2))
+}
+```
+
+Output:
+
+```text
+priyoTrue
+priyoFalse
+```
+
+### Example 4: Sum All Elements in Result Matrix
+
+```priyo
+monalisa {
+  priyoKeep matrix = [[19, 22], [43, 50]]
+  priyoKeep total = 0
+
+  prakritiCount (row priyoInside matrix) {
+    prakritiCount (val priyoInside row) {
+      total = total + val
+    }
+  }
+
+  priyoTell(total)
+}
+```
+
+Output:
+
+```text
+134
+```
+
+### Example 5: Final Practical Pattern (Compute + Print)
+
+```priyo
+monalisa {
+  priyoKeep out = [[19, 22], [43, 50]]
+  priyoTell("Final matrix:")
+  prakritiCount (row priyoInside out) {
+    priyoTell(row)
+  }
+}
+```
+
+Output:
+
+```text
+Final matrix:
+[19, 22]
+[43, 50]
+```
+
+## 3. Execution Flow
+
+1. Two matrices are read from user input.
+2. Outer loop selects result row `i`.
+3. Middle loop selects result column `j`.
+4. Inner loop computes dot product using index `k`.
+5. Dot-product sum is stored in `result[i][j]`.
+6. Steps repeat until all cells are computed.
+7. Final matrix is printed.
+
+Simple child-friendly analogy:
+
+- First matrix = ingredient table A.
+- Second matrix = ingredient table B.
+- For each output box, you multiply matching pairs and add them.
+- Put the final sum in that output box.
+
+<Callout title="Why this example matters" type="idea">
+  Matrix multiplication proves you can combine syntax, loops, arrays, and functions into one
+  complete real algorithm.
+</Callout>

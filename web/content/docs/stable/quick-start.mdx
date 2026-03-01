@@ -1,13 +1,21 @@
 ﻿---
 title: Quick Start
-description: Build your first PriyoScript programs with clear step-by-step understanding.
+description: Create, run, and understand your first PriyoScript programs in minutes.
 ---
 
-## Theory
+## Goal
 
-A program is just instructions executed top to bottom unless control-flow changes the order.
+This page helps you move from installation to working PriyoScript code quickly.
 
-## Example 1: Hello World
+By the end, you will be able to:
+
+- Run a `.priyo` file with `monalisa`
+- Read input and print output
+- Use variables and functions
+
+## Step 1: Hello World
+
+Create `hello.priyo`:
 
 ```priyo
 monalisa {
@@ -15,54 +23,92 @@ monalisa {
 }
 ```
 
-## Example 2: Input + output
+Run:
+
+```bash
+monalisa hello.priyo
+```
+
+Expected output:
+
+```text
+Hello from PriyoScript
+```
+
+## Step 2: Input and output
 
 ```priyo
 monalisa {
   priyoKeep name = priyoListenSentence("Your name: ")
   priyoKeep age = priyoListenNumber("Your age: ")
+
   priyoTell.Success("Hi " + name)
   priyoTell.Info("Age: " + age)
 }
 ```
 
-## Example 3: Variables + math
+## Step 3: Variables and expressions
 
 ```priyo
 monalisa {
   priyoKeep base = 12
   priyoChange tax = 3
   priyoPromise total = base + tax
+
   priyoTell(total)
 }
 ```
 
-## Example 4: Small function
+## Step 4: First function
 
 ```priyo
 monalisa {
   lisaaTask areaSquare(side) {
     priyoGiveBack side * side
   }
+
   priyoTell(areaSquare(5))
 }
 ```
 
-## How execution works (like a 5-year-old)
+Expected output:
 
-Imagine robot steps:
+```text
+25
+```
 
-1. Robot enters `monalisa { ... }`
-2. Robot reads line 1, does it
-3. Reads next line, does it
-4. When robot sees function call, it jumps into function and comes back with answer
+## Execution flow
 
-Equivalent hello world:
+1. Execution starts inside `monalisa { ... }`.
+2. Statements run in sequence from top to bottom.
+3. Variable declarations store values in runtime memory.
+4. Function definitions are registered.
+5. Function calls evaluate arguments, execute function body, and return results.
+6. `priyoTell` prints final values.
+
+## Quick comparison
+
+JavaScript:
 
 ```js
 console.log('Hello from JavaScript')
 ```
 
+Python:
+
 ```python
 print('Hello from Python')
 ```
+
+PriyoScript:
+
+```priyo
+monalisa {
+  priyoTell("Hello from PriyoScript")
+}
+```
+
+<Callout title="Next Step" type="idea">
+  Continue with [Syntax Basics](./syntax-basics) to learn full language grammar and assignment
+  rules.
+</Callout>
