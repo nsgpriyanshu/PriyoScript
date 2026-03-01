@@ -11,6 +11,7 @@ const {
   createCompileError,
   createEngineError,
   createRuntimeError,
+  ErrorCodes,
   classifyRuntimeFailure,
   ErrorStage,
 } = require('../errors')
@@ -93,40 +94,157 @@ function attachSourceContext(err, { source, filename } = {}) {
   return err
 }
 
-function resolveModulePath(importSource, importerFile) {
-  const source = String(importSource || '').trim()
-  const looksLikePath =
+function uniquePaths(paths) {
+  const seen = new Set()
+  const result = []
+  for (const candidate of paths) {
+    const normalized = path.normalize(candidate)
+    if (!seen.has(normalized)) {
+      seen.add(normalized)
+      result.push(normalized)
+    }
+  }
+  return result
+}
+
+function looksLikePathImport(source) {
+  return (
     source.startsWith('./') ||
     source.startsWith('../') ||
     source.startsWith('/') ||
-    source.includes('\\') ||
     source.includes('/') ||
-    source.endsWith('.priyo')
+    source.includes('\\') ||
+    source.endsWith('.priyo') ||
+    path.isAbsolute(source)
+  )
+}
 
-  if (!looksLikePath) return null
+function buildModuleCandidates(importSource, importerFile, projectRoot) {
+  const source = String(importSource || '').trim()
+  if (!source) {
+    return {
+      source,
+      mode: 'invalid',
+      candidates: [],
+      isPathImport: true,
+      errorReason: 'Empty module import source',
+    }
+  }
 
-  const baseDir = importerFile ? path.dirname(importerFile) : process.cwd()
-  const resolved = path.resolve(baseDir, source)
-  if (path.extname(resolved)) return resolved
-  return `${resolved}.priyo`
+  if (!looksLikePathImport(source)) {
+    return {
+      source,
+      mode: 'package',
+      candidates: [],
+      isPathImport: false,
+      errorReason: null,
+    }
+  }
+
+  const importerDir = importerFile ? path.dirname(importerFile) : process.cwd()
+  let baseResolved
+  let mode
+
+  if (source.startsWith('./') || source.startsWith('../')) {
+    mode = 'relative'
+    baseResolved = path.resolve(importerDir, source)
+  } else if (source.startsWith('/')) {
+    // PriyoScript absolute imports are project-root relative (not OS-root relative).
+    mode = 'project-absolute'
+    baseResolved = path.resolve(projectRoot, `.${source}`)
+  } else if (path.isAbsolute(source)) {
+    mode = 'filesystem-absolute'
+    baseResolved = path.normalize(source)
+  } else {
+    // Backward compatibility: "folder/module.priyo" or "module.priyo" without ./ prefix.
+    mode = 'legacy-relative'
+    baseResolved = path.resolve(importerDir, source)
+  }
+
+  const candidates = []
+  const ext = path.extname(baseResolved)
+  if (ext) {
+    candidates.push(baseResolved)
+  } else {
+    candidates.push(baseResolved)
+    candidates.push(`${baseResolved}.priyo`)
+  }
+  candidates.push(path.join(baseResolved, 'index.priyo'))
+
+  return {
+    source,
+    mode,
+    candidates: uniquePaths(candidates),
+    isPathImport: true,
+    errorReason: null,
+  }
+}
+
+function resolveModulePath(importSource, importerFile, projectRoot = process.cwd()) {
+  const resolution = buildModuleCandidates(importSource, importerFile, projectRoot)
+  if (!resolution.isPathImport || resolution.errorReason) {
+    return { modulePath: null, resolution }
+  }
+
+  const modulePath = resolution.candidates.find(candidate => {
+    try {
+      return fs.existsSync(candidate) && fs.statSync(candidate).isFile()
+    } catch {
+      return false
+    }
+  })
+
+  return { modulePath: modulePath || null, resolution }
 }
 
 function createModuleRuntime(io = {}) {
   const moduleCache = new Map()
   const loadingModules = new Set()
+  const projectRoot = io.projectRoot || process.cwd()
 
   const moduleLoader = async (importSource, importerFile) => {
-    const modulePath = resolveModulePath(importSource, importerFile)
-    if (!modulePath) {
-      throw new Error(`Unknown module path import: "${importSource}"`)
+    const { modulePath, resolution } = resolveModulePath(importSource, importerFile, projectRoot)
+    if (!resolution.isPathImport) {
+      throw createRuntimeError(
+        `Unknown module path import: "${importSource}". Path imports must use ./, ../, /, or an explicit .priyo path.`,
+        {
+          code: ErrorCodes.RUNTIME.UNKNOWN_MODULE,
+          metadata: {
+            importSource,
+            importerFile: importerFile || null,
+            resolutionMode: resolution.mode,
+          },
+        },
+      )
     }
 
-    if (!fs.existsSync(modulePath)) {
-      throw new Error(`Module file not found: "${importSource}"`)
+    if (!modulePath) {
+      throw createRuntimeError(
+        `Module not found: "${importSource}". Tried: ${resolution.candidates.join(', ')}`,
+        {
+          code: ErrorCodes.RUNTIME.UNKNOWN_MODULE,
+          metadata: {
+            importSource,
+            importerFile: importerFile || null,
+            resolutionMode: resolution.mode,
+            triedPaths: resolution.candidates,
+          },
+        },
+      )
     }
 
     if (loadingModules.has(modulePath)) {
-      throw new Error(`Cyclic module import detected for "${importSource}"`)
+      throw createRuntimeError(
+        `Cyclic module import detected for "${importSource}" at "${modulePath}"`,
+        {
+          code: ErrorCodes.RUNTIME.UNKNOWN_MODULE,
+          metadata: {
+            importSource,
+            importerFile: importerFile || null,
+            resolvedPath: modulePath,
+          },
+        },
+      )
     }
 
     if (moduleCache.has(modulePath)) {
@@ -168,6 +286,9 @@ function createModuleRuntime(io = {}) {
 async function runSource(source, options = {}) {
   const {
     printBytecode = false,
+    trace = false,
+    traceLogger = null,
+    debugHooks = null,
     environment = new Environment(null, { isFunctionScope: true }),
     builtins = createBuiltins(options.io),
     filename = null,
@@ -216,13 +337,17 @@ async function runSource(source, options = {}) {
   const activeModuleContext =
     moduleContext || (ast.kind === 'package' ? { exports: { __priyoHostObject: true } } : null)
 
+  let vm = null
   try {
-    const vm = new VM(bytecode, {
+    vm = new VM(bytecode, {
       environment,
       builtins,
       moduleLoader,
       currentFile: filename,
       moduleContext: activeModuleContext,
+      trace,
+      traceLogger,
+      debugHooks,
     })
     await vm.run()
   } catch (err) {
@@ -238,10 +363,17 @@ async function runSource(source, options = {}) {
     }
 
     const fallback = firstMeaningfulLocation(source)
+    const sourceStack = vm && typeof vm.getSourceStack === 'function' ? vm.getSourceStack() : []
     const runtimeErr = createRuntimeError(err.message, {
       code: classification.code,
       category: classification.category,
-      metadata: { phase: 'vm', file: filename, stack: cleanStack(err.stack), ...fallback },
+      metadata: {
+        phase: 'vm',
+        file: filename,
+        stack: cleanStack(err.stack),
+        sourceStack,
+        ...fallback,
+      },
       cause: err,
     })
     throw attachSourceContext(runtimeErr, { source, filename })

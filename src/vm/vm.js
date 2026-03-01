@@ -17,16 +17,26 @@ class VM {
     this.moduleLoader = options.moduleLoader || null
     this.currentFile = options.currentFile || null
     this.moduleContext = options.moduleContext || null
+    this.traceEnabled = !!options.trace
+    this.traceLogger = typeof options.traceLogger === 'function' ? options.traceLogger : null
+    this.debugHooks = options.debugHooks || {}
+    this.sourceCallStack = []
+    this.debugSequence = 0
+    this.installDebugBuiltins()
     this.registerBuiltinGlobals()
   }
 
   async run() {
-    await this.executeFrame(this.instructions, this.environment, false)
+    await this.executeFrame(this.instructions, this.environment, false, '<main>')
   }
 
-  async executeFrame(instructions, frameEnvironment, isFunctionFrame) {
+  async executeFrame(instructions, frameEnvironment, isFunctionFrame, frameName = '<frame>') {
     const previousEnvironment = this.environment
     this.environment = frameEnvironment
+    this.sourceCallStack.push({
+      file: this.currentFile || '<memory>',
+      frame: frameName,
+    })
 
     const stack = []
     const tryStack = []
@@ -36,6 +46,7 @@ class VM {
     try {
       while (ip < instructions.length) {
         const instr = instructions[ip]
+        this.traceInstruction(ip, instr, stack, frameName)
 
         try {
           switch (instr.op) {
@@ -545,6 +556,7 @@ class VM {
 
       return { returned: false, value: null }
     } finally {
+      this.sourceCallStack.pop()
       this.environment = previousEnvironment
     }
   }
@@ -586,7 +598,7 @@ class VM {
       callEnv.define(callee.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(callee.instructions, callEnv, true)
+    const result = await this.executeFrame(callee.instructions, callEnv, true, `fn:${name}`)
     return result.value
   }
 
@@ -769,7 +781,12 @@ class VM {
       callEnv.define(method.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(method.instructions, callEnv, true)
+    const result = await this.executeFrame(
+      method.instructions,
+      callEnv,
+      true,
+      `method:${receiver.classRef.name}.${methodName}`,
+    )
     return result.value
   }
 
@@ -807,7 +824,12 @@ class VM {
       callEnv.define(method.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(method.instructions, callEnv, true)
+    const result = await this.executeFrame(
+      method.instructions,
+      callEnv,
+      true,
+      `static:${classRef.name}.${methodName}`,
+    )
     return result.value
   }
 
@@ -878,7 +900,12 @@ class VM {
       },
       'const',
     )
-    const result = await this.executeFrame(instructions, callEnv, true)
+    const result = await this.executeFrame(
+      instructions,
+      callEnv,
+      true,
+      isStatic ? `init:static:${ownerClass.name}` : `init:instance:${ownerClass.name}`,
+    )
     return result.value
   }
 
@@ -1221,6 +1248,84 @@ class VM {
         // Ignore redeclare collisions in reused environments.
       }
     }
+  }
+
+  installDebugBuiltins() {
+    if (typeof this.builtins.priyoBreak !== 'function') {
+      this.builtins.priyoBreak = label => {
+        this.triggerBreakpoint(label)
+        return null
+      }
+      this.builtins.priyoBreak.__priyoHostObject = true
+    }
+  }
+
+  traceInstruction(ip, instr, stack, frameName) {
+    if (!this.traceEnabled && typeof this.debugHooks.onInstruction !== 'function') return
+    const record = {
+      seq: ++this.debugSequence,
+      file: this.currentFile || '<memory>',
+      frame: frameName,
+      ip,
+      op: instr.op,
+      operand: this.formatTraceOperand(instr.operand),
+      stackDepth: stack.length,
+    }
+
+    if (this.traceEnabled) {
+      const line =
+        `[TRACE #${record.seq}] ${record.file} ${record.frame} ip=${record.ip} ` +
+        `op=${record.op}` +
+        (record.operand ? ` operand=${record.operand}` : '') +
+        ` stack=${record.stackDepth}`
+      if (this.traceLogger) this.traceLogger(line)
+      else console.log(line)
+    }
+
+    if (typeof this.debugHooks.onInstruction === 'function') {
+      this.debugHooks.onInstruction(record)
+    }
+  }
+
+  triggerBreakpoint(label) {
+    const payload = {
+      seq: ++this.debugSequence,
+      file: this.currentFile || '<memory>',
+      frame: this.sourceCallStack[this.sourceCallStack.length - 1]?.frame || '<frame>',
+      label: label == null ? '' : String(label),
+      sourceStack: this.getSourceStack(),
+    }
+    const line =
+      `[BREAK #${payload.seq}] ${payload.file} ${payload.frame}` +
+      (payload.label ? ` label="${payload.label}"` : '')
+    if (this.traceLogger) this.traceLogger(line)
+    else console.log(line)
+
+    if (typeof this.debugHooks.onBreakpoint === 'function') {
+      this.debugHooks.onBreakpoint(payload)
+    }
+  }
+
+  formatTraceOperand(operand) {
+    if (operand == null) return ''
+    if (typeof operand === 'string') return JSON.stringify(operand)
+    if (typeof operand === 'number' || typeof operand === 'boolean') return String(operand)
+    if (typeof operand === 'object') {
+      try {
+        return JSON.stringify(operand)
+      } catch {
+        return '[object]'
+      }
+    }
+    return String(operand)
+  }
+
+  getSourceStack() {
+    if (!Array.isArray(this.sourceCallStack) || this.sourceCallStack.length === 0) return []
+    return this.sourceCallStack
+      .slice()
+      .reverse()
+      .map(frame => `${frame.frame} @ ${frame.file}`)
   }
 
   applyDestructurePattern(pattern, value, kind) {

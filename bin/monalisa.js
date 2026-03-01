@@ -10,7 +10,9 @@ const { ErrorCodes } = require('../src/errors/codes')
 
 const { version: VERSION } = require('../package.json')
 
-const args = process.argv.slice(2)
+const rawArgs = process.argv.slice(2)
+const traceEnabled = rawArgs.includes('-trace')
+const args = rawArgs.filter(value => value !== '-trace')
 const arg = args[0]
 
 const ERROR_CODE_HELP = {
@@ -55,6 +57,7 @@ Usage:
   monalisa -repl                     Start interactive REPL
   monalisa -v | -version             Show CLI version
   monalisa -h | -help                Show general help
+  monalisa -trace <file.priyo>       Execute a file with opcode trace logs
   monalisa -syntax                   Show quick syntax help
   monalisa -errors                   List error codes and meanings
   monalisa -explain <ERROR_CODE>     Explain one specific error code
@@ -92,6 +95,9 @@ Modules:
   lisaaBox { lisaaShare sum }
   // in app
   lisaaBring "./module.priyo"
+
+Debug hook:
+  priyoBreak("label")                Emits a breakpoint event (use with -trace)
 `)
 }
 
@@ -151,7 +157,7 @@ if (arg === '-errors') {
 }
 
 if (arg === '-repl') {
-  startRepl({ logger: { build, info, error } }).catch(err => {
+  startRepl({ logger: { build, info, error }, trace: traceEnabled }).catch(err => {
     printPriyoError(err, {
       mode: 'cli',
       logger: {
@@ -175,7 +181,7 @@ if (arg === '-explain') {
 -------------------------- */
 
 if (!arg) {
-  startRepl({ logger: { build, info, error } }).catch(err => {
+  startRepl({ logger: { build, info, error }, trace: traceEnabled }).catch(err => {
     printPriyoError(err, {
       mode: 'cli',
       logger: {
@@ -199,7 +205,10 @@ if (!fs.existsSync(fullPath)) {
 
 async function main() {
   try {
-    await runFile(fullPath)
+    await runFile(fullPath, {
+      trace: traceEnabled,
+      traceLogger: line => info(line),
+    })
   } catch (err) {
     printPriyoError(err, {
       mode: 'cli',

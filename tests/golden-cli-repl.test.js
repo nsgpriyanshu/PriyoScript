@@ -50,7 +50,7 @@ monalsia {
       expect(output).toContain('Did you mean:')
       expect(output).toMatch(/Span:\s+\^+/)
       expect(output).toContain(
-        'Docs: https://github.com/nsgpriyanshu/PriyoScript/blob/main/ERRORS.md#psyn-001',
+        'Docs: https://priyyoscript.vercel.app/docs/stable/errors-reference#psyn-001',
       )
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true })

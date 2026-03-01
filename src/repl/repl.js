@@ -63,6 +63,7 @@ function parseReplCommand(line) {
 }
 
 async function startRepl(options = {}) {
+  const traceEnabled = !!options.trace
   const logger = options.logger || { build, info, error: console.error }
   const rl = readline.createInterface({
     input: options.input || stdin,
@@ -84,7 +85,7 @@ async function startRepl(options = {}) {
   const { version: VERSION } = require('../../package.json')
 
   logger.build(`Hey, this is PriyoScript REPL - v${VERSION}`)
-  logger.info('Type .help for commands, .exit to quit.')
+  logger.info(`Type .help for commands, .exit to quit.${traceEnabled ? ' Trace mode is ON.' : ''}`)
 
   let buffer = ''
 
@@ -119,6 +120,9 @@ async function startRepl(options = {}) {
             logger.info('  .reset           Reset runtime state and module cache')
             logger.info('  .load <file>     Execute a .priyo file in current REPL context')
             logger.info('  .exit            Exit REPL')
+            logger.info(
+              '  Tip: Use `priyoBreak("label")` inside code for breakpoint-style trace hooks.',
+            )
             continue
           }
 
@@ -161,6 +165,8 @@ async function startRepl(options = {}) {
                 builtins,
                 moduleLoader: moduleRuntime.moduleLoader,
                 moduleCache: moduleRuntime.moduleCache,
+                trace: traceEnabled,
+                traceLogger: line => (logger.info || console.log)(line),
               })
               logger.info(`Loaded: ${target}`)
             } catch (err) {
@@ -191,6 +197,8 @@ async function startRepl(options = {}) {
           builtins,
           moduleLoader: moduleRuntime.moduleLoader,
           moduleCache: moduleRuntime.moduleCache,
+          trace: traceEnabled,
+          traceLogger: line => (logger.info || console.log)(line),
         })
       } catch (err) {
         printPriyoError(err, {

@@ -38,6 +38,12 @@ function formatErrorForUser(err) {
   if (Array.isArray(metadata.stack) && metadata.stack.length > 0) {
     details.push(`Stack: ${metadata.stack[0]}`)
   }
+  if (Array.isArray(metadata.sourceStack) && metadata.sourceStack.length > 0) {
+    details.push(`Priyo Stack: ${metadata.sourceStack[0]}`)
+    for (let i = 1; i < metadata.sourceStack.length; i++) {
+      details.push(`             ${metadata.sourceStack[i]}`)
+    }
+  }
   details.push(`Docs: ${getDocsLink(err.code)}`)
 
   return {

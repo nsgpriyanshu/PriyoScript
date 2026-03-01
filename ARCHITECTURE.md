@@ -2,11 +2,13 @@
 
 ## Current Version Snapshot
 
-- Version: `v1.9.0`
+- Version: `v1.10.0`
 - CI baseline:
   - `npm run lint` passes
   - `npm run test:run` passes
 - Major additions in this version:
+  - module system v3 (relative/absolute resolution, optional `index.priyo`, clearer not-found diagnostics)
+  - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `priyoBreak(...)` debug hook)
   - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
   - golden CLI/REPL tests and deep module-cycle stress tests
   - web docs app (Next.js + Fumadocs) with stable/canary docs structure
@@ -129,13 +131,16 @@ tests/
 | Packages     | Built-in package registry (`priyoPackage.*`)                                         | 100%   |
 | Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                           | 100%   |
 | Modules      | Import alias + named imports + cycle guard                                           | 100%   |
+| Modules      | Relative/absolute path resolution + `index.priyo` fallback                           | 100%   |
 | Runtime      | Bytecode VM + lexical scope + call frames                                            | 100%   |
 | Runtime      | REPL module cache invalidation on reset                                              | 100%   |
+| Runtime      | Source-level Priyo stack traces on runtime errors                                    | 100%   |
 | Errors       | Typed staged errors + codes + humanized printer                                      | 100%   |
 | Errors       | Source-aware metadata (`file`, `line`, `column`, source excerpt, trimmed stack)      | 100%   |
 | Errors       | Caret span highlighting + keyword typo suggestions + docs links per code             | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
+| CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                   | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
 | Release      | Separate web versioning/changelog flow (`web-v*` tags)                               | 100%   |
@@ -244,8 +249,14 @@ tests/
   - import by path: `lisaaBring "./module.priyo"`
   - alias import: `lisaaBring "./module.priyo": moduleAlias`
   - named import: `lisaaBring "./module.priyo": [x, y: localY]`
+  - module path resolution v3:
+    - relative imports: `./` and `../` resolve from importer file
+    - project-root absolute imports: `/path/to/module` resolves from current project root
+    - optional fallbacks: `module`, `module.priyo`, and `module/index.priyo`
   - cycle guard for recursive module graphs
   - REPL `.reset` clears module cache to avoid stale imports during iterative development
+- Debug helper:
+  - `priyoBreak("label")` emits a traceable breakpoint marker while keeping execution flow
 
 ## 5. Runtime Model
 
@@ -254,6 +265,7 @@ tests/
 - Lexical environments are parent-linked.
 - Scope enter/exit is explicit (`ENTER_SCOPE` / `EXIT_SCOPE`).
 - Loop control jumps carry scope-unwind metadata to prevent leaks.
+- Optional VM tracing mode prints opcode-level execution (`-trace`) with frame + stack depth context.
 - Class runtime stores:
   - instance methods
   - static methods
@@ -274,6 +286,7 @@ tests/
   - VM/runtime -> runtime errors
 - CLI and REPL share a common printer (`src/errors/printer.js`) to render humanized output consistently.
 - Dev entry prints developer-oriented output with code + stage.
+- Runtime failures now include source-level Priyo stack metadata where available.
 
 ## 7. Automated Testing Architecture
 
@@ -286,6 +299,8 @@ We use **Vitest** for our unit testing framework, providing fast, modular test e
 - **Diagnostics Tests** (\`tests/diagnostics.test.js\`): Verify span highlighting, typo suggestions, and docs links for syntax/compile/runtime error formatting.
 - **Golden Output Tests** (\`tests/golden-cli-repl.test.js\`): Validate stable CLI and REPL user-facing output for help/errors.
 - **Cycle Stress Tests** (\`tests/module-cycle-stress.test.js\`): Validate module loader behavior under deep cyclic dependency chains.
+- **Module Resolution v3 Tests** (\`tests/module-resolution-v3.test.js\`): Validate path resolution behavior (`./`, `../`, `/`, and `index.priyo` fallback) and actionable not-found diagnostics.
+- **Trace/Debug Tests** (\`tests/trace-debug.test.js\`): Validate `-trace` output and `priyoBreak(...)` debug marker behavior.
 
 ## 8. Current Limitations
 

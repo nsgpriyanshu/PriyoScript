@@ -57,7 +57,7 @@ function humanizeError(input) {
     },
     [ErrorCodes.RUNTIME.UNKNOWN_MODULE]: {
       message: 'So Rude - The requested module could not be loaded.',
-      tip: 'Use `lisaaBring "relative/path"`; ensure the module uses `lisaaBox { ... }` and avoid cyclic imports.',
+      tip: 'Use `./`, `../`, or `/` imports; PriyoScript also tries `path.priyo` and `path/index.priyo`. Ensure module starts with `lisaaBox { ... }` and avoid cyclic imports.',
     },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
