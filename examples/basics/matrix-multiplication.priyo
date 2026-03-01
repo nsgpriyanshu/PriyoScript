@@ -1,0 +1,49 @@
+monalisa {
+  // Reads a 2x2 matrix from user input.
+  lisaaTask readMatrix2x2(label) {
+    priyoTell.Info("Enter values for " + label)
+
+    priyoKeep matrix = [[0, 0], [0, 0]]
+
+    prakritiCount (priyoChange i = 0; i < 2; i = i + 1) {
+      prakritiCount (priyoChange j = 0; j < 2; j = j + 1) {
+        matrix[i][j] = priyoListenNumber("Value at [" + i + "][" + j + "]: ")
+      }
+    }
+
+    priyoGiveBack matrix
+  }
+
+  // Multiplies two 2x2 matrices.
+  lisaaTask multiply2x2(a, b) {
+    priyoKeep result = [[0, 0], [0, 0]]
+
+    prakritiCount (priyoChange i = 0; i < 2; i = i + 1) {
+      prakritiCount (priyoChange j = 0; j < 2; j = j + 1) {
+        priyoKeep sum = 0
+        prakritiCount (priyoChange k = 0; k < 2; k = k + 1) {
+          sum = sum + a[i][k] * b[k][j]
+        }
+        result[i][j] = sum
+      }
+    }
+
+    priyoGiveBack result
+  }
+
+  // Prints matrix row by row for clean output.
+  lisaaTask printMatrix2x2(matrix) {
+    prakritiCount (row priyoInside matrix) {
+      priyoTell(row)
+    }
+  }
+
+  priyoKeep matrixA = readMatrix2x2("Matrix A")
+  priyoKeep matrixB = readMatrix2x2("Matrix B")
+
+  priyoKeep output = multiply2x2(matrixA, matrixB)
+
+  priyoTell.Success("Result matrix:")
+  printMatrix2x2(output)
+}
+

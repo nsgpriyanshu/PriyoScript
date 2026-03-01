@@ -2,7 +2,7 @@
 
 Examples are grouped by language area:
 
-- `basics/`: declarations, assignment, expressions
+- `basics/`: declarations, assignment, expressions, and matrix multiplication
 - `io/`: input/output builtins
 - `control-flow/`: conditionals, switch/case, loops, break/continue, try/catch/finally/throw
 - `functions/`: function declarations, closures, recursion
