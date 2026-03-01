@@ -9,15 +9,18 @@ const geistMono = Geist_Mono({
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <HomeLayout {...baseOptions()}
-    links={[{
-        icon: <BookMarkedIcon />,
-        text: 'Docs',
-        url: '/docs/stable',
-        secondary: false,
-      },]}>
+    <HomeLayout
+      {...baseOptions()}
+      links={[
+        {
+          icon: <BookMarkedIcon />,
+          text: 'Docs',
+          url: '/docs/stable',
+          secondary: false,
+        },
+      ]}
+    >
       <div className={geistMono.className}>{children}</div>
     </HomeLayout>
   )
 }
-  

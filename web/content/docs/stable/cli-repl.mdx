@@ -9,6 +9,8 @@ CLI means Command Line Interface: run full files from terminal.
 REPL means Read-Eval-Print Loop: run one snippet at a time interactively.  
 Use CLI for repeatable project execution.  
 Use REPL for fast experiments and quick checks.  
+Trace mode helps you debug execution flow instruction-by-instruction.  
+You can also place `priyoBreak("label")` in code to mark debug checkpoints.  
 Both are important in daily development.  
 PriyoScript provides commands for help, syntax, errors, and explanations.  
 REPL keeps runtime memory between lines, which is useful for testing ideas.  
@@ -81,6 +83,37 @@ List of error codes...
 Explanation for PSYN-002...
 ```
 
+### Example 6: Trace Mode
+
+```bash
+monalisa -trace examples/basics/for-loop.priyo
+```
+
+Output (short):
+
+```text
+[TRACE #1] file=examples/basics/for-loop.priyo frame=main op=...
+[TRACE #2] file=examples/basics/for-loop.priyo frame=main op=...
+...
+```
+
+### Example 7: Breakpoint-Style Hook
+
+```priyo
+monalisa {
+  priyoKeep total = 10
+  priyoBreak("after-total")
+  priyoTell(total)
+}
+```
+
+Output (short):
+
+```text
+[BREAK #1] after-total
+10
+```
+
 ## 3. Execution Flow
 
 CLI flow:
@@ -96,6 +129,13 @@ REPL flow:
 2. REPL evaluates it immediately.
 3. State stays in memory for next line.
 4. You repeat until `.exit`.
+
+Trace flow:
+
+1. You run with `-trace`.
+2. VM emits execution lines for each instruction.
+3. If `priyoBreak(...)` exists, VM prints a breakpoint marker.
+4. On runtime error, PriyoScript includes source-level stack context.
 
 ## 4. Comparison With Other Languages
 
@@ -121,6 +161,7 @@ PriyoScript:
 
 - `monalisa file.priyo`
 - `monalisa -repl`
+- `monalisa -trace file.priyo`
 
 Difference summary:
 
@@ -141,4 +182,9 @@ Difference summary:
 <Callout title="Limitations" type="warn">
   REPL is ideal for learning and prototyping, but long programs should be stored in `.priyo` files
   and executed via CLI.
+</Callout>
+
+<Callout title="Debug Tip" type="idea">
+  Start with normal run. If behavior is unclear, rerun with `-trace` and place
+  `priyoBreak("checkpoint")` at important points.
 </Callout>

@@ -11,6 +11,8 @@ In PriyoScript, modules are created with `lisaaBox`.
 Exports use `lisaaShare`, and imports use `lisaaBring`.  
 Built-in packages (like `math`) are imported directly.  
 Local modules are imported by path.  
+PriyoScript resolves relative imports from the current file and project-root absolute imports from your project folder.  
+It can also auto-resolve `module.priyo` and `module/index.priyo`.  
 This structure helps teams work on separate files safely.  
 It also reduces copy-paste coding.
 
@@ -109,17 +111,94 @@ Output:
 16
 ```
 
+### Example 6: Relative Import + Optional `index.priyo`
+
+Directory structure:
+
+```text
+project/
+  modules/
+    billing/
+      index.priyo
+  main.priyo
+```
+
+`modules/billing/index.priyo`:
+
+```priyo
+lisaaBox {
+  lisaaTask total(base, tax) {
+    priyoGiveBack base + tax
+  }
+
+  lisaaShare total
+}
+```
+
+`main.priyo`:
+
+```priyo
+monalisa {
+  lisaaBring "./modules/billing": billing
+  priyoTell(billing.total(100, 18))
+}
+```
+
+Output:
+
+```text
+118
+```
+
+### Example 7: Project-Root Absolute Import
+
+```priyo
+monalisa {
+  lisaaBring "/modules/billing": billing
+  priyoTell(billing.total(100, 12))
+}
+```
+
+Output:
+
+```text
+112
+```
+
 ## 3. Execution Flow
 
 1. Interpreter reads import statements early.
 2. Built-in package names resolve from package registry.
-3. File path imports load target file.
-4. `lisaaBox` defines module boundary.
-5. Only symbols marked by `lisaaShare` are exposed.
-6. Import alias maps module exports into current file scope.
-7. Program continues normal execution using imported values.
+3. File path imports resolve with Module v3 rules:
+   - `./` and `../` from the importer file
+   - `/...` from project root
+4. Resolver tries candidates in order:
+   - direct path
+   - `path.priyo`
+   - `path/index.priyo`
+5. `lisaaBox` defines module boundary.
+6. Only symbols marked by `lisaaShare` are exposed.
+7. Import alias maps module exports into current file scope.
+8. Program continues normal execution using imported values.
 
-## 4. Comparison With Other Languages
+## 4.1 Module v3 Resolution Rules (Quick Reference)
+
+- Built-in package:
+  - `lisaaBring math`
+- Relative module:
+  - `lisaaBring "./utils/pricing"`
+  - `lisaaBring "../shared/constants.priyo"`
+- Project-root absolute module:
+  - `lisaaBring "/modules/billing"`
+- Optional auto-fallback:
+  - `pricing` -> `pricing.priyo` -> `pricing/index.priyo`
+
+<Callout title="Module Not Found Diagnostics" type="idea">
+  If a module is not found, PriyoScript now reports the resolved import path and the exact candidate
+  paths it tried, so you can fix the path quickly.
+</Callout>
+
+## 5. Comparison With Other Languages
 
 Java:
 
@@ -161,7 +240,7 @@ Difference summary:
 - Similar goal to Java/Python/Node imports: reuse code cleanly.
 - `lisaaBox` + `lisaaShare` gives clear export boundaries.
 
-## 5. Inspiration and Official References
+## 6. Inspiration and Official References
 
 - Java imports/packages inspiration:  
   https://docs.oracle.com/javase/tutorial/java/package/
