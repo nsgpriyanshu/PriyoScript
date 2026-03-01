@@ -3,6 +3,30 @@ description: Suggest a language/runtime/CLI enhancement
 title: '[Feature]: '
 labels: ['enhancement']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the problem first, then the proposed solution.
+        Clear examples make feature reviews much faster.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Target Area
+      options:
+        - Language Syntax
+        - Parser/Compiler
+        - Runtime/VM
+        - CLI
+        - REPL
+        - Modules/Packages
+        - Error Handling/Diagnostics
+        - Examples
+        - Documentation
+        - Web docs/app
+    validations:
+      required: true
+
   - type: textarea
     id: problem
     attributes:
@@ -10,6 +34,7 @@ body:
       description: What limitation or pain point are you facing?
     validations:
       required: true
+
   - type: textarea
     id: proposal
     attributes:
@@ -17,15 +42,50 @@ body:
       description: Describe the desired behavior/syntax/API.
     validations:
       required: true
+
+  - type: textarea
+    id: execution
+    attributes:
+      label: Execution / User Flow
+      description: Step-by-step, how should this work for end users?
+      placeholder: |
+        1. User writes ...
+        2. Compiler/runtime does ...
+        3. Output/behavior is ...
+
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives Considered
+
   - type: textarea
     id: examples
     attributes:
-      label: Example Snippet
+      label: Example Snippet(s)
       placeholder: |
         monalisa {
-          ...
+          // proposed syntax or behavior
         }
+    validations:
+      required: true
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Backward Compatibility Impact
+      description: Will this break existing code? If yes, describe migration path.
+      placeholder: |
+        - Breaking: yes/no
+        - Migration needed: ...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-Submission Checks
+      options:
+        - label: I searched existing issues and discussions for duplicates.
+          required: true
+        - label: I clearly described the problem, not only the solution.
+          required: true
+        - label: I included at least one concrete PriyoScript example.
+          required: true

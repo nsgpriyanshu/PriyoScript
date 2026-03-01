@@ -1,28 +1,35 @@
-# Security Policy
+﻿# Security Policy
+
+## Supported Versions
+
+We actively maintain and support the following versions of PriyoScript. Please ensure you are using one of these versions to receive security updates.
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.x     | :white_check_mark: |
+| < 1.0   | :x:                |
+
+_Last updated: March 01, 2026_
 
 ## Reporting a Vulnerability
 
-Please do not open public issues for security vulnerabilities.
+At PriyoScript, we take security seriously and appreciate your help in keeping the project safe. If you discover a security vulnerability, please do not open a public GitHub issue.
 
-Report privately by emailing the maintainer with:
+Instead, report it privately by email and include the following details:
 
-1. A clear description of the issue.
-2. Reproduction steps or proof-of-concept.
-3. Affected version/commit.
-4. Impact assessment (what can be exploited).
+- A clear description of the vulnerability.
+- Steps to reproduce the issue.
+- The affected version(s) of the project.
+- Any potential impact or severity assessment.
 
-## Response Process
+We aim to acknowledge your report within **48 hours** and provide an initial response with a resolution plan. For critical vulnerabilities, we will work to deliver a fix within **30 days**, depending on complexity and severity.
 
-1. Acknowledgement target: within 72 hours.
-2. Triage and severity assessment.
-3. Fix preparation and validation.
-4. Coordinated disclosure after patch release.
+## Comments
 
-## Scope
+Thank you for contributing to the security of PriyoScript. Responsible disclosure helps us maintain a safe and trustworthy environment for all developers.
 
-Security issues in scope include:
+If you need further help, open a general project discussion or issue (non-sensitive topics only):
 
-- CLI execution vulnerabilities.
-- Module loading/path traversal issues.
-- Sandbox/runtime escape paths.
-- Dependency vulnerabilities with exploitable impact.
+- https://github.com/nsgpriyanshu/PriyoScript/issues
+
+_This policy was established on February 07, 2026, at 09:00 PM IST._

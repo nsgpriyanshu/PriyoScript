@@ -3,13 +3,39 @@ description: Report a bug in PriyoScript parser/compiler/runtime/CLI
 title: '[Bug]: '
 labels: ['bug']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide a minimal reproducible report.
+        Reports without reproducible steps may be closed until more details are added.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      description: Which part is failing?
+      options:
+        - Lexer
+        - Parser
+        - Compiler
+        - VM/Runtime
+        - CLI
+        - REPL
+        - Modules/Packages
+        - Examples
+        - Documentation
+        - Web docs/app
+    validations:
+      required: true
+
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: What went wrong?
+      description: What went wrong? Keep this short and specific.
     validations:
       required: true
+
   - type: textarea
     id: repro
     attributes:
@@ -17,25 +43,63 @@ body:
       description: Minimal `.priyo` snippet and commands to reproduce
       placeholder: |
         monalisa {
-          ...
+          priyoTell("hello")
         }
-        Command: monalisa file.priyo
+        Command:
+        monalisa file.priyo
     validations:
       required: true
+
   - type: textarea
     id: expected
     attributes:
       label: Expected Behavior
+      description: What should happen?
     validations:
       required: true
+
   - type: textarea
     id: actual
     attributes:
       label: Actual Behavior / Error Output
+      description: Paste full output. Include error code/stage/location if shown.
     validations:
       required: true
+
+  - type: input
+    id: error_code
+    attributes:
+      label: Error Code (if available)
+      placeholder: e.g. PSYN-002, PRUN-101
+
   - type: input
     id: version
     attributes:
-      label: Version
-      placeholder: e.g. v1.6.0
+      label: PriyoScript Version
+      placeholder: e.g. monalisa -v -> v1.9.0
+    validations:
+      required: true
+
+  - type: input
+    id: node_version
+    attributes:
+      label: Node.js Version
+      placeholder: e.g. v22.14.0
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / Environment
+      placeholder: e.g. Windows 11, Ubuntu 24.04, macOS 15
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-Submission Checks
+      options:
+        - label: I searched existing issues for duplicates.
+          required: true
+        - label: I tested with the latest published PriyoScript version.
+          required: true
+        - label: I provided a minimal reproducible snippet and command.
+          required: true
