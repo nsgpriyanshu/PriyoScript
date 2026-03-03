@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [1.10.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.7.0...1.10.0) - (2026-03-03)
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 # [1.9.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.8.0...1.9.0) - (2026-02-27)
 
 ## Features
