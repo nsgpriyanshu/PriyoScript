@@ -6,7 +6,7 @@
 
 ## Overview
 
-[![Deployment](https://img.shields.io/badge/Deployment-Vercel-black?logo=vercel)](https://priyyoscript.vercel.app)
+[![Deployment](https://img.shields.io/badge/Deployment-Vercel-black?logo=vercel)](https://priyoscript.vercel.app)
 ![Web Version](https://img.shields.io/github/package-json/v/nsgpriyanshu/PriyoScript?filename=web%2Fpackage.json&color=ff2056&label=web-version)
 [![Last Commit](https://img.shields.io/github/last-commit/nsgpriyanshu/PriyoScript?color=ff2056&label=last-commit)](https://github.com/nsgpriyanshu/PriyoScript/commits/main)
 
@@ -15,7 +15,7 @@ This package contains the official documentation website for **PriyoScript**, lo
 The web app is independently versioned, independently released, and deployed separately from the core PriyoScript CLI.
 
 Live site:
-👉 [https://priyyoscript.vercel.app](https://priyyoscript.vercel.app)
+👉 [https://priyoscript.vercel.app](https://priyoscript.vercel.app)
 
 ---
 
@@ -139,7 +139,7 @@ The documentation site is deployed on Vercel.
 Deployment is triggered automatically via the connected GitHub repository.
 
 Production URL:
-[https://priyyoscript.vercel.app](https://priyyoscript.vercel.app)
+[https://priyoscript.vercel.app](https://priyoscript.vercel.app)
 
 ---
 
@@ -147,7 +147,7 @@ Production URL:
 
 - Issues: [https://github.com/nsgpriyanshu/PriyoScript/issues](https://github.com/nsgpriyanshu/PriyoScript/issues)
 - Repository: [https://github.com/nsgpriyanshu/PriyoScript](https://github.com/nsgpriyanshu/PriyoScript)
-- Documentation site: [https://priyyoscript.vercel.app](https://priyyoscript.vercel.app)
+- Documentation site: [https://priyoscript.vercel.app](https://priyoscript.vercel.app)
 
 ---
 

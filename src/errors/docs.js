@@ -1,4 +1,4 @@
-const DOCS_BASE = 'https://priyyoscript.vercel.app/docs/stable/errors-reference'
+const DOCS_BASE = 'https://priyoscript.vercel.app/docs/stable/errors-reference'
 
 function docsSlugFromCode(code) {
   return String(code || '')
