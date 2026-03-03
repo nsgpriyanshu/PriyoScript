@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.7.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.6.0...web-v0.7.0) - (2026-03-03)
+
+## Features
+
+- Add stand alone bin installation files ([7393c10](https://github.com/nsgpriyanshu/PriyoScript/commit/7393c107a1636dcc28c4a2bf0be1c97ac8999813))
+
+## Refactor
+
+- Remove stand alone bin installation and planned it for future ([da20c1e](https://github.com/nsgpriyanshu/PriyoScript/commit/da20c1e1eb37ed96cad7e3d22e541207a8d22a05))
+
+## Styling
+
+- Add icons for files ([5ba090c](https://github.com/nsgpriyanshu/PriyoScript/commit/5ba090cc2b23edb5f195c7d80e55403f6e7a40a2))
+
 # [web-v0.6.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.5.0...web-v0.6.0) - (2026-03-01)
 
 ## Bug Fixes
