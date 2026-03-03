@@ -26,4 +26,4 @@ Write-Host "Build complete:" -ForegroundColor Green
 Write-Host "  $exePath" -ForegroundColor Green
 Write-Host ""
 Write-Host "Run with: .\\dist\\priyoscript.exe -h" -ForegroundColor Cyan
-Write-Host "Install for current user with: powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1" -ForegroundColor Cyan
+Write-Host "Install for current user with: npm run dist:win:install:user" -ForegroundColor Cyan

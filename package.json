@@ -14,8 +14,6 @@
     "bin/",
     "src/",
     "packages/",
-    "SYNTAX.md",
-    "ARCHITECTURE.md",
     "README.md",
     "LICENSE"
   ],
@@ -26,6 +24,9 @@
     "build:exe:win": "pkg . --targets node18-win-x64 --output dist/priyoscript.exe",
     "build:exe:all": "pkg . --out-path dist",
     "dist:win": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-exe.ps1",
+    "dist:win:setup": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-installer.ps1",
+    "dist:win:install:user": "powershell -ExecutionPolicy Bypass -File installer/setup-priyoscript.ps1 -Scope User -SourceExe .\\dist\\priyoscript.exe -Version $env:npm_package_version",
+    "dist:win:install:machine": "powershell -ExecutionPolicy Bypass -File installer/setup-priyoscript.ps1 -Scope Machine -SourceExe .\\dist\\priyoscript.exe -Version $env:npm_package_version",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:check": "prettier . --check",

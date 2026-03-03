@@ -71,7 +71,10 @@ bin/
   monalisa.js               # CLI entry
 scripts/
   build-windows-exe.ps1     # Build standalone Windows executable (pkg)
-  install-windows.ps1       # Install CLI executable for current user (PATH setup)
+  build-windows-installer.ps1 # Build Windows installer bundle (setup + uninstall + payload)
+installer/
+  setup-priyoscript.ps1     # Production installer script (PATH + shims + uninstall registry)
+  uninstall-priyoscript.ps1 # Uninstaller script
 web/
   app/                      # Next.js app router pages/layout/routes
   content/docs/             # Fumadocs content (stable + canary)
@@ -142,6 +145,7 @@ tests/
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
 | CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                   | 100%   |
 | Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
+| Distribution | Windows installer bundle (`setup` + `uninstall` + PATH + uninstall entry)           | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
 | Release      | Separate web versioning/changelog flow (`web-v*` tags)                               | 100%   |
 
@@ -329,9 +333,16 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Add async and advanced runtime capabilities:
+1. Expand async/runtime model:
    - staged support for `async/await` and future concurrency primitives.
-2. Add native distribution channels:
-   - standalone binaries/installers for Windows/macOS/Linux (beyond npm global install).
-3. Expand docs automation:
-   - CI-based docs preview deploys and release-note sync between root/web changelogs.
+2. Harden distribution pipeline:
+   - keep Windows installer flow production-ready (signing, upgrade path, rollback safety).
+   - add native installer/binary channels for macOS and Linux.
+3. Expand module ecosystem:
+   - user package publishing and lockfile/version pinning workflow.
+4. Extend standard library:
+   - add core filesystem/string/date utilities beyond current `math` package.
+5. Strengthen diagnostics/debug UX:
+   - richer trace filtering, structured debug sessions, and improved stack readability.
+6. Expand docs/release automation:
+   - CI docs preview deploys and synchronized release notes between root and web changelogs.

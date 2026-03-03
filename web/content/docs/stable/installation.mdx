@@ -1,40 +1,66 @@
 ---
 title: Installation
-description: End-user installation guide for PriyoScript using npm global install.
+description: Complete installation guide for npm and standalone Windows installer flows.
 icon: Download
 ---
 
-## Theory
+## Overview
 
-For end users, installation should be one simple command.  
-Global install makes the `monalisa` command available in your terminal.  
-After install, you can run `.priyo` files from any folder.  
-This is the official user-facing install method right now.
+PriyoScript supports two stable installation paths for end users:
 
-<Callout title="Current install path" type="idea">
-  Use npm global install. Standalone installer/binary flow is not the official stable user path yet.
+1. npm global install (cross-platform)
+2. Standalone Windows installer bundle (no npm required on target machine)
+
+Both paths install the `monalisa` command so you can run `.priyo` files from any folder.
+
+<Callout title="Recommended choice" type="idea">
+If you already have Node.js installed, use npm global install.  
+If your machine has no Node.js or npm, use the Windows standalone installer bundle.
 </Callout>
 
-## Prerequisite
+---
 
-- Node.js 18+ with npm
+## 1. Prerequisites
 
-## Install PriyoScript globally
+### For npm install
+- Node.js 18 or higher
+- npm (comes with Node.js)
+
+### For standalone Windows install
+- Windows PowerShell
+- Installer bundle downloaded from PriyoScript releases
+
+---
+
+## 2. What Happens During Installation
+
+When you install PriyoScript:
+
+1. The PriyoScript CLI is installed on your system.
+2. Command shims are created (`monalisa`).
+3. Your PATH is updated so the command works from any folder.
+4. You verify installation using `monalisa -h`.
+
+---
+
+## 3. Method A: npm Global Install (All Platforms)
+
+### Install
 
 ```bash
-npm i -g priyoscript
+npm install -g priyoscript
 ```
 
-## Verify installation
+### Verify Installation
 
 ```bash
 monalisa -h
 monalisa -repl
 ```
 
-## Run your first file
+### Run Your First Program
 
-Create `hello.priyo`:
+Create a file named `hello.priyo`:
 
 ```priyo
 monalisa {
@@ -42,7 +68,7 @@ monalisa {
 }
 ```
 
-Run:
+Run it:
 
 ```bash
 monalisa hello.priyo
@@ -54,18 +80,110 @@ Expected output:
 Hello, PriyoScript!
 ```
 
-## Update PriyoScript
+---
+
+### Update PriyoScript
 
 ```bash
-npm i -g priyoscript@latest
+npm install -g priyoscript@latest
 ```
 
-## Uninstall PriyoScript
+---
+
+### Uninstall (npm method)
 
 ```bash
 npm uninstall -g priyoscript
 ```
 
-<Callout title="Troubleshooting" type="error">
-  If `monalisa` is not recognized, restart terminal and ensure your npm global bin path is in PATH.
+---
+
+## 4. Method B: Standalone Windows Installer (No npm Required)
+
+This method is ideal if the system does not have Node.js or npm installed.
+
+### 4.1 Download Installer
+
+Download the release artifact:
+
+* `priyoscript-installer.zip`
+
+From:
+
+* PriyoScript GitHub Releases
+
+---
+
+### 4.2 Run Setup
+
+Extract the zip file.
+
+Open PowerShell inside the extracted folder and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup-priyoscript.ps1 -Scope User -Version <version>
+```
+
+For machine-wide installation (Admin PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup-priyoscript.ps1 -Scope Machine -Version <version>
+```
+
+---
+
+### 4.3 What Setup Configures Automatically
+
+* Installs `priyoscript.exe`
+* Creates command shims:
+
+  * `monalisa.cmd`
+* Adds installation `bin` folder to PATH
+* Registers uninstall entry
+* Stores installation metadata
+
+---
+
+### 4.4 Verify Installation
+
+Close the terminal.
+Open a new terminal and run:
+
+```bash
+monalisa -h
+monalisa -repl
+```
+
+---
+
+### 4.5 Uninstall Standalone Install
+
+User install:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\uninstall-priyoscript.ps1 -Scope User
+```
+
+Machine install:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\uninstall-priyoscript.ps1 -Scope Machine
+```
+
+---
+
+## 5. Troubleshooting
+
+<Callout title="Command not found" type="error">
+If `monalisa` is not recognized:
+
+1. Close the terminal completely.
+2. Open a new terminal.
+3. Run `monalisa -h` again.
+
+If it still fails, check whether the install `bin` folder exists in your system PATH. 
+</Callout>
+
+<Callout title="Execution policy error" type="warn">
+If PowerShell blocks setup scripts, make sure you run the command exactly as shown with `-ExecutionPolicy Bypass`.
 </Callout>
