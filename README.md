@@ -10,6 +10,8 @@ PriyoScript is a simple, interpreted programming language created for fun and as
 
 It combines elements of Python, JavaScript, C, and Java in its syntax and code structure.
 
+Our official website for documentation: [https://priyoscript.vercel.app](https://priyoscript.vercel.app)
+
 ## Motivation
 
 PriyoScript was inspired during a Data Analysis and Algorithm lab session. While struggling with C code, my friend suggested creating a programming language with personalized keywords. I decided to bring that idea to life using my knowledge and coding experience. I want to make it an innovative, stand out language.
@@ -68,6 +70,7 @@ npm --prefix web run build
 npm --prefix web run start
 ```
 
+<!--
 ## Release Flows
 
 ### CLI/runtime release (root package)
@@ -93,7 +96,7 @@ npm run release:web
 Web release config and changelog:
 
 - `web/.cliff-jumperrc.json`
-- `web/CHANGELOG.md`
+- `web/CHANGELOG.md` -->
 
 ## Inspiration
 
@@ -137,8 +140,9 @@ For docs-site setup/versioning, see [`web/README.md`](web/README.md).
 
 ## Developer
 
+This project is developed by:
+
 <div>
-  <br>
   <a href="https://nsgpriyanshu.github.io">
     <img src="https://img.shields.io/badge/Developer-nsgpriyanshu-author.svg?color=f10a0a" alt="nsgpriyanshu" />
   </a>
