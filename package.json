@@ -21,12 +21,6 @@
   "scripts": {
     "start": "node src/index.js examples/basics/main.priyo",
     "run:examples": "node scripts/run-all.js",
-    "build:exe:win": "pkg . --targets node18-win-x64 --output dist/priyoscript.exe",
-    "build:exe:all": "pkg . --out-path dist",
-    "dist:win": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-exe.ps1",
-    "dist:win:setup": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-installer.ps1",
-    "dist:win:install:user": "powershell -ExecutionPolicy Bypass -File installer/setup-priyoscript.ps1 -Scope User -SourceExe .\\dist\\priyoscript.exe -Version $env:npm_package_version",
-    "dist:win:install:machine": "powershell -ExecutionPolicy Bypass -File installer/setup-priyoscript.ps1 -Scope Machine -SourceExe .\\dist\\priyoscript.exe -Version $env:npm_package_version",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:check": "prettier . --check",
@@ -53,22 +47,12 @@
     "url": "https://github.com/nsgpriyanshu/PriyoScript/issues"
   },
   "homepage": "https://nsgpriyanshu.github.io/PriyoScript",
-  "pkg": {
-    "assets": [
-      "src/**/*",
-      "packages/**/*"
-    ],
-    "scripts": [
-      "bin/**/*.js"
-    ]
-  },
   "devDependencies": {
     "@commitlint/config-angular": "^20.4.1",
     "@eslint/js": "^10.0.1",
     "@favware/cliff-jumper": "^6.0.0",
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
-    "pkg": "^5.8.1",
     "prettier": "3.8.1",
     "vitest": "^4.0.18"
   },

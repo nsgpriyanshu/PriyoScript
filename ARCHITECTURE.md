@@ -70,11 +70,7 @@ src/
 bin/
   monalisa.js               # CLI entry
 scripts/
-  build-windows-exe.ps1     # Build standalone Windows executable (pkg)
-  build-windows-installer.ps1 # Build Windows installer bundle (setup + uninstall + payload)
-installer/
-  setup-priyoscript.ps1     # Production installer script (PATH + shims + uninstall registry)
-  uninstall-priyoscript.ps1 # Uninstaller script
+  run-all.js                # Run all language examples
 web/
   app/                      # Next.js app router pages/layout/routes
   content/docs/             # Fumadocs content (stable + canary)
@@ -144,8 +140,7 @@ tests/
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
 | CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                   | 100%   |
-| Distribution | Windows standalone `.exe` build/install workflow                                     | 100%   |
-| Distribution | Windows installer bundle (`setup` + `uninstall` + PATH + uninstall entry)           | 100%   |
+| Distribution | npm global installation (`npm install -g priyoscript`)                               | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
 | Release      | Separate web versioning/changelog flow (`web-v*` tags)                               | 100%   |
 
@@ -336,8 +331,8 @@ Planned development sequence:
 1. Expand async/runtime model:
    - staged support for `async/await` and future concurrency primitives.
 2. Harden distribution pipeline:
-   - keep Windows installer flow production-ready (signing, upgrade path, rollback safety).
-   - add native installer/binary channels for macOS and Linux.
+   - keep npm global installation and published package reliability production-ready.
+   - add standalone installer/binary channels later after package lifecycle stabilizes.
 3. Expand module ecosystem:
    - user package publishing and lockfile/version pinning workflow.
 4. Extend standard library:

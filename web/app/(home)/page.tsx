@@ -73,13 +73,11 @@ export default async function HomePage() {
 
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
               <Link
-                href="https://github.com/nsgpriyanshu/PriyoScript/releases/latest"
-                target="_blank"
-                rel="noreferrer"
+                href="/docs/stable/installation"
                 className="rounded-full border border-white/30 bg-white/15 px-6 py-3 text-center text-base font-semibold text-fd-foreground backdrop-blur-xl transition hover:bg-white/25 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
                 style={{ boxShadow: `inset 0 0 0 1px ${BRAND}22` }}
               >
-                Install
+                Get Started
               </Link>
               <Link
                 href="/docs/stable/quick-start"

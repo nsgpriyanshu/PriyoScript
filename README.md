@@ -132,7 +132,7 @@ PriyoScript is inspired by multiple mainstream languages but intentionally avoid
 
 For the current implemented syntax, see [`SYNTAX.md`](SYNTAX.md).
 For error code reference and docs links used in CLI/REPL diagnostics, see [`ERRORS.md`](ERRORS.md).
-For standalone and npm installation sequences, see [`INSTALL.md`](INSTALL.md).
+Install/update/uninstall commands are documented in the Installation section above.
 For docs-site setup/versioning, see [`web/README.md`](web/README.md).
 
 ## Developer

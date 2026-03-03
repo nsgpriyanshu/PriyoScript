@@ -1,34 +1,24 @@
 ---
 title: Installation
-description: Complete installation guide for npm and standalone Windows installer flows.
+description: Install PriyoScript globally with npm and verify your CLI setup.
 icon: Download
 ---
 
 ## Overview
 
-PriyoScript supports two stable installation paths for end users:
-
-1. npm global install (cross-platform)
-2. Standalone Windows installer bundle (no npm required on target machine)
-
-Both paths install the `monalisa` command so you can run `.priyo` files from any folder.
+PriyoScript currently supports npm global installation.
+This installs the `monalisa` command so you can run `.priyo` files from any folder.
 
 <Callout title="Recommended choice" type="idea">
-If you already have Node.js installed, use npm global install.  
-If your machine has no Node.js or npm, use the Windows standalone installer bundle.
+  Use npm global install as the official stable path.
 </Callout>
 
 ---
 
 ## 1. Prerequisites
 
-### For npm install
 - Node.js 18 or higher
 - npm (comes with Node.js)
-
-### For standalone Windows install
-- Windows PowerShell
-- Installer bundle downloaded from PriyoScript releases
 
 ---
 
@@ -43,7 +33,7 @@ When you install PriyoScript:
 
 ---
 
-## 3. Method A: npm Global Install (All Platforms)
+## 3. Install (All Platforms)
 
 ### Install
 
@@ -98,81 +88,7 @@ npm uninstall -g priyoscript
 
 ---
 
-## 4. Method B: Standalone Windows Installer (No npm Required)
-
-This method is ideal if the system does not have Node.js or npm installed.
-
-### 4.1 Download Installer
-
-Download the release artifact:
-
-* `priyoscript-installer.zip`
-
-From:
-
-* PriyoScript GitHub Releases
-
----
-
-### 4.2 Run Setup
-
-Extract the zip file.
-
-Open PowerShell inside the extracted folder and run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup-priyoscript.ps1 -Scope User -Version <version>
-```
-
-For machine-wide installation (Admin PowerShell):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup-priyoscript.ps1 -Scope Machine -Version <version>
-```
-
----
-
-### 4.3 What Setup Configures Automatically
-
-* Installs `priyoscript.exe`
-* Creates command shims:
-
-  * `monalisa.cmd`
-* Adds installation `bin` folder to PATH
-* Registers uninstall entry
-* Stores installation metadata
-
----
-
-### 4.4 Verify Installation
-
-Close the terminal.
-Open a new terminal and run:
-
-```bash
-monalisa -h
-monalisa -repl
-```
-
----
-
-### 4.5 Uninstall Standalone Install
-
-User install:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\uninstall-priyoscript.ps1 -Scope User
-```
-
-Machine install:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\uninstall-priyoscript.ps1 -Scope Machine
-```
-
----
-
-## 5. Troubleshooting
+## 4. Troubleshooting
 
 <Callout title="Command not found" type="error">
 If `monalisa` is not recognized:
@@ -181,9 +97,11 @@ If `monalisa` is not recognized:
 2. Open a new terminal.
 3. Run `monalisa -h` again.
 
-If it still fails, check whether the install `bin` folder exists in your system PATH. 
+If it still fails, check whether the install `bin` folder exists in your system PATH.
+
 </Callout>
 
 <Callout title="Execution policy error" type="warn">
-If PowerShell blocks setup scripts, make sure you run the command exactly as shown with `-ExecutionPolicy Bypass`.
+  If PowerShell blocks setup scripts, make sure you run the command exactly as shown with
+  `-ExecutionPolicy Bypass`.
 </Callout>
