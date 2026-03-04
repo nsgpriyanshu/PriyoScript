@@ -100,7 +100,6 @@ export default async function HomePage() {
           <HomeTabs tabs={highlightedTabs} />
         </section>
       </Wrapper>
-      <Footer />
     </main>
   )
 }

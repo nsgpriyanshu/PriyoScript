@@ -5,7 +5,7 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-fd-border/80 text-sm">
+    <footer className="border-t border-fd-border/80 text-sm ">
       <Wrapper className="relative z-10 py-2 md:py-4 lg:py-6">
         <div className="flex flex-col items-start justify-between gap-2 text-fd-muted-foreground sm:flex-row sm:items-center">
           <p>© {year} PriyoScript. All rights reserved.</p>
