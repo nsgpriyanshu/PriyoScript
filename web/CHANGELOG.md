@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.9.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.8.0...web-v0.9.0) - (2026-03-04)
+
+## Features
+
+- Add decorators package ([4253f2f](https://github.com/nsgpriyanshu/PriyoScript/commit/4253f2f22c8295fd2f65ee02d0c8de9d7ce4ccbd))
+
+## Refactor
+
+- Restructure the docs, more production level feel ([676e73f](https://github.com/nsgpriyanshu/PriyoScript/commit/676e73ff1781196a59a8a2194961d03d1ec91b2c))
+
 # [web-v0.8.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.10.0...web-v0.8.0) - (2026-03-04)
 
 ## Features
