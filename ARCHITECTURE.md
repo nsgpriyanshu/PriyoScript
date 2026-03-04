@@ -73,6 +73,7 @@ scripts/
   run-all.js                # Run all language examples
 web/
   app/                      # Next.js app router pages/layout/routes
+  playground/               # Browser-only lightweight playground runtime helpers
   content/docs/             # Fumadocs content (stable + canary)
   lib/                      # Docs source/layout/metadata helpers
   package.json              # Web package with its own version
@@ -142,6 +143,8 @@ tests/
 | CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                   | 100%   |
 | Distribution | npm global installation (`npm install -g priyoscript`)                               | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
+| Web          | Browser-only PriyoScript playground for basic programs (`/playground`)               | 100%   |
+| Web          | Playground UX: syntax-highlighted editor + humanized error/tip output                | 100%   |
 | Release      | Separate web versioning/changelog flow (`web-v*` tags)                               | 100%   |
 
 ### 4.1 Core syntax
@@ -323,6 +326,10 @@ Current language/runtime limitations that still need dedicated implementation:
   - access modifiers / interfaces / enums are reserved only
 - Standard library is intentionally minimal:
   - only core builtins + `math` package currently exist
+- Browser playground is intentionally constrained:
+  - executes only in user browser runtime (no server execution)
+  - supports basic statements only (`priyoTell`, variable declarations/assignment, simple expressions)
+  - hard limits on source size, statement count, and output lines
 
 ## 9. Future Plan (Roadmap)
 
