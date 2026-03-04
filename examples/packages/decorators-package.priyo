@@ -1,0 +1,19 @@
+monalisa {
+  lisaaBring decorators
+
+  priyoTell("=== String Formatting ===")
+  priyoTell(decorators.upper("mona and piue"))
+  priyoTell(decorators.title("welcome to priyoscript"))
+  priyoTell(decorators.slug("Priyo Script Language"))
+  priyoTell(decorators.replaceAll("mona likes tea", "tea", "coffee"))
+
+  priyoTell("=== Date and Time ===")
+  priyoTell("today: " + decorators.today())
+  priyoTell("now: " + decorators.timeNow())
+  priyoTell("iso: " + decorators.nowISO())
+
+  priyoKeep sessionDate = "2026-03-01T10:30:00.000Z"
+  priyoTell(decorators.format(sessionDate, "DD/MM/YYYY HH:mm:ss"))
+  priyoTell("after 7 days: " + decorators.addDays(sessionDate, 7))
+  priyoTell("days diff: " + decorators.diffDays("2026-03-01", "2026-03-21"))
+}

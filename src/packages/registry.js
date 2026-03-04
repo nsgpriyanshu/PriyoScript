@@ -1,7 +1,9 @@
 const mathPackage = require('../../packages/math')
+const decoratorsPackage = require('../../packages/decorators')
 
 const BUILTIN_PACKAGES = {
   math: mathPackage,
+  decorators: decoratorsPackage,
 }
 
 function createPackageManager() {

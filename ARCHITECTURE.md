@@ -82,6 +82,8 @@ web/
 packages/
   math/
     index.js                # Built-in math package (phase-1 package system)
+  decorators/
+    index.js                # Built-in string/date/time formatting package
 examples/
   basics/
   io/
@@ -129,6 +131,7 @@ tests/
 | Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                            | 100%   |
 | Packages     | Built-in package import (`lisaaBring`)                                               | 100%   |
 | Packages     | Built-in package registry (`priyoPackage.*`)                                         | 100%   |
+| Packages     | `decorators` package (string formatting + date/time helpers)                         | 100%   |
 | Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                           | 100%   |
 | Modules      | Import alias + named imports + cycle guard                                           | 100%   |
 | Modules      | Relative/absolute path resolution + `index.priyo` fallback                           | 100%   |
@@ -238,7 +241,9 @@ tests/
   - `priyoPackage.has(name)`
   - `priyoPackage.use(name)`
   - `lisaaBring <packageName>` (syntactic sugar for built-in package loading)
-  - current built-in package: `math` (arithmetic, trigonometry, and geometry helpers)
+  - current built-in packages:
+    - `math` (arithmetic, trigonometry, geometry helpers)
+    - `decorators` (string formatting + date/time helpers)
 - Array helpers:
   - `priyoArray.length(arr)`, `priyoArray.push(arr, value)`, `priyoArray.pop(arr)`
   - `priyoArray.at(arr, index)`, `priyoArray.slice(arr, start?, end?)`
@@ -310,6 +315,7 @@ Current language/runtime limitations that still need dedicated implementation:
 
 - Package + module system currently supports:
   - built-in package import (`lisaaBring math`)
+  - built-in package import (`lisaaBring decorators`)
   - user modules via path import (`lisaaBring "./file.priyo"`)
   - module exports via `lisaaShare`
   - alias and named import list syntax
@@ -324,8 +330,9 @@ Current language/runtime limitations that still need dedicated implementation:
 - OOP semantics are strong but not exhaustive:
   - additional inheritance invariants can still be expanded
   - access modifiers / interfaces / enums are reserved only
-- Standard library is intentionally minimal:
-  - only core builtins + `math` package currently exist
+- Standard library is still intentionally small:
+  - currently: core builtins + `math` + `decorators`
+  - filesystem and system-level utilities are not added yet
 - Browser playground is intentionally constrained:
   - executes only in user browser runtime (no server execution)
   - supports basic statements only (`priyoTell`, variable declarations/assignment, simple expressions)
@@ -343,7 +350,7 @@ Planned development sequence:
 3. Expand module ecosystem:
    - user package publishing and lockfile/version pinning workflow.
 4. Extend standard library:
-   - add core filesystem/string/date utilities beyond current `math` package.
+   - add core filesystem and system utilities on top of current `math` and `decorators` packages.
 5. Strengthen diagnostics/debug UX:
    - richer trace filtering, structured debug sessions, and improved stack readability.
 6. Expand docs/release automation:
