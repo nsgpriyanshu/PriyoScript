@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.8.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.10.0...web-v0.8.0) - (2026-03-04)
+
+## Features
+
+- Add playground ([e6658b8](https://github.com/nsgpriyanshu/PriyoScript/commit/e6658b881de73402ce39f0da3deb63282400033f))
+- **v1.10.0:** Stable version is out now ([357feb9](https://github.com/nsgpriyanshu/PriyoScript/commit/357feb99d0e94dd0b818a61d2c15ce13e6eaa158))
+
+## Non Code changes
+
+- Update architecture to match latest version ([4b8ac8e](https://github.com/nsgpriyanshu/PriyoScript/commit/4b8ac8ea95b93a2124c75e694307fb0aa68dd576))
+- Fix a typ ([f94bb2a](https://github.com/nsgpriyanshu/PriyoScript/commit/f94bb2a68059f9e89fce56657fa4b9b7b4257a1f))
+
+## Styling
+
+- Add downloads badge ([3d3ea29](https://github.com/nsgpriyanshu/PriyoScript/commit/3d3ea29bdbc1cc53e504fde5eeaa8f5ac0b13b47))
+
+# [1.10.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.1.0...1.10.0) - (2026-03-03)
+
+## Non Code changes
+
+- **PriyoScript:** Release PriyoScript@1.10.0 ([a6b3c17](https://github.com/nsgpriyanshu/PriyoScript/commit/a6b3c1774807e4de3ea391655aec85ab364d9deb))
+
 # [web-v0.7.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.6.0...web-v0.7.0) - (2026-03-03)
 
 ## Features
