@@ -3,6 +3,7 @@
 An emotional, interpreted programming language built with Node.js.
 
 ![Version](https://img.shields.io/github/package-json/v/nsgpriyanshu/PriyoScript?color=ff2056)
+![downloads](https://img.shields.io/npm/dt/priyoscript?color=ff2056&label=downloads)
 
 ## Introduction
 
