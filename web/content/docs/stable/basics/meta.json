@@ -1,0 +1,5 @@
+{
+  "title": "Basics",
+  "icon": "BookOpen",
+  "pages": ["syntax", "control-flow", "functions", "arrays"]
+}

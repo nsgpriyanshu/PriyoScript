@@ -1,0 +1,5 @@
+{
+  "title": "Standard Library",
+  "icon": "Package",
+  "pages": ["index", "math", "decorators"]
+}

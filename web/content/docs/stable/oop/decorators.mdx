@@ -1,0 +1,48 @@
+---
+title: OOP Decorators Pattern
+description: Practical object behavior decoration pattern in PriyoScript.
+icon: NotebookPen
+---
+
+## Theory
+
+PriyoScript currently does not have a language keyword for class decorators.
+But you can still apply decorator-style design using wrapper functions or composition.
+Decorator pattern means adding behavior without rewriting original class logic.
+
+## Example
+
+```priyo
+monalisa {
+  lisaaFamily Greeter {
+    lisaaTask init(name) {
+      priyoSelf.name = name
+    }
+
+    lisaaTask speak() {
+      priyoGiveBack "Hi " + priyoSelf.name
+    }
+  }
+
+  lisaaTask withPrefix(obj, prefix) {
+    lisaaTask wrappedSpeak() {
+      priyoGiveBack prefix + obj.speak()
+    }
+    priyoGiveBack wrappedSpeak
+  }
+
+  priyoKeep g = priyoCreate Greeter("mona")
+  priyoKeep speakWithTag = withPrefix(g, "[INFO] ")
+  priyoTell(speakWithTag())
+}
+```
+
+Output:
+
+```text
+[INFO] Hi mona
+```
+
+<Callout title="Clarification" type="warn">
+  This page documents a design pattern, not a dedicated `decorator` language keyword.
+</Callout>

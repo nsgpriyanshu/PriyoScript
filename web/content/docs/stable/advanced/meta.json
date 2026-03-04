@@ -1,0 +1,5 @@
+{
+  "title": "Advanced",
+  "icon": "FlaskConical",
+  "pages": ["error-handling", "advanced-concepts"]
+}

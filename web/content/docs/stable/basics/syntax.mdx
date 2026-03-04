@@ -198,3 +198,37 @@ Difference summary:
 - Errors: `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
 - Modules: `lisaaBring`, `lisaaShare`, `lisaaBox`
 - OOP: `lisaaFamily`, `lisaaInherit`, `lisaaStable`
+
+## Variables
+
+PriyoScript has three variable declarations:
+
+- `priyoKeep`: function-scoped, re-assignable
+- `priyoChange`: block-scoped, re-assignable
+- `priyoPromise`: block-scoped, cannot be reassigned
+
+```priyo
+monalisa {
+  priyoKeep name = "mona"
+  priyoChange marks = 80
+  priyoPromise passMark = 40
+
+  marks = marks + 5
+
+  priyoTell(name)
+  priyoTell(marks)
+  priyoTell(passMark)
+}
+```
+
+Output:
+
+```text
+mona
+85
+40
+```
+
+<Callout title="Best practice" type="idea">
+  Prefer `priyoPromise` by default. Use `priyoChange` only when mutation is required.
+</Callout>

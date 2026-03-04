@@ -1,0 +1,53 @@
+---
+title: decorators Package
+description: String and date-time formatting utilities in one built-in package.
+icon: PaintbrushVertical
+---
+
+`decorators` combines text formatting and date-time helpers.
+
+## String helpers
+
+- `decorators.upper(value)`
+- `decorators.lower(value)`
+- `decorators.trim(value)`
+- `decorators.title(value)`
+- `decorators.slug(value)`
+- `decorators.repeat(value, count)`
+- `decorators.padStart(value, targetLength, fill?)`
+- `decorators.padEnd(value, targetLength, fill?)`
+- `decorators.replaceAll(value, searchValue, replaceValue)`
+
+## Date/time helpers
+
+- `decorators.nowTimestamp()`
+- `decorators.nowISO()`
+- `decorators.today()`
+- `decorators.timeNow()`
+- `decorators.format(dateValue, pattern?)`
+- `decorators.addDays(dateValue, days)`
+- `decorators.addMonths(dateValue, months)`
+- `decorators.addYears(dateValue, years)`
+- `decorators.diffDays(startDate, endDate)`
+
+## Format tokens
+
+- `YYYY` year
+- `MM` month
+- `DD` day
+- `HH` hour
+- `mm` minute
+- `ss` second
+- `SSS` milliseconds
+
+## Example
+
+```priyo
+monalisa {
+  lisaaBring decorators
+
+  priyoTell(decorators.title("welcome to priyoscript"))
+  priyoTell(decorators.slug("Priyo Script Language"))
+  priyoTell(decorators.format("2026-03-01T10:30:00.000Z", "DD/MM/YYYY HH:mm:ss"))
+}
+```

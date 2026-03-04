@@ -1,0 +1,80 @@
+---
+title: math Package
+description: Numeric, trigonometric, and geometry utilities in the built-in math package.
+icon: SquareFunction
+---
+
+## Theory
+
+`math` is the built-in package for safe numeric operations.
+It includes arithmetic helpers, aggregate helpers, trigonometric helpers, and area/circumference formulas.
+Methods validate inputs and throw readable errors when invalid values are passed.
+
+## Import
+
+```priyo
+monalisa {
+  lisaaBring math
+  priyoTell(math.add(10, 5))
+}
+```
+
+## Core methods
+
+### Arithmetic
+
+- `math.add(a, b)`
+- `math.sub(a, b)`
+- `math.mul(a, b)`
+- `math.div(a, b)`
+- `math.mod(a, b)`
+- `math.pow(base, exponent)`
+- `math.sqrt(value)`
+- `math.abs(value)`
+- `math.cube(value)`
+
+### Aggregates
+
+- `math.sum(...values)`
+- `math.average(...values)`
+- `math.min(...values)`
+- `math.max(...values)`
+- `math.clamp(value, minValue, maxValue)`
+
+### Trigonometry (radians)
+
+- `math.sin(x)`, `math.cos(x)`, `math.tan(x)`
+- `math.asin(x)`, `math.acos(x)`, `math.atan(x)`
+- `math.degToRad(degrees)`, `math.radToDeg(radians)`
+
+### Geometry
+
+- `math.areaCircle(radius)`
+- `math.areaRectangle(length, width)`
+- `math.areaTriangle(base, height)`
+- `math.areaSquare(side)`
+- `math.circumference(radius)`
+
+## Examples
+
+```priyo
+monalisa {
+  lisaaBring math
+
+  priyoTell(math.sum(1, 2, 3, 4))
+  priyoTell(math.average(10, 20, 30))
+  priyoTell(math.areaCircle(2))
+}
+```
+
+Output:
+
+```text
+10
+20
+12.566370614359172
+```
+
+<Callout title="Validation behavior" type="warn">
+  `math.div(10, 0)` and `math.mod(10, 0)` throw runtime errors by design.
+</Callout>

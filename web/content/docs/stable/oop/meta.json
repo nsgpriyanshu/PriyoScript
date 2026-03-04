@@ -1,0 +1,5 @@
+{
+  "title": "OOP",
+  "icon": "Boxes",
+  "pages": ["classes", "decorators"]
+}
