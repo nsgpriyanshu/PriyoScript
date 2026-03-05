@@ -1,80 +1,221 @@
 ---
 title: math Package
-description: Numeric, trigonometric, and geometry utilities in the built-in math package.
+description: Complete reference for all built-in math package APIs in PriyoScript.
 icon: SquareFunction
 ---
 
 ## Theory
 
-`math` is the built-in package for safe numeric operations.
-It includes arithmetic helpers, aggregate helpers, trigonometric helpers, and area/circumference formulas.
-Methods validate inputs and throw readable errors when invalid values are passed.
+The `math` package is the standard numeric utility package in PriyoScript. It provides safe arithmetic, aggregation, trigonometry, unit conversion, and geometry helpers so users do not need to rewrite common calculations in every program. All APIs are runtime-validated, so invalid inputs produce clear errors.
+
+<Callout title="Current status" type="success">
+  `math` is stable and production-ready in current PriyoScript docs.
+</Callout>
 
 ## Import
 
 ```priyo
 monalisa {
   lisaaBring math
-  priyoTell(math.add(10, 5))
+  priyoTell(math.add(2, 3))
 }
 ```
 
-## Core methods
+## API Table
 
-### Arithmetic
+### Arithmetic APIs
 
-- `math.add(a, b)`
-- `math.sub(a, b)`
-- `math.mul(a, b)`
-- `math.div(a, b)`
-- `math.mod(a, b)`
-- `math.pow(base, exponent)`
-- `math.sqrt(value)`
-- `math.abs(value)`
-- `math.cube(value)`
+| Method | Signature                  | Description                 |
+| ------ | -------------------------- | --------------------------- |
+| `add`  | `math.add(a, b)`           | Adds two numbers            |
+| `sub`  | `math.sub(a, b)`           | Subtracts second from first |
+| `mul`  | `math.mul(a, b)`           | Multiplies two numbers      |
+| `div`  | `math.div(a, b)`           | Divides first by second     |
+| `mod`  | `math.mod(a, b)`           | Remainder operation         |
+| `abs`  | `math.abs(value)`          | Absolute value              |
+| `pow`  | `math.pow(base, exponent)` | Exponentiation              |
+| `sqrt` | `math.sqrt(value)`         | Square root                 |
+| `cube` | `math.cube(value)`         | Cube (`value^3`)            |
 
-### Aggregates
+### Aggregate APIs
 
-- `math.sum(...values)`
-- `math.average(...values)`
-- `math.min(...values)`
-- `math.max(...values)`
-- `math.clamp(value, minValue, maxValue)`
+| Method    | Signature                               | Description             |
+| --------- | --------------------------------------- | ----------------------- |
+| `sum`     | `math.sum(...values)`                   | Sum of all values       |
+| `average` | `math.average(...values)`               | Mean value              |
+| `min`     | `math.min(...values)`                   | Smallest value          |
+| `max`     | `math.max(...values)`                   | Largest value           |
+| `clamp`   | `math.clamp(value, minValue, maxValue)` | Bounds a value in range |
 
-### Trigonometry (radians)
+### Trigonometry APIs (radians)
 
-- `math.sin(x)`, `math.cos(x)`, `math.tan(x)`
-- `math.asin(x)`, `math.acos(x)`, `math.atan(x)`
-- `math.degToRad(degrees)`, `math.radToDeg(radians)`
+| Method     | Signature                | Description                 |
+| ---------- | ------------------------ | --------------------------- |
+| `sin`      | `math.sin(radians)`      | Sine                        |
+| `cos`      | `math.cos(radians)`      | Cosine                      |
+| `tan`      | `math.tan(radians)`      | Tangent                     |
+| `asin`     | `math.asin(value)`       | Inverse sine                |
+| `acos`     | `math.acos(value)`       | Inverse cosine              |
+| `atan`     | `math.atan(value)`       | Inverse tangent             |
+| `degToRad` | `math.degToRad(degrees)` | Degree to radian conversion |
+| `radToDeg` | `math.radToDeg(radians)` | Radian to degree conversion |
 
-### Geometry
+### Geometry APIs
 
-- `math.areaCircle(radius)`
-- `math.areaRectangle(length, width)`
-- `math.areaTriangle(base, height)`
-- `math.areaSquare(side)`
-- `math.circumference(radius)`
+| Method          | Signature                           | Description          |
+| --------------- | ----------------------------------- | -------------------- |
+| `areaCircle`    | `math.areaCircle(radius)`           | Circle area          |
+| `areaRectangle` | `math.areaRectangle(length, width)` | Rectangle area       |
+| `areaTriangle`  | `math.areaTriangle(base, height)`   | Triangle area        |
+| `areaSquare`    | `math.areaSquare(side)`             | Square area          |
+| `circumference` | `math.circumference(radius)`        | Circle circumference |
 
-## Examples
+## API Examples (Every Method)
+
+### Arithmetic + Aggregate
 
 ```priyo
 monalisa {
   lisaaBring math
 
+  priyoTell(math.add(10, 5))
+  priyoTell(math.sub(10, 5))
+  priyoTell(math.mul(10, 5))
+  priyoTell(math.div(10, 5))
+  priyoTell(math.mod(10, 3))
+  priyoTell(math.abs(-9))
+  priyoTell(math.pow(2, 4))
+  priyoTell(math.sqrt(25))
+  priyoTell(math.cube(3))
+
   priyoTell(math.sum(1, 2, 3, 4))
   priyoTell(math.average(10, 20, 30))
-  priyoTell(math.areaCircle(2))
+  priyoTell(math.min(9, 2, 7))
+  priyoTell(math.max(9, 2, 7))
+  priyoTell(math.clamp(27, 0, 20))
 }
 ```
 
 Output:
 
 ```text
+15
+5
+50
+2
+1
+9
+16
+5
+27
 10
 20
+2
+9
+20
+```
+
+### Trigonometry + Conversion
+
+```priyo
+monalisa {
+  lisaaBring math
+
+  priyoKeep r = math.degToRad(30)
+  priyoTell(math.sin(r))
+  priyoTell(math.cos(r))
+  priyoTell(math.tan(r))
+
+  priyoTell(math.asin(0.5))
+  priyoTell(math.acos(0.5))
+  priyoTell(math.atan(1))
+
+  priyoTell(math.degToRad(180))
+  priyoTell(math.radToDeg(3.141592653589793))
+}
+```
+
+Output:
+
+```text
+0.49999999999999994
+0.8660254037844387
+0.5773502691896257
+0.5235987755982989
+1.0471975511965979
+0.7853981633974483
+3.141592653589793
+180
+```
+
+### Geometry
+
+```priyo
+monalisa {
+  lisaaBring math
+
+  priyoTell(math.areaCircle(2))
+  priyoTell(math.areaRectangle(10, 5))
+  priyoTell(math.areaTriangle(10, 5))
+  priyoTell(math.areaSquare(9))
+  priyoTell(math.circumference(2))
+}
+```
+
+Output:
+
+```text
+12.566370614359172
+50
+25
+81
 12.566370614359172
 ```
 
-<Callout title="Validation behavior" type="warn">
-  `math.div(10, 0)` and `math.mod(10, 0)` throw runtime errors by design.
+## Error Cases
+
+```priyo
+monalisa {
+  lisaaBring math
+  priyoTell(math.div(10, 0))
+}
+```
+
+Expected error:
+
+```text
+math.div cannot divide by zero
+```
+
+```priyo
+monalisa {
+  lisaaBring math
+  priyoTell(math.sqrt(-1))
+}
+```
+
+Expected error:
+
+```text
+math.sqrt expects non-negative value
+```
+
+<Callout title="Validation Notes" type="warn">
+  - `div` and `mod` reject zero divisor. - `sqrt`, `areaCircle`, `areaSquare`, `areaTriangle`,
+  `areaRectangle`, `circumference` require non-negative dimensions. - All APIs expect numeric
+  arguments.
 </Callout>
+
+## Practice Questions
+
+<Callout title="Concept Check" type="idea">
+  1. When should you use `clamp` instead of manual `if` checks? 2. Why must `sin/cos/tan` input be
+  in radians in this API? 3. Which geometry API would you use for each: coin, notebook, and warning
+  sign triangle?
+</Callout>
+
+## Related Docs
+
+- [Standard Library](./index)
+- [decorators Package](./decorators)
+- [Arrays](../basics/arrays)

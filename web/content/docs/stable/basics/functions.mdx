@@ -1,25 +1,125 @@
 ---
 title: Functions
-description: Reuse logic with function blocks, recursion, and closures.
-icon: Sigma
+description: Define reusable logic with parameters, return values, recursion, and closures.
+icon: SquareFunction
 ---
 
 ## Theory
 
-Functions are reusable instruction groups. They reduce duplication and make code easier to test.
+Functions are reusable blocks of logic that improve readability, reduce duplication, and make code easier to test. In PriyoScript, functions are declared with `lisaaTask` and optionally return values using `priyoGiveBack`. A function can accept parameters, perform calculations, call other functions, and return output to the caller. Functions are essential for structuring medium and large programs.
 
-## Example 1: Basic function
+<Callout title="Why functions matter" type="idea">
+  If a logic block is repeated, move it into a function once and call it where needed.
+</Callout>
+
+## Function Types Table
+
+| Function type              | Syntax pattern                   | Description                                         |
+| -------------------------- | -------------------------------- | --------------------------------------------------- |
+| Basic function (no params) | `lisaaTask name() { ... }`       | Runs reusable logic without input parameters.       |
+| Function with parameters   | `lisaaTask name(a, b) { ... }`   | Accepts input values from caller.                   |
+| Function returning value   | `priyoGiveBack value`            | Sends computed result back to caller.               |
+| Void-style function        | no `priyoGiveBack`               | Performs side effects (for example output/logging). |
+| Recursive function         | `name(...)` inside same function | Calls itself until base condition is met.           |
+| Closure function           | returns inner function           | Inner function remembers outer variables.           |
+
+## Syntax Quick Reference
 
 ```priyo
 monalisa {
   lisaaTask add(a, b) {
     priyoGiveBack a + b
   }
+
+  priyoTell(add(2, 3))
+}
+```
+
+## 1. Function Without Return Value
+
+Runs logic without explicit returned result.
+
+### Example 1
+
+```priyo
+monalisa {
+  lisaaTask greet() {
+    priyoTell("Hello from function")
+  }
+
+  greet()
+}
+```
+
+Output:
+
+```text
+Hello from function
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  lisaaTask banner() {
+    priyoTell("==== PriyoScript ====")
+  }
+
+  banner()
+}
+```
+
+Output:
+
+```text
+==== PriyoScript ====
+```
+
+## 2. Function With Return Value
+
+Returns data so caller can reuse the computed value.
+
+### Example 1
+
+```priyo
+monalisa {
+  lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+
   priyoTell(add(10, 5))
 }
 ```
 
-## Example 2: Recursion
+Output:
+
+```text
+15
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  lisaaTask isAdult(age) {
+    priyoGiveBack age >= 18
+  }
+
+  priyoTell(isAdult(21))
+}
+```
+
+Output:
+
+```text
+priyoTrue
+```
+
+## 3. Recursive Function
+
+A function that calls itself with a smaller problem until base condition.
+
+### Example 1
 
 ```priyo
 monalisa {
@@ -29,11 +129,47 @@ monalisa {
     }
     priyoGiveBack n * factorial(n - 1)
   }
+
   priyoTell(factorial(5))
 }
 ```
 
-## Example 3: Closure
+Output:
+
+```text
+120
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  lisaaTask countdown(n) {
+    prakritiIf (n == 0) {
+      priyoGiveBack "done"
+    }
+    priyoTell(n)
+    priyoGiveBack countdown(n - 1)
+  }
+
+  priyoTell(countdown(3))
+}
+```
+
+Output:
+
+```text
+3
+2
+1
+done
+```
+
+## 4. Closure Function
+
+Function returns another function that keeps access to outer variables.
+
+### Example 1
 
 ```priyo
 monalisa {
@@ -45,31 +181,53 @@ monalisa {
     }
     priyoGiveBack next
   }
+
   priyoKeep c = makeCounter()
+  priyoTell(c())
   priyoTell(c())
 }
 ```
 
-## Example 4: Business rule helper
+Output:
+
+```text
+1
+2
+```
+
+### Example 2
 
 ```priyo
 monalisa {
-  lisaaTask isAdult(age) {
-    priyoGiveBack age >= 18
+  lisaaTask makeGreeter(prefix) {
+    lisaaTask greet(name) {
+      priyoGiveBack prefix + " " + name
+    }
+    priyoGiveBack greet
   }
-  priyoTell(isAdult(21))
+
+  priyoKeep welcome = makeGreeter("Welcome")
+  priyoTell(welcome("mona"))
 }
 ```
 
-## How execution works (simple)
+Output:
 
-Think of function like a toy box:
+```text
+Welcome mona
+```
 
-1. Put steps in box (`lisaaTask`)
-2. Call box by name
-3. Box runs steps
-4. Gives result back (`priyoGiveBack`)
+## Practice Questions
 
-<Callout title="Rule" type="warn">
-  `priyoGiveBack` can be used only inside function blocks.
+<Callout title="Concept Check" type="idea">
+  1. When should you return a value instead of printing inside the function? 2. Why is a base
+  condition mandatory in recursive functions? 3. What value does a closure preserve after the outer
+  function finishes?
 </Callout>
+
+## Related Docs
+
+- [Syntax Basics](./syntax)
+- [Conditions](./condition)
+- [Control Flow](./control-flow)
+- [Classes and OOP](../oop/classes)

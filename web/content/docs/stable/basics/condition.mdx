@@ -1,0 +1,163 @@
+---
+title: Conditions
+description: Decision-making with if, else, and else-if in PriyoScript.
+icon: GitBranch
+---
+
+## Theory
+
+Condition statements let a program choose one path from multiple possible paths at runtime. They solve decision problems such as validation, branching business rules, and fallback behavior. In PriyoScript, `prakritiIf`, `prakritiElseIf`, and `prakritiElse` are evaluated top-to-bottom, and only one matching branch executes for a single condition chain.
+
+<Callout title="When to use conditions" type="idea">
+  Use conditions when output depends on input state, user data, or computed values.
+</Callout>
+
+## Condition Syntax Table
+
+| Keyword          | Syntax                               | Purpose                             |
+| ---------------- | ------------------------------------ | ----------------------------------- |
+| `prakritiIf`     | `prakritiIf (condition) { ... }`     | First conditional check             |
+| `prakritiElseIf` | `prakritiElseIf (condition) { ... }` | Additional check if previous failed |
+| `prakritiElse`   | `prakritiElse { ... }`               | Default/fallback branch             |
+
+## 1. `prakritiIf`
+
+`prakritiIf` runs a block only when its condition evaluates to true.
+
+### Example 1
+
+```priyo
+monalisa {
+  priyoKeep marks = 92
+  prakritiIf (marks >= 90) {
+    priyoTell("Grade A")
+  }
+}
+```
+
+Output:
+
+```text
+Grade A
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  priyoKeep isLoggedIn = priyoFalse
+  prakritiIf (!isLoggedIn) {
+    priyoTell("Please login")
+  }
+}
+```
+
+Output:
+
+```text
+Please login
+```
+
+## 2. `prakritiElse`
+
+`prakritiElse` defines the fallback block when the paired `prakritiIf` condition is false.
+
+### Example 1
+
+```priyo
+monalisa {
+  priyoKeep age = 16
+  prakritiIf (age >= 18) {
+    priyoTell("Adult")
+  } prakritiElse {
+    priyoTell("Minor")
+  }
+}
+```
+
+Output:
+
+```text
+Minor
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  priyoKeep stock = 0
+  prakritiIf (stock > 0) {
+    priyoTell("Available")
+  } prakritiElse {
+    priyoTell("Out of stock")
+  }
+}
+```
+
+Output:
+
+```text
+Out of stock
+```
+
+## 3. `prakritiElseIf`
+
+`prakritiElseIf` extends a condition chain with multiple ordered checks.
+
+### Example 1
+
+```priyo
+monalisa {
+  priyoKeep score = 78
+  prakritiIf (score >= 90) {
+    priyoTell("A")
+  } prakritiElseIf (score >= 80) {
+    priyoTell("B")
+  } prakritiElseIf (score >= 70) {
+    priyoTell("C")
+  } prakritiElse {
+    priyoTell("D")
+  }
+}
+```
+
+Output:
+
+```text
+C
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  priyoKeep hour = 14
+  prakritiIf (hour < 12) {
+    priyoTell("Morning")
+  } prakritiElseIf (hour < 18) {
+    priyoTell("Afternoon")
+  } prakritiElse {
+    priyoTell("Evening")
+  }
+}
+```
+
+Output:
+
+```text
+Afternoon
+```
+
+## Practice Questions
+
+<Callout title="Concept Check" type="idea">
+  1. When should you use `prakritiElseIf` instead of nested `prakritiIf` statements? 2. Why is
+  branch order important in an `prakritiIf / prakritiElseIf / prakritiElse` chain? 3. What happens
+  if no `prakritiIf` or `prakritiElseIf` condition is true and there is no `prakritiElse` block?
+</Callout>
+
+## Related Docs
+
+- [Control Flow: Loops and Switch](./control-flow)
+- [Syntax Basics](./syntax)
+- [Functions](./functions)

@@ -4,20 +4,27 @@ description: Use PriyoScript from terminal effectively, and know when to choose 
 icon: Terminal
 ---
 
-## 1. Theory
+## Theory
 
-CLI means Command Line Interface: run full files from terminal.  
-REPL means Read-Eval-Print Loop: run one snippet at a time interactively.  
-Use CLI for repeatable project execution.  
-Use REPL for fast experiments and quick checks.  
-Trace mode helps you debug execution flow instruction-by-instruction.  
-You can also place `priyoBreak("label")` in code to mark debug checkpoints.  
-Both are important in daily development.  
-PriyoScript provides commands for help, syntax, errors, and explanations.  
-REPL keeps runtime memory between lines, which is useful for testing ideas.  
-For production scripts, prefer CLI-based `.priyo` files in version control.
+CLI (Command Line Interface) and REPL (Read-Eval-Print Loop) serve different development modes in PriyoScript. CLI is file-oriented and deterministic, making it ideal for repeatable execution, project workflows, and CI automation. REPL is interactive and stateful, making it ideal for experimentation, quick checks, and iterative learning. PriyoScript supports both flows with common diagnostics tooling (`-errors`, `-explain`) and runtime tracing (`-trace`) so users can move from exploration to production without changing language semantics.
 
-## 2. Program Examples
+<Callout title="Quick choice rule" type="idea">
+  Use CLI for real scripts and repeatable runs. Use REPL for rapid experiments and learning loops.
+</Callout>
+
+### Core command summary
+
+| Command                        | Mode | Purpose                     |
+| ------------------------------ | ---- | --------------------------- |
+| `monalisa <file.priyo>`        | CLI  | Run a PriyoScript file      |
+| `monalisa -repl`               | REPL | Start interactive shell     |
+| `monalisa -trace <file.priyo>` | CLI  | Run with opcode-level trace |
+| `monalisa -h`                  | CLI  | Help and command list       |
+| `monalisa -syntax`             | CLI  | Syntax quick help           |
+| `monalisa -errors`             | CLI  | List error codes            |
+| `monalisa -explain <CODE>`     | CLI  | Explain specific error code |
+
+## Program Examples
 
 ### Example 1: Show Help
 
@@ -31,6 +38,8 @@ Output (short):
 PriyoScript CLI help...
 ```
 
+Explanation: verifies installation and available command options.
+
 ### Example 2: Run a File
 
 ```bash
@@ -42,6 +51,8 @@ Output:
 ```text
 Hello, PriyoScript!
 ```
+
+Explanation: standard production execution path for `.priyo` scripts.
 
 ### Example 3: Start REPL
 
@@ -55,6 +66,8 @@ Output (short):
 Hey, this is PriyoScript REPL...
 priyo>
 ```
+
+Explanation: opens interactive shell with persistent in-session state.
 
 ### Example 4: REPL Session
 
@@ -70,6 +83,8 @@ Output:
 24
 ```
 
+Explanation: second line uses variable from previous line because REPL keeps environment alive.
+
 ### Example 5: Error Discovery Commands
 
 ```bash
@@ -84,6 +99,8 @@ List of error codes...
 Explanation for PSYN-002...
 ```
 
+Explanation: helps users map runtime/syntax failures to exact docs and fixes.
+
 ### Example 6: Trace Mode
 
 ```bash
@@ -97,6 +114,8 @@ Output (short):
 [TRACE #2] file=examples/basics/for-loop.priyo frame=main op=...
 ...
 ```
+
+Explanation: shows VM instruction-by-instruction flow for deep debugging.
 
 ### Example 7: Breakpoint-Style Hook
 
@@ -115,7 +134,28 @@ Output (short):
 10
 ```
 
-## 3. Execution Flow
+Explanation: `priyoBreak(...)` marks checkpoints inside trace output.
+
+### Example 8: Useful REPL commands
+
+```text
+priyo> .help
+priyo> .load examples/basics/main.priyo
+priyo> .reset
+priyo> .exit
+```
+
+Output (short):
+
+```text
+REPL commands list...
+Loaded: examples/basics/main.priyo
+Runtime state reset.
+```
+
+Explanation: supports structured iteration in interactive mode.
+
+## Execution Flow
 
 CLI flow:
 
@@ -123,6 +163,7 @@ CLI flow:
 2. CLI loads full source.
 3. Parser/compiler/VM run once.
 4. Program exits with output or error.
+5. Each run starts with a clean runtime process.
 
 REPL flow:
 
@@ -130,6 +171,7 @@ REPL flow:
 2. REPL evaluates it immediately.
 3. State stays in memory for next line.
 4. You repeat until `.exit`.
+5. `.reset` clears state and module cache for clean retry.
 
 Trace flow:
 
@@ -137,8 +179,9 @@ Trace flow:
 2. VM emits execution lines for each instruction.
 3. If `priyoBreak(...)` exists, VM prints a breakpoint marker.
 4. On runtime error, PriyoScript includes source-level stack context.
+5. Use trace output to isolate exact failing sequence.
 
-## 4. Comparison With Other Languages
+## Comparison With Other Languages
 
 Node.js CLI/REPL:
 
@@ -167,8 +210,9 @@ PriyoScript:
 Difference summary:
 
 - PriyoScript behaves like modern interpreted workflows (Node/Python) with dedicated language diagnostics.
+- PriyoScript adds built-in error-code explanation flow (`-errors` and `-explain`) for beginner-friendly debugging.
 
-## 5. Inspiration and Official References
+## Inspiration and Official References
 
 - Node.js CLI and REPL concepts:  
   https://nodejs.org/api/cli.html  

@@ -1,77 +1,176 @@
 ---
 title: Control Flow
-description: Understand how programs choose paths and repeat actions.
-icon: GitBranch
+description: Looping and selection with for, while, and switch in PriyoScript.
+icon: Workflow
 ---
 
 ## Theory
 
-Control flow is how your program decides:
+Loop and switch constructs control repeated execution and multi-branch value selection. They solve iterative tasks (counting, traversing arrays, accumulation) and value-based dispatch logic (menu choice, status mapping, routing labels). In PriyoScript, `prakritiCount` and `prakritiAsLongAs` repeat blocks under explicit conditions, and `prakritiChoose` selects a branch by matching a value against cases.
 
-- Which block to run (`if`, `switch`)
-- How long to run (`while`, `for`)
-- When to stop (`break`, `continue`)
+<Callout title="Control-flow strategy" type="idea">
+  Use the simplest construct that matches your intent: `for` for counted loops, `while` for
+  open-ended loops, `switch` for fixed value choices.
+</Callout>
 
-## Example 1: If / else-if / else
+## Control Flow Syntax Table
+
+| Construct  | Syntax                                                      | Use case                    |
+| ---------- | ----------------------------------------------------------- | --------------------------- |
+| `for`      | `prakritiCount (init; condition; update) { ... }`           | Counted iteration           |
+| `for-each` | `prakritiCount (item priyoInside arr) { ... }`              | Array traversal             |
+| `while`    | `prakritiAsLongAs (condition) { ... }`                      | Condition-driven repetition |
+| `switch`   | `prakritiChoose (value) { prakritiCase (...) { ... } ... }` | Value-based branching       |
+
+## 5. `prakritiCount` loop
+
+`prakritiCount` loop runs a block with explicit start, condition, and update.
+
+### Example 1: Counted loop
 
 ```priyo
 monalisa {
-  priyoKeep score = 82
-  prakritiIf (score >= 90) {
-    priyoTell("A")
-  } prakritiElseIf (score >= 80) {
-    priyoTell("B")
-  } prakritiElse {
-    priyoTell("C")
+  prakritiCount (priyoChange i = 1; i <= 3; i = i + 1) {
+    priyoTell(i)
   }
 }
 ```
 
-## Example 2: While loop
+Output:
+
+```text
+1
+2
+3
+```
+
+### Example 2: For-each over array
 
 ```priyo
 monalisa {
-  priyoKeep i = 0
-  prakritiAsLongAs (i < 3) {
+  priyoKeep names = ["mona", "piue"]
+  prakritiCount (name priyoInside names) {
+    priyoTell(name)
+  }
+}
+```
+
+Output:
+
+```text
+mona
+piue
+```
+
+## 6. `prakritiAsLongAs` loop
+
+`prakritiAsLongAs` loop executes as long as condition remains true.
+
+### Example 1: Basic while
+
+```priyo
+monalisa {
+  priyoKeep x = 0
+  prakritiAsLongAs (x < 3) {
+    priyoTell(x)
+    x = x + 1
+  }
+}
+```
+
+Output:
+
+```text
+0
+1
+2
+```
+
+### Example 2: While with break condition
+
+```priyo
+monalisa {
+  priyoKeep i = 1
+  prakritiAsLongAs (priyoTrue) {
     priyoTell(i)
+    prakritiIf (i == 3) {
+      prakritiStop
+    }
     i = i + 1
   }
 }
 ```
 
-## Example 3: For loop
+Output:
+
+```text
+1
+2
+3
+```
+
+## 7. `prakritiChoose` case
+
+`prakritiChoose` compares one value against multiple candidate cases.
+
+### Example 1: Basic switch/default
 
 ```priyo
 monalisa {
-  prakritiCount (priyoChange i = 1; i <= 5; i = i + 1) {
-    priyoTell(i)
+  priyoKeep role = "admin"
+  prakritiChoose (role) {
+    prakritiCase ("admin") {
+      priyoTell("Full access")
+    }
+    prakritiCase ("user") {
+      priyoTell("Limited access")
+    }
+    prakritiOtherwise {
+      priyoTell("Guest access")
+    }
   }
 }
 ```
 
-## Example 4: For-each + switch
+Output:
+
+```text
+Full access
+```
+
+### Example 2: Switch in loop
 
 ```priyo
 monalisa {
-  priyoKeep tags = ["news", "music"]
+  priyoKeep tags = ["news", "music", "other"]
   prakritiCount (tag priyoInside tags) {
     prakritiChoose (tag) {
       prakritiCase ("music") { priyoTell("Audio") }
+      prakritiCase ("news") { priyoTell("Text") }
       prakritiOtherwise { priyoTell("General") }
     }
   }
 }
 ```
 
-## How execution works (like a child)
+Output:
 
-Imagine traffic lights:
+```text
+Text
+Audio
+General
+```
 
-- Green (`if true`) -> go this way
-- Red (`else`) -> go other way
-- Round track (`loop`) -> keep going until condition says stop
+## Practice Questions
 
-Language mapping:
+<Callout title="Concept Check" type="idea">
+  1. What is the practical difference between `prakritiCount` and `prakritiAsLongAs` loops? 2. When
+  is `prakritiCount` better than indexed looping? 3. Why is `prakritiChoose` often clearer than many
+  chained `prakritiIf` checks for fixed values?
+</Callout>
 
-- JS/Java/C: similar `if/for/while/switch`
-- Python: `elif` and `for in range(...)`
+## Related Docs
+
+- [Conditions](./condition)
+- [Arrays](./arrays)
+- [Functions](./functions)

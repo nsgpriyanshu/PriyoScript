@@ -1,53 +1,178 @@
 ---
 title: decorators Package
-description: String and date-time formatting utilities in one built-in package.
-icon: PaintbrushVertical
+description: Complete reference for string and date-time formatting APIs in PriyoScript.
+icon: Sparkles
 ---
 
-`decorators` combines text formatting and date-time helpers.
+## Theory
 
-## String helpers
+The `decorators` package centralizes text and date-time formatting in one place. It solves inconsistency in output formatting, slug generation, display strings, and date rendering across programs. Instead of duplicating utility logic in each project file, you can use stable built-in methods that validate inputs and return predictable results.
 
-- `decorators.upper(value)`
-- `decorators.lower(value)`
-- `decorators.trim(value)`
-- `decorators.title(value)`
-- `decorators.slug(value)`
-- `decorators.repeat(value, count)`
-- `decorators.padStart(value, targetLength, fill?)`
-- `decorators.padEnd(value, targetLength, fill?)`
-- `decorators.replaceAll(value, searchValue, replaceValue)`
+<Callout title="Current status" type="success">
+  `decorators` is stable and production-ready in current PriyoScript docs.
+</Callout>
 
-## Date/time helpers
+## Import
 
-- `decorators.nowTimestamp()`
-- `decorators.nowISO()`
-- `decorators.today()`
-- `decorators.timeNow()`
-- `decorators.format(dateValue, pattern?)`
-- `decorators.addDays(dateValue, days)`
-- `decorators.addMonths(dateValue, months)`
-- `decorators.addYears(dateValue, years)`
-- `decorators.diffDays(startDate, endDate)`
+```priyo
+monalisa {
+  lisaaBring decorators
+  priyoTell(decorators.upper("mona"))
+}
+```
 
-## Format tokens
+## API Table
 
-- `YYYY` year
-- `MM` month
-- `DD` day
-- `HH` hour
-- `mm` minute
-- `ss` second
-- `SSS` milliseconds
+### String APIs
 
-## Example
+| Method       | Signature                                                 | Description                        |
+| ------------ | --------------------------------------------------------- | ---------------------------------- |
+| `upper`      | `decorators.upper(value)`                                 | Converts text to uppercase         |
+| `lower`      | `decorators.lower(value)`                                 | Converts text to lowercase         |
+| `trim`       | `decorators.trim(value)`                                  | Removes leading/trailing spaces    |
+| `title`      | `decorators.title(value)`                                 | Converts words to title case       |
+| `slug`       | `decorators.slug(value)`                                  | Converts text to URL-friendly slug |
+| `repeat`     | `decorators.repeat(value, count)`                         | Repeats string `count` times       |
+| `padStart`   | `decorators.padStart(value, targetLength, fill?)`         | Left pads string                   |
+| `padEnd`     | `decorators.padEnd(value, targetLength, fill?)`           | Right pads string                  |
+| `replaceAll` | `decorators.replaceAll(value, searchValue, replaceValue)` | Replaces all occurrences           |
+
+### Date-Time APIs
+
+| Method         | Signature                                 | Description                  |
+| -------------- | ----------------------------------------- | ---------------------------- |
+| `nowTimestamp` | `decorators.nowTimestamp()`               | Current epoch timestamp      |
+| `nowISO`       | `decorators.nowISO()`                     | Current ISO date-time string |
+| `today`        | `decorators.today()`                      | Current date as `YYYY-MM-DD` |
+| `timeNow`      | `decorators.timeNow()`                    | Current time as `HH:mm:ss`   |
+| `format`       | `decorators.format(dateValue, pattern?)`  | Formats date by tokens       |
+| `addDays`      | `decorators.addDays(dateValue, days)`     | Adds days to date            |
+| `addMonths`    | `decorators.addMonths(dateValue, months)` | Adds months to date          |
+| `addYears`     | `decorators.addYears(dateValue, years)`   | Adds years to date           |
+| `diffDays`     | `decorators.diffDays(startDate, endDate)` | Day difference               |
+
+## Format Tokens
+
+| Token  | Meaning      |
+| ------ | ------------ |
+| `YYYY` | Year         |
+| `MM`   | Month        |
+| `DD`   | Day          |
+| `HH`   | Hour         |
+| `mm`   | Minute       |
+| `ss`   | Second       |
+| `SSS`  | Milliseconds |
+
+## API Examples (All String Methods)
 
 ```priyo
 monalisa {
   lisaaBring decorators
 
+  priyoTell(decorators.upper("mona and piue"))
+  priyoTell(decorators.lower("HELLO PRIYOSCRIPT"))
+  priyoTell(decorators.trim("  hello  "))
   priyoTell(decorators.title("welcome to priyoscript"))
   priyoTell(decorators.slug("Priyo Script Language"))
-  priyoTell(decorators.format("2026-03-01T10:30:00.000Z", "DD/MM/YYYY HH:mm:ss"))
+  priyoTell(decorators.repeat("ha", 3))
+  priyoTell(decorators.padStart("7", 3, "0"))
+  priyoTell(decorators.padEnd("7", 3, "0"))
+  priyoTell(decorators.replaceAll("mona likes tea", "tea", "coffee"))
 }
 ```
+
+Output:
+
+```text
+MONA AND PIUE
+hello priyoscript
+hello
+Welcome To Priyoscript
+priyo-script-language
+hahaha
+007
+700
+mona likes coffee
+```
+
+## API Examples (All Date-Time Methods)
+
+```priyo
+monalisa {
+  lisaaBring decorators
+
+  priyoTell(decorators.nowTimestamp())
+  priyoTell(decorators.nowISO())
+  priyoTell(decorators.today())
+  priyoTell(decorators.timeNow())
+
+  priyoKeep base = "2026-03-01T10:30:00.000Z"
+  priyoTell(decorators.format(base, "DD/MM/YYYY HH:mm:ss"))
+  priyoTell(decorators.addDays(base, 7))
+  priyoTell(decorators.addMonths(base, 1))
+  priyoTell(decorators.addYears(base, 1))
+  priyoTell(decorators.diffDays("2026-03-01", "2026-03-21"))
+}
+```
+
+Output:
+
+```text
+(current timestamp number)
+(current ISO date-time string)
+(current date)
+(current time)
+01/03/2026 16:00:00
+2026-03-08T10:30:00.000Z
+2026-04-01T10:30:00.000Z
+2027-03-01T10:30:00.000Z
+20
+```
+
+## Error Cases
+
+```priyo
+monalisa {
+  lisaaBring decorators
+  priyoTell(decorators.repeat("x", -1))
+}
+```
+
+Expected error:
+
+```text
+decorators.repeat expects count to be a non-negative integer
+```
+
+```priyo
+monalisa {
+  lisaaBring decorators
+  priyoTell(decorators.format("not-a-date", "YYYY-MM-DD"))
+}
+```
+
+Expected error:
+
+```text
+decorators.format expects dateValue to be a valid date input
+```
+
+<Callout title="Validation Notes" type="warn">
+  - String helpers expect string input unless method signature says otherwise. - Date helpers
+  require valid date input values. - `replaceAll` requires non-empty `searchValue`. - `repeat`
+  requires non-negative integer count.
+</Callout>
+
+## Practice Questions
+
+<Callout title="Concept Check" type="idea">
+  1. When should you use `title` vs `upper`? 2. Why is `format(date, pattern)` better than manual
+  string concatenation for dates? 3. What is the practical difference between `today()` and
+  `nowISO()`?
+</Callout>
+
+## Related Docs
+
+- [Standard Library](./index)
+- [math Package](./math)
+- [Modules and Packages](../modules/packages)

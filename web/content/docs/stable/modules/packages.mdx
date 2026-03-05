@@ -1,42 +1,54 @@
 ---
 title: Modules and Packages
-description: Practical modular programming in PriyoScript using lisaaBox, lisaaShare, and lisaaBring.
-icon: Puzzle
+description: Complete guide to lisaaBox/lisaaShare/lisaaBring and priyoPackage APIs.
+icon: FolderTree
 ---
 
-## 1. Theory
+## Theory
 
-Modular programming means splitting large code into small focused files.  
-This improves readability, maintainability, and reuse.  
-In PriyoScript, modules are created with `lisaaBox`.  
-Exports use `lisaaShare`, and imports use `lisaaBring`.  
-Built-in packages (like `math`) are imported directly.  
-Local modules are imported by path.  
-PriyoScript resolves relative imports from the current file and project-root absolute imports from your project folder.  
-It can also auto-resolve `module.priyo` and `module/index.priyo`.  
-This structure helps teams work on separate files safely.  
-It also reduces copy-paste coding.
+Modules and packages help you split code into reusable units. A module is your own file-based code unit (`lisaaBox`) that exports selected symbols (`lisaaShare`). A package is a pre-registered reusable utility object (for example `math`, `decorators`) imported through `lisaaBring` or accessed via `priyoPackage`. This separation makes large projects easier to organize and test.
 
-## 2. Program Examples
+<Callout title="Current module/package features" type="success">
+- Module declaration with `lisaaBox { ... }`  
+- Explicit exports with `lisaaShare`  
+- Built-in package import (`lisaaBring math`, `lisaaBring decorators`)  
+- Path import with alias and named imports  
+- Relative (`./`, `../`) and project-root absolute (`/...`) resolution  
+- Automatic fallback to `path.priyo` and `path/index.priyo`  
+- Built-in package APIs via `priyoPackage.list/has/use`
+</Callout>
 
-### Example 1: Built-in Package Import
+## API Table
 
-```priyo
-monalisa {
-  lisaaBring math
-  priyoTell(math.cube(2))
-}
-```
+### Module syntax APIs
 
-Output:
+| API             | Syntax                                   | Purpose                                |
+| --------------- | ---------------------------------------- | -------------------------------------- |
+| Module boundary | `lisaaBox { ... }`                       | Marks file as importable module        |
+| Export symbol   | `lisaaShare name`                        | Exposes symbol to importers            |
+| Alias import    | `lisaaBring "./m.priyo": mod`            | Imports full module object under alias |
+| Named import    | `lisaaBring "./m.priyo": [x, y: localY]` | Imports selected exports               |
+
+### Package runtime APIs
+
+| API           | Syntax                     | Purpose                                  |
+| ------------- | -------------------------- | ---------------------------------------- |
+| List packages | `priyoPackage.list()`      | Returns available built-in package names |
+| Check package | `priyoPackage.has("math")` | Returns boolean                          |
+| Load package  | `priyoPackage.use("math")` | Returns package object                   |
+| Direct import | `lisaaBring math`          | Shortcut built-in package binding        |
+
+## Example 1: Create and import a basic module (alias import)
+
+Folder structure:
 
 ```text
-8
+project/
+  college.priyo
+  main.priyo
 ```
 
-### Example 2: Create a Local Module
-
-`college.priyo`:
+`college.priyo`
 
 ```priyo
 lisaaBox {
@@ -51,15 +63,7 @@ lisaaBox {
 }
 ```
 
-Output:
-
-```text
-(No direct output; this file defines exports)
-```
-
-### Example 3: Import as Namespace
-
-`main.priyo`:
+`main.priyo`
 
 ```priyo
 monalisa {
@@ -69,6 +73,12 @@ monalisa {
 }
 ```
 
+Explanation:
+
+- `college.priyo` is a module file, so it starts with `lisaaBox`.
+- Only shared symbols become importable.
+- Alias `college` holds exported members as properties.
+
 Output:
 
 ```text
@@ -76,7 +86,17 @@ NSEC
 25
 ```
 
-### Example 4: Named + Alias Import
+## Example 2: Named import with alias
+
+Folder structure:
+
+```text
+project/
+  college.priyo
+  main.priyo
+```
+
+`main.priyo`
 
 ```priyo
 monalisa {
@@ -86,6 +106,11 @@ monalisa {
 }
 ```
 
+Explanation:
+
+- Imports only needed names.
+- `square: sq` renames export locally for readability.
+
 Output:
 
 ```text
@@ -93,57 +118,111 @@ NSEC
 36
 ```
 
-### Example 5: Multi-Module Project Pattern
+## Example 3: Built-in package import
+
+Folder structure:
+
+```text
+project/
+  main.priyo
+```
+
+`main.priyo`
 
 ```priyo
 monalisa {
   lisaaBring math
-  lisaaBring "./college.priyo": college
+  lisaaBring decorators
 
-  priyoTell(math.areaCircle(2))
-  priyoTell(college.square(4))
+  priyoTell(math.cube(2))
+  priyoTell(decorators.upper("mona"))
 }
 ```
+
+Explanation:
+
+- `lisaaBring math` and `lisaaBring decorators` load built-ins from package registry.
+- No local file path needed.
 
 Output:
 
 ```text
-12.56636
-16
+8
+MONA
 ```
 
-### Example 6: Relative Import + Optional `index.priyo`
+## Example 4: `priyoPackage` methods (`list`, `has`, `use`)
 
-Directory structure:
+Folder structure:
+
+```text
+project/
+  main.priyo
+```
+
+`main.priyo`
+
+```priyo
+monalisa {
+  priyoTell(priyoPackage.list())
+  priyoTell(priyoPackage.has("math"))
+
+  priyoKeep pkg = priyoPackage.use("math")
+  priyoTell(pkg.add(10, 5))
+}
+```
+
+Explanation:
+
+- `list()` helps discover available built-ins.
+- `has(name)` validates before loading.
+- `use(name)` returns package object manually.
+
+Output:
+
+```text
+[math, decorators]
+priyoTrue
+15
+```
+
+## Example 5: Relative + absolute path resolution and index fallback
+
+Folder structure:
 
 ```text
 project/
   modules/
     billing/
       index.priyo
-  main.priyo
+  app/
+    main.priyo
 ```
 
-`modules/billing/index.priyo`:
+`modules/billing/index.priyo`
 
 ```priyo
 lisaaBox {
   lisaaTask total(base, tax) {
     priyoGiveBack base + tax
   }
-
   lisaaShare total
 }
 ```
 
-`main.priyo`:
+`app/main.priyo`
 
 ```priyo
 monalisa {
-  lisaaBring "./modules/billing": billing
+  lisaaBring "/modules/billing": billing
   priyoTell(billing.total(100, 18))
 }
 ```
+
+Explanation:
+
+- `/modules/billing` is project-root absolute import.
+- Resolver tries: direct path -> `.priyo` -> `index.priyo`.
 
 Output:
 
@@ -151,106 +230,30 @@ Output:
 118
 ```
 
-### Example 7: Project-Root Absolute Import
+## Edge Cases
 
-```priyo
-monalisa {
-  lisaaBring "/modules/billing": billing
-  priyoTell(billing.total(100, 12))
-}
-```
+| Case                                  | What happens                                          |
+| ------------------------------------- | ----------------------------------------------------- |
+| Module file does not exist            | module-not-found error with attempted candidate paths |
+| File does not start with `lisaaBox`   | compile/runtime module-shape error                    |
+| Cyclic imports (`A -> B -> A`)        | cycle guard error                                     |
+| Unknown package in `use`/`lisaaBring` | package-not-found error                               |
+| Export name not shared                | imported symbol unavailable                           |
 
-Output:
-
-```text
-112
-```
-
-## 3. Execution Flow
-
-1. Interpreter reads import statements early.
-2. Built-in package names resolve from package registry.
-3. File path imports resolve with Module v3 rules:
-   - `./` and `../` from the importer file
-   - `/...` from project root
-4. Resolver tries candidates in order:
-   - direct path
-   - `path.priyo`
-   - `path/index.priyo`
-5. `lisaaBox` defines module boundary.
-6. Only symbols marked by `lisaaShare` are exposed.
-7. Import alias maps module exports into current file scope.
-8. Program continues normal execution using imported values.
-
-## 4.1 Module v3 Resolution Rules (Quick Reference)
-
-- Built-in package:
-  - `lisaaBring math`
-- Relative module:
-  - `lisaaBring "./utils/pricing"`
-  - `lisaaBring "../shared/constants.priyo"`
-- Project-root absolute module:
-  - `lisaaBring "/modules/billing"`
-- Optional auto-fallback:
-  - `pricing` -> `pricing.priyo` -> `pricing/index.priyo`
-
-<Callout title="Module Not Found Diagnostics" type="idea">
-  If a module is not found, PriyoScript now reports the resolved import path and the exact candidate
-  paths it tried, so you can fix the path quickly.
+<Callout title="Debug tip" type="warn">
+  If import fails, check in order: file path, `lisaaBox` at file root, `lisaaShare` names, and cycle
+  presence.
 </Callout>
 
-## 5. Comparison With Other Languages
+## Practice Questions
 
-Java:
-
-```java
-import java.util.ArrayList;
-```
-
-Python:
-
-```python
-import math
-from module import square as sq
-```
-
-Node.js (ESM):
-
-```javascript
-import { readFile } from 'node:fs/promises'
-```
-
-Node.js (CommonJS):
-
-```javascript
-const fs = require('fs')
-```
-
-PriyoScript:
-
-```priyo
-monalisa {
-  lisaaBring math
-  lisaaBring "./college.priyo": college
-}
-```
-
-Difference summary:
-
-- PriyoScript module syntax is explicit and beginner-readable.
-- Similar goal to Java/Python/Node imports: reuse code cleanly.
-- `lisaaBox` + `lisaaShare` gives clear export boundaries.
-
-## 6. Inspiration and Official References
-
-- Java imports/packages inspiration:  
-  https://docs.oracle.com/javase/tutorial/java/package/
-- Python import system inspiration:  
-  https://docs.python.org/3/reference/import.html
-- Node.js modules inspiration:  
-  https://nodejs.org/api/modules.html  
-  https://nodejs.org/api/esm.html
-
-<Callout title="About priyoPackage" type="idea">
-  In PriyoScript docs, �package/module boundary� is implemented through `lisaaBox`.
+<Callout title="Concept Check" type="idea">
+  1. When should you use alias import vs named import? 2. What is the difference between `lisaaBring
+  math` and `priyoPackage.use("math")`? 3. Why does module resolution try `index.priyo` as fallback?
 </Callout>
+
+## Related Docs
+
+- [Standard Library](../standard-library/index)
+- [Functions](../basics/functions)
+- [Error Reference](../reference/errors-reference)

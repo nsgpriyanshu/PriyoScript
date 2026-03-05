@@ -1,234 +1,176 @@
 ---
 title: Syntax Basics
-description: Core PriyoScript syntax explained from first principles with examples, outputs, and language comparisons.
+description: Core PriyoScript syntax in a structured, beginner-friendly reference format.
 icon: Code
 ---
 
-## 1. Theory
+## Theory
 
-Syntax is the grammar of a programming language.  
-If grammar is correct, the computer can understand your instructions.  
-PriyoScript keeps syntax explicit so beginners can read code like a story.  
-A valid program starts in a `monalisa { ... }` block.  
-Variables store values and expressions compute new values.  
-Conditions choose paths, and loops repeat work.  
-Functions group reusable logic.  
-Comments explain code for humans without affecting execution.  
-Learning syntax first makes every advanced topic easier.
+Syntax is the formal grammar that tells PriyoScript how to read and execute your program. If syntax is valid, the interpreter can understand your intent and run statements in deterministic order. PriyoScript is designed to keep this grammar explicit and readable, so beginners can identify program structure quickly while still writing production-quality logic. In practical terms, syntax defines how you enter a program (`monalisa { ... }`), how you store data, how you branch and loop, how you define reusable functions, and how you organize code through modules and classes.
 
-<Callout title="Beginner Rule" type="idea">
-  Write small, valid programs first. Correct syntax gives you clear confidence.
+<Callout title="Why this matters" type="idea">
+  Good syntax habits reduce debugging time and make every advanced concept easier to learn.
 </Callout>
 
-## 2. Program Examples
+## Syntax Catalog
 
-### Example 1: Hello World
+### Basic Structure
 
-```priyo
-monalisa {
-  priyoTell("Hello, PriyoScript!")
-}
-```
+| Syntax             | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `monalisa { ... }` | Program entry block. All executable statements start here. |
+| `// comment`       | Single-line comment.                                       |
+| `/* comment */`    | Multi-line comment block.                                  |
 
-Output:
+### Literals and Values
 
-```text
-Hello, PriyoScript!
-```
+| Syntax                    | Description            |
+| ------------------------- | ---------------------- |
+| `123`, `3.14`             | Number literals.       |
+| `"mona"`                  | String literal.        |
+| `priyoTrue`, `priyoFalse` | Boolean literals.      |
+| `priyoEmpty`              | Null-like empty value. |
 
-### Example 2: Variables and Math
+### Variables and Assignment
 
-```priyo
-monalisa {
-  priyoKeep a = 10
-  priyoChange b = 5
-  priyoPromise sum = a + b
-  priyoTell(sum)
-}
-```
+| Syntax               | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `priyoKeep x = 1`    | Function-scoped mutable declaration.         |
+| `priyoChange x = 1`  | Block-scoped mutable declaration.            |
+| `priyoPromise x = 1` | Block-scoped immutable binding.              |
+| `x = x + 1`          | Reassignment (not valid for `priyoPromise`). |
 
-Output:
+### Expressions and Operators
 
-```text
-15
-```
+| Syntax                             | Description                       |
+| ---------------------------------- | --------------------------------- |
+| `a + b`, `a - b`, `a * b`, `a / b` | Arithmetic expressions.           |
+| `a == b`, `a >= b`, `a != b`       | Comparison expressions.           |
+| `a && b`, `a \|\| b`, `!a`         | Logical expressions.              |
+| `(a + b) * c`                      | Grouping with precedence control. |
 
-### Example 3: Condition
+### Control Flow
 
-```priyo
-monalisa {
-  priyoKeep marks = 82
+| Syntax                           | Description                        |
+| -------------------------------- | ---------------------------------- |
+| `prakritiIf (...) { ... }`       | Conditional branch.                |
+| `prakritiElseIf (...) { ... }`   | Additional condition branch.       |
+| `prakritiElse { ... }`           | Fallback branch.                   |
+| `prakritiCount (...) { ... }`    | Counted loop.                      |
+| `prakritiAsLongAs (...) { ... }` | While loop.                        |
+| `prakritiStop`, `prakritiGoOn`   | Break/continue style flow control. |
 
-  prakritiIf (marks >= 80) {
-    priyoTell("Pass with distinction")
-  } prakritiElse {
-    priyoTell("Pass")
-  }
-}
-```
+### Functions
 
-Output:
+| Syntax                        | Description           |
+| ----------------------------- | --------------------- |
+| `lisaaTask name(...) { ... }` | Function declaration. |
+| `priyoGiveBack value`         | Return from function. |
+| `name(arg)`                   | Function call.        |
 
-```text
-Pass with distinction
-```
+### Arrays
 
-### Example 4: Loop
+| Syntax       | Description               |
+| ------------ | ------------------------- |
+| `[1, 2, 3]`  | Array literal.            |
+| `arr[0]`     | Index read.               |
+| `arr[1] = 9` | Index write.              |
+| `arr[1:3]`   | Slice (range extraction). |
 
-```priyo
-monalisa {
-  prakritiCount (priyoChange i = 1; i <= 3; i = i + 1) {
-    priyoTell(i)
-  }
-}
-```
+### OOP
 
-Output:
+| Syntax                          | Description                    |
+| ------------------------------- | ------------------------------ |
+| `lisaaFamily ClassName { ... }` | Class declaration.             |
+| `priyoCreate ClassName(...)`    | Instance creation.             |
+| `priyoSelf`                     | Current instance reference.    |
+| `lisaaInherit Parent`           | Inheritance from parent class. |
+| `priyoParent(...)`              | Parent constructor call.       |
 
-```text
-1
-2
-3
-```
+### Modules and Packages
 
-### Example 5: Function
+| Syntax                     | Description                  |
+| -------------------------- | ---------------------------- |
+| `lisaaBox { ... }`         | Module declaration boundary. |
+| `lisaaShare symbol`        | Module export.               |
+| `lisaaBring "path": alias` | Module import with alias.    |
+| `lisaaBring math`          | Built-in package import.     |
 
-```priyo
-monalisa {
-  lisaaTask square(x) {
-    priyoGiveBack x * x
-  }
+## Example Programs
 
-  priyoTell(square(4))
-}
-```
-
-Output:
-
-```text
-16
-```
-
-## 3. Execution Flow
-
-1. `monalisa` block starts program execution.
-2. Statements run top to bottom.
-3. Variable lines store values in memory.
-4. Expressions are evaluated left to right by precedence rules.
-5. `if` checks condition and chooses one block.
-6. Loop repeats block while condition allows.
-7. Function call jumps into function body and returns using `priyoGiveBack`.
-8. `priyoTell` prints result to output.
-
-## 4. Comparison With Other Languages
-
-### Hello World Equivalent
-
-C:
-
-```c
-#include <stdio.h>
-int main() {
-  printf("Hello, PriyoScript!\n");
-  return 0;
-}
-```
-
-Java:
-
-```java
-class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello, PriyoScript!");
-  }
-}
-```
-
-JavaScript:
-
-```javascript
-console.log('Hello, PriyoScript!')
-```
-
-Python:
-
-```python
-print("Hello, PriyoScript!")
-```
-
-PriyoScript:
-
-```priyo
-monalisa {
-  priyoTell("Hello, PriyoScript!")
-}
-```
-
-Difference summary:
-
-- C/Java need extra boilerplate (`main`, class declarations, includes).
-- JavaScript/Python are concise.
-- PriyoScript uses an explicit entry block (`monalisa`) for clarity.
-
-## 5. Inspiration and Official References
-
-- C program entry and structured syntax inspiration: ISO C overview  
-  https://www.iso.org/standard/74528.html
-- Java block-based syntax and explicit structure influence:  
-  https://docs.oracle.com/javase/tutorial/java/nutsandbolts/
-- JavaScript expression/operator model influence:  
-  https://tc39.es/ecma262/
-- Python readability and beginner-first philosophy influence:  
-  https://docs.python.org/3/tutorial/
-
----
-
-### Available Core Syntax Keywords (Current Stable)
-
-- Entry: `monalisa`
-- Output/Input: `priyoTell`, `priyoListen`, `priyoListenSentence`, `priyoListenNumber`
-- Values: `priyoTrue`, `priyoFalse`, `priyoEmpty`
-- Variables: `priyoKeep`, `priyoChange`, `priyoPromise`
-- Object/Class context: `priyoSelf`, `priyoParent`, `priyoCreate`
-- Functions: `lisaaTask`, `priyoGiveBack`
-- Conditionals: `prakritiIf`, `prakritiElseIf`, `prakritiElse`
-- Switch: `prakritiChoose`, `prakritiCase`, `prakritiOtherwise`
-- Loops: `prakritiCount`, `prakritiAsLongAs`, `priyoInside`
-- Loop control: `prakritiStop`, `prakritiGoOn`
-- Errors: `prakritiTry`, `prakritiCatch`, `prakritiAtEnd`, `prakritiThrow`
-- Modules: `lisaaBring`, `lisaaShare`, `lisaaBox`
-- OOP: `lisaaFamily`, `lisaaInherit`, `lisaaStable`
-
-## Variables
-
-PriyoScript has three variable declarations:
-
-- `priyoKeep`: function-scoped, re-assignable
-- `priyoChange`: block-scoped, re-assignable
-- `priyoPromise`: block-scoped, cannot be reassigned
+### Example 1: Basic Output + Variables
 
 ```priyo
 monalisa {
   priyoKeep name = "mona"
-  priyoChange marks = 80
-  priyoPromise passMark = 40
-
-  marks = marks + 5
-
-  priyoTell(name)
-  priyoTell(marks)
-  priyoTell(passMark)
+  priyoPromise version = "stable"
+  priyoTell("Hello " + name + " (" + version + ")")
 }
 ```
 
-Output:
+Expected output:
 
 ```text
-mona
-85
-40
+Hello mona (stable)
 ```
 
-<Callout title="Best practice" type="idea">
-  Prefer `priyoPromise` by default. Use `priyoChange` only when mutation is required.
+### Example 2: Condition + Loop
+
+```priyo
+monalisa {
+  prakritiCount (priyoChange i = 1; i <= 3; i = i + 1) {
+    prakritiIf (i == 2) {
+      priyoTell("middle")
+    } prakritiElse {
+      priyoTell(i)
+    }
+  }
+}
+```
+
+Expected output:
+
+```text
+1
+middle
+3
+```
+
+### Example 3: Function + Array
+
+```priyo
+monalisa {
+  lisaaTask sum2(a, b) {
+    priyoGiveBack a + b
+  }
+
+  priyoKeep nums = [5, 7]
+  priyoTell(sum2(nums[0], nums[1]))
+}
+```
+
+Expected output:
+
+```text
+12
+```
+
+<Callout title="Common mistake" type="warn">
+  Do not use `priyoGiveBack` outside a function body.
 </Callout>
+
+## Practice Check
+
+<Callout title="Concept Check" type="idea">
+1. Which declaration should you choose for a value that must not be reassigned?  
+2. What is the difference between `arr[1]` and `arr[1:3]`?  
+3. Why must executable code be inside `monalisa { ... }`?
+</Callout>
+
+## Related Docs
+
+- [Quick Start](../quick-start)
+- [Control Flow](./control-flow)
+- [Functions](./functions)
+- [Arrays](./arrays)
+- [Classes and OOP](../oop/classes)

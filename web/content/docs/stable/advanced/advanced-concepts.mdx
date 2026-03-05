@@ -1,20 +1,72 @@
 ---
 title: Advanced Concepts
-description: End-to-end matrix multiplication example that combines loops, arrays, functions, and control flow.
+description: End-to-end matrix multiplication example combining loops, arrays, functions, and control flow.
 icon: ShipWheel
 ---
 
-## 1. Theory
+## 1. Concept Overview
 
-Matrix multiplication is a strong foundational problem for learning programming deeply.  
-It combines arrays, loops, indexing, variable updates, and function decomposition.  
-If you understand this program, you understand core algorithmic thinking.  
-You will read input-like data structures, apply deterministic rules, and produce structured output.  
-This is also how many real systems process numeric data internally.  
-The example below intentionally uses clear loops so beginners can follow every step.  
-After this, you can confidently solve many table-based and list-based problems.
+Matrix multiplication is one of the best exercises for mastering **core programming logic**.
 
-## 2. Program Examples
+It requires understanding how multiple programming constructs work together:
+
+- Arrays (2D data structures)
+- Nested loops
+- Index-based access
+- Accumulating values
+- Function decomposition
+- Input and output handling
+
+Because of this, matrix multiplication appears in many real-world systems such as:
+
+- Graphics engines
+- Physics simulations
+- Machine learning models
+- Data processing pipelines
+- Scientific computing
+
+Learning to implement matrix multiplication helps build **algorithmic thinking**, which is essential for solving more complex programming problems.
+
+---
+
+## 2. Mathematical Idea
+
+Two matrices can be multiplied **only if**:
+
+```text
+Columns of Matrix A = Rows of Matrix B
+```
+
+Example:
+
+```text
+A (2 x 2)      B (2 x 2)
+
+[1 2]          [5 6]
+[3 4]          [7 8]
+```
+
+Result matrix:
+
+```text
+C = A x B
+
+[ (1x5 + 2x7)   (1x6 + 2x8) ]
+[ (3x5 + 4x7)   (3x6 + 4x8) ]
+```
+
+Output:
+
+```text
+[19 22]
+[43 50]
+```
+
+This operation is called a **dot product between rows and columns**.
+
+---
+
+## 3. Program Examples
 
 ### Example 1: Matrix Multiplication (2x2) with User Input
 
@@ -51,8 +103,8 @@ monalisa {
 
   priyoKeep m1 = readMatrix2x2("Matrix A")
   priyoKeep m2 = readMatrix2x2("Matrix B")
-
   priyoKeep out = multiply2x2(m1, m2)
+
   priyoTell.Success("Result matrix:")
   priyoTell(out)
 }
@@ -67,11 +119,16 @@ Result matrix:
 [[19, 22], [43, 50]]
 ```
 
-### Example 2: Print Matrix Row by Row
+---
+
+## 4. Printing Matrix Row by Row
+
+Sometimes we want to print matrices in a cleaner way.
 
 ```priyo
 monalisa {
   priyoKeep matrix = [[19, 22], [43, 50]]
+
   prakritiCount (row priyoInside matrix) {
     priyoTell(row)
   }
@@ -85,7 +142,13 @@ Output:
 [43, 50]
 ```
 
-### Example 3: Validate Matrix Dimensions
+This loop iterates over each **row in the matrix**.
+
+---
+
+## 5. Validating Matrix Dimensions
+
+Before multiplying matrices, we must check if the operation is valid.
 
 ```priyo
 monalisa {
@@ -105,7 +168,13 @@ priyoTrue
 priyoFalse
 ```
 
-### Example 4: Sum All Elements in Result Matrix
+This simple validation prevents **invalid mathematical operations**.
+
+---
+
+## 6. Summing All Elements in a Matrix
+
+We can also process matrices after computation.
 
 ```priyo
 monalisa {
@@ -128,11 +197,22 @@ Output:
 134
 ```
 
-### Example 5: Final Practical Pattern (Compute + Print)
+This demonstrates **nested iteration over 2D structures**.
+
+---
+
+## 7. Final Practical Pattern (Compute + Print)
+
+A common workflow:
+
+1. Compute a matrix
+2. Store the result
+3. Print each row clearly
 
 ```priyo
 monalisa {
   priyoKeep out = [[19, 22], [43, 50]]
+
   priyoTell("Final matrix:")
   prakritiCount (row priyoInside out) {
     priyoTell(row)
@@ -148,24 +228,100 @@ Final matrix:
 [43, 50]
 ```
 
-## 3. Execution Flow
+---
 
-1. Two matrices are read from user input.
-2. Outer loop selects result row `i`.
-3. Middle loop selects result column `j`.
-4. Inner loop computes dot product using index `k`.
-5. Dot-product sum is stored in `result[i][j]`.
-6. Steps repeat until all cells are computed.
-7. Final matrix is printed.
+## 8. Execution Flow
 
-Simple child-friendly analogy:
+When the program runs, this sequence happens:
 
-- First matrix = ingredient table A.
-- Second matrix = ingredient table B.
-- For each output box, you multiply matching pairs and add them.
-- Put the final sum in that output box.
+1. The user enters values for two matrices.
+2. The program calls the **multiplication function**.
+3. The outer loop selects the **row index `i`**.
+4. The middle loop selects the **column index `j`**.
+5. The inner loop multiplies and accumulates values using index **`k`**.
+6. The calculated sum becomes `result[i][j]`.
+7. After all loops finish, the final matrix is printed.
+
+---
+
+## 9. Algorithm Representation
+
+Matrix multiplication algorithm:
+
+```text
+for each row i in A
+  for each column j in B
+    sum = 0
+    for each k
+      sum += A[i][k] * B[k][j]
+    result[i][j] = sum
+```
+
+This is the **classic triple-loop matrix algorithm**.
+
+---
+
+## 10. Time Complexity
+
+For an `n x n` matrix:
+
+```text
+Time Complexity = O(n^3)
+```
+
+Reason:
+
+- First loop -> rows
+- Second loop -> columns
+- Third loop -> dot product computation
+
+Total operations grow roughly with **n^3**.
+
+---
+
+## 11. Beginner Mental Model
+
+Think of matrix multiplication like **combining ingredients in a recipe table**.
+
+- Matrix A = ingredient quantities
+- Matrix B = recipe combinations
+- Each output cell mixes **matching row and column ingredients**
+
+Steps:
+
+1. Pick a row from matrix A
+2. Pick a column from matrix B
+3. Multiply matching values
+4. Add them together
+5. Store the result in the output matrix
+
+---
 
 <Callout title="Why this example matters" type="idea">
-  Matrix multiplication proves you can combine syntax, loops, arrays, and functions into one
-  complete real algorithm.
+Matrix multiplication is one of the first programs where multiple programming ideas combine into a **complete algorithm**.
+
+By understanding this example, you learn how to combine:
+
+- Functions
+- Nested loops
+- Arrays
+- Data validation
+- Structured output
+
+This is the foundation for building **real computational systems**.
+
 </Callout>
+
+---
+
+## 12. What You Learned
+
+After completing this page, you now understand:
+
+- How to represent matrices using arrays
+- How nested loops operate in algorithms
+- How to perform dot product calculations
+- How to validate matrix dimensions
+- How to structure programs using reusable functions
+
+These concepts are essential for **data science, graphics programming, and algorithm design**.

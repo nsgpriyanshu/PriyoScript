@@ -1,23 +1,61 @@
 ---
 title: Arrays
-description: Complete beginner-to-practical guide to arrays in PriyoScript.
+description: Complete array guide with literals, indexing, slicing, and all priyoArray helper functions.
 icon: List
 ---
 
-## 1. Theory
+## Theory
 
-An array stores multiple values in one variable.  
-Each value has a numeric position called index.  
-Use arrays when you have a list of related items.  
-PriyoScript arrays are first-class values.  
-You can read, update, slice, loop, destructure, and transform arrays.  
-Helpers like `map`, `filter`, and `reduce` make collection work clean.  
-Learning arrays is essential for real applications and data handling.  
-Arrays also build the base for matrix-style programs.
+Arrays are ordered collections used to store multiple values under one variable name. They solve repeated-data problems such as lists of marks, names, prices, matrix rows, and filtered search results. In PriyoScript, arrays are first-class values: you can create them, mutate them, slice them, iterate through them, and process them with helper methods. A strong array foundation is essential for writing practical programs.
 
-## 2. Program Examples
+<Callout title="Why arrays matter" type="idea">
+  If you are handling repeated values, arrays usually make the code shorter, safer, and easier to
+  maintain.
+</Callout>
 
-### Example 1: Indexing and Update
+## Array Basics Table
+
+| Feature       | Syntax                                 | Description           |
+| ------------- | -------------------------------------- | --------------------- |
+| Literal       | `[1, 2, 3]`                            | Create an array       |
+| Index read    | `arr[0]`                               | Read value at index   |
+| Index write   | `arr[1] = 10`                          | Update index value    |
+| Slice         | `arr[1:3]`                             | Extract subarray      |
+| For-each loop | `prakritiCount (item priyoInside arr)` | Iterate over elements |
+
+## `priyoArray` Helper Functions Table
+
+### Core helpers
+
+| Helper     | Signature                             | Returns                                   |
+| ---------- | ------------------------------------- | ----------------------------------------- |
+| `length`   | `priyoArray.length(arr)`              | Number                                    |
+| `push`     | `priyoArray.push(arr, value)`         | New length                                |
+| `pop`      | `priyoArray.pop(arr)`                 | Removed value or `priyoEmpty`-like result |
+| `first`    | `priyoArray.first(arr)`               | First value or `null`                     |
+| `last`     | `priyoArray.last(arr)`                | Last value or `null`                      |
+| `at`       | `priyoArray.at(arr, index)`           | Value at index or `null`                  |
+| `slice`    | `priyoArray.slice(arr, start?, end?)` | New array                                 |
+| `reverse`  | `priyoArray.reverse(arr)`             | New reversed array                        |
+| `includes` | `priyoArray.includes(arr, value)`     | Boolean                                   |
+| `indexOf`  | `priyoArray.indexOf(arr, value)`      | Index or `-1`                             |
+| `join`     | `priyoArray.join(arr, sep?)`          | String                                    |
+
+### Callback helpers
+
+| Helper    | Signature                                    | Returns               |
+| --------- | -------------------------------------------- | --------------------- |
+| `map`     | `priyoArray.map(arr, callback)`              | New mapped array      |
+| `filter`  | `priyoArray.filter(arr, callback)`           | New filtered array    |
+| `reduce`  | `priyoArray.reduce(arr, callback, initial?)` | Accumulated value     |
+| `forEach` | `priyoArray.forEach(arr, callback)`          | `null`                |
+| `find`    | `priyoArray.find(arr, callback)`             | Found value or `null` |
+| `some`    | `priyoArray.some(arr, callback)`             | Boolean               |
+| `every`   | `priyoArray.every(arr, callback)`            | Boolean               |
+
+## Basic Array Syntax Examples
+
+### Example 1: Literal + index read/write
 
 ```priyo
 monalisa {
@@ -40,63 +78,62 @@ Output:
 ```priyo
 monalisa {
   priyoKeep nums = [10, 20, 30, 40]
-  priyoTell(nums[0:2])
-  priyoTell(nums[:2])
-  priyoTell(nums[1:])
+  priyoTell(nums[1:3])
 }
 ```
 
 Output:
 
 ```text
-[10, 20]
-[10, 20]
-[20, 30, 40]
+[20, 30]
 ```
 
-### Example 3: Destructuring With Default
+## Core Helper Examples (all functions)
 
 ```priyo
 monalisa {
-  priyoKeep values = [7, 8]
-  priyoChange[(first, second, third = 99)] = values
-  priyoTell(first)
-  priyoTell(second)
-  priyoTell(third)
+  priyoKeep arr = [10, 20, 30]
+
+  priyoTell(priyoArray.length(arr))
+  priyoTell(priyoArray.push(arr, 40))
+  priyoTell(priyoArray.pop(arr))
+  priyoTell(priyoArray.first(arr))
+  priyoTell(priyoArray.last(arr))
+  priyoTell(priyoArray.at(arr, 1))
+  priyoTell(priyoArray.at(arr, 99))
+  priyoTell(priyoArray.slice(arr, 0, 2))
+  priyoTell(priyoArray.reverse(arr))
+  priyoTell(priyoArray.includes(arr, 20))
+  priyoTell(priyoArray.indexOf(arr, 30))
+  priyoTell(priyoArray.join(arr, "-"))
 }
 ```
 
 Output:
 
 ```text
-7
-8
-99
+3
+4
+40
+10
+30
+20
+null
+[10, 20]
+[30, 20, 10]
+priyoTrue
+2
+10-20-30
 ```
 
-### Example 4: Iteration
+## Callback Helper Examples (all functions)
 
 ```priyo
 monalisa {
-  priyoKeep items = ["A", "B", "C"]
-  prakritiCount (item priyoInside items) {
-    priyoTell(item)
+  lisaaTask double(x) {
+    priyoGiveBack x * 2
   }
-}
-```
 
-Output:
-
-```text
-A
-B
-C
-```
-
-### Example 5: map / filter / reduce
-
-```priyo
-monalisa {
   lisaaTask isEven(x) {
     priyoGiveBack x % 2 == 0
   }
@@ -105,89 +142,64 @@ monalisa {
     priyoGiveBack acc + x
   }
 
-  priyoKeep values = [1, 2, 3, 4, 5]
-  priyoKeep evens = priyoArray.filter(values, isEven)
-  priyoKeep sum = priyoArray.reduce(evens, add, 0)
+  lisaaTask printItem(x) {
+    priyoTell("item=" + x)
+  }
 
-  priyoTell(evens)
-  priyoTell(sum)
+  priyoKeep vals = [1, 2, 3, 4]
+
+  priyoTell(priyoArray.map(vals, double))
+  priyoTell(priyoArray.filter(vals, isEven))
+  priyoTell(priyoArray.reduce(vals, add, 0))
+  priyoArray.forEach(vals, printItem)
+  priyoTell(priyoArray.find(vals, isEven))
+  priyoTell(priyoArray.some(vals, isEven))
+  priyoTell(priyoArray.every(vals, isEven))
 }
 ```
 
 Output:
 
 ```text
+[2, 4, 6, 8]
 [2, 4]
-6
+10
+item=1
+item=2
+item=3
+item=4
+2
+priyoTrue
+priyoFalse
 ```
 
-## 3. Execution Flow
-
-1. Array literal allocates ordered storage.
-2. `arr[i]` reads value at index `i`.
-3. `arr[i] = value` updates one slot.
-4. Slice builds a new array from range.
-5. For-each loop reads each item one by one.
-6. `filter` keeps matching items.
-7. `reduce` combines array into one final value.
-
-## 4. Comparison With Other Languages
-
-C arrays:
-
-```c
-int nums[3] = {10, 20, 30};
-printf("%d\n", nums[0]);
-```
-
-Java arrays:
-
-```java
-int[] nums = {10, 20, 30};
-System.out.println(nums[0]);
-```
-
-JavaScript arrays:
-
-```javascript
-const nums = [10, 20, 30]
-console.log(nums[0])
-```
-
-Python lists:
-
-```python
-nums = [10, 20, 30]
-print(nums[0])
-```
-
-PriyoScript:
+## Invalid Usage Example
 
 ```priyo
 monalisa {
-  priyoKeep nums = [10, 20, 30]
-  priyoTell(nums[0])
+  priyoTell(priyoArray.length("not-array"))
 }
 ```
 
-Difference summary:
+Why invalid: first argument must be an array.  
+Expected error output:
 
-- C arrays are low-level and fixed-size.
-- Java arrays are typed and fixed-size.
-- JavaScript/Python/PriyoScript arrays are dynamic and ergonomic.
-- PriyoScript adds readable helper APIs through `priyoArray`.
+```text
+priyoArray.length expects an array as the first argument
+```
 
-## 5. Inspiration and Official References
+## Practice Questions
 
-- JavaScript Array methods (`map/filter/reduce`) inspiration:  
-  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
-- Python list behavior inspiration:  
-  https://docs.python.org/3/tutorial/datastructures.html
-- Java arrays reference:  
-  https://docs.oracle.com/javase/tutorial/java/nutsandbolts/arrays.html
-- C arrays reference:  
-  https://en.cppreference.com/w/c/language/array
-
-<Callout title="Best Practice" type="idea">
-  Use direct indexing for simple reads/writes, and `priyoArray` helpers for transformations.
+<Callout title="Concept Check" type="idea">
+  1. What is the difference between `priyoArray.slice(...)` and `priyoArray.reverse(...)` in
+  mutation behavior? 2. When should you use `map` vs `forEach`? 3. Why does `find` return `null`
+  when nothing matches?
 </Callout>
+
+## Related Docs
+
+- [Syntax Basics](./syntax)
+- [Conditions](./condition)
+- [Control Flow](./control-flow)
+- [Functions](./functions)
+- [Advanced Concepts](../advanced/advanced-concepts)

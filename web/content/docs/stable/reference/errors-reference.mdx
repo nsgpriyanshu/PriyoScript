@@ -1,28 +1,81 @@
 ---
 title: Error Codes Reference
-description: Understand each error by cause, wrong code, and corrected code.
+description: Complete reference for PriyoScript syntax, compile, runtime, and engine error codes.
 icon: Bug
 ---
 
 ## Theory
 
-Error codes make debugging fast because each code maps to one problem family.
+Error codes are stable identifiers that map failures to specific language/runtime rules. They make debugging faster because you can search by exact code instead of guessing from a generic message.
 
-## How to use
+## Stages and Categories
+
+### Error stages
+
+| Stage     | Meaning                            |
+| --------- | ---------------------------------- |
+| `syntax`  | Source parsing/grammar failure     |
+| `compile` | AST-to-bytecode generation failure |
+| `runtime` | Failure during program execution   |
+| `core`    | Internal engine-level failure      |
+
+### Error categories
+
+| Category | Meaning                            |
+| -------- | ---------------------------------- |
+| `user`   | Error caused by program/code usage |
+| `engine` | Internal runtime/compiler failure  |
+
+## CLI Commands
 
 ```bash
 monalisa -errors
 monalisa -explain <ERROR_CODE>
 ```
 
-## `PSYN-002` Unexpected token/keyword
+## Complete Error Code Table
 
-Why:
+| Code       | Stage   | Category | Meaning                          |
+| ---------- | ------- | -------- | -------------------------------- |
+| `PSYN-001` | syntax  | user     | Parse failed                     |
+| `PSYN-002` | syntax  | user     | Illegal token / unexpected token |
+| `PSYN-003` | syntax  | user     | Reserved/forbidden word usage    |
+| `PCMP-001` | compile | user     | Compile failed                   |
+| `PRUN-000` | runtime | user     | Generic runtime failure          |
+| `PRUN-101` | runtime | user     | Undefined variable               |
+| `PRUN-102` | runtime | user     | Constant reassignment            |
+| `PRUN-103` | runtime | user     | Division by zero                 |
+| `PRUN-104` | runtime | user     | Unknown class                    |
+| `PRUN-105` | runtime | user     | Unknown callable                 |
+| `PRUN-106` | runtime | user     | Property access/assignment error |
+| `PRUN-107` | runtime | user     | Argument mismatch                |
+| `PRUN-108` | runtime | user     | Invalid input                    |
+| `PRUN-109` | runtime | user     | Unknown package                  |
+| `PRUN-110` | runtime | user     | Unknown module                   |
+| `PENG-001` | core    | engine   | Internal engine error            |
 
-- Keyword typo or invalid token order.
+## Syntax Errors
 
-Wrong:
+### `PSYN-001` Parse failed
 
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoTell("hello"
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  priyoTell("hello")
+}
+```
+</Callout>
+
+### `PSYN-002` Illegal token
+
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   prakritiIff (priyoTrue) {
@@ -30,9 +83,8 @@ monalisa {
   }
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
   prakritiIf (priyoTrue) {
@@ -40,119 +92,289 @@ monalisa {
   }
 }
 ```
+</Callout>
 
-## `PRUN-101` Variable scope error
+### `PSYN-003` Reserved word usage
 
-Why:
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep class = 10
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  priyoKeep classCount = 10
+}
+```
+</Callout>
 
-- Variable used before declaration or outside scope.
+## Compile Error
 
-Wrong:
+### `PCMP-001` Compile failed
 
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoGiveBack 10
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  lisaaTask getValue() {
+    priyoGiveBack 10
+  }
+  priyoTell(getValue())
+}
+```
+</Callout>
+
+## Runtime Errors
+
+### `PRUN-000` Generic runtime failure
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep x = priyoEmpty.foo
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  priyoKeep obj = { foo: 10 }
+  priyoTell(obj.foo)
+}
+```
+</Callout>
+
+### `PRUN-101` Undefined variable
+
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   priyoTell(total)
-  priyoKeep total = 10
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
   priyoKeep total = 10
   priyoTell(total)
 }
 ```
+</Callout>
 
-## `PRUN-102` Cannot reassign `priyoPromise`
+### `PRUN-102` Const reassignment
 
-Wrong:
-
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   priyoPromise x = 1
   x = 2
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
   priyoChange x = 1
   x = 2
 }
 ```
+</Callout>
 
-## `PRUN-103` Division by zero
+### `PRUN-103` Division by zero
 
-Wrong:
-
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   priyoTell(10 / 0)
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
-  lisaaTask safeDivide(a, b) {
-    prakritiIf (b == 0) {
-      priyoGiveBack priyoEmpty
-    }
+  lisaaTask safeDiv(a, b) {
+    prakritiIf (b == 0) { priyoGiveBack priyoEmpty }
     priyoGiveBack a / b
+  }
+  priyoTell(safeDiv(10, 2))
+}
+```
+</Callout>
+
+### `PRUN-104` Unknown class
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep u = priyoCreate UnknownClass()
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  lisaaFamily User {}
+  priyoKeep u = priyoCreate User()
+}
+```
+</Callout>
+
+### `PRUN-105` Unknown callable
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep x = 10
+  x()
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  lisaaTask x() {
+    priyoTell("ok")
+  }
+  x()
+}
+```
+</Callout>
+
+### `PRUN-106` Property error
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep x = priyoEmpty
+  priyoTell(x.name)
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  priyoKeep x = { name: "mona" }
+  priyoTell(x.name)
+}
+```
+</Callout>
+
+### `PRUN-107` Argument mismatch
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+  priyoTell(add(10))
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  lisaaTask add(a, b) {
+    priyoGiveBack a + b
+  }
+  priyoTell(add(10, 5))
+}
+```
+</Callout>
+
+### `PRUN-108` Invalid input
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  priyoKeep age = priyoListenNumber("Age: ")
+  priyoTell(age + 1)
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  priyoKeep age = priyoListenNumber("Age: ")
+  prakritiIf (age == priyoEmpty) {
+    priyoTell.Warn("Invalid number")
+  } prakritiElse {
+    priyoTell(age + 1)
   }
 }
 ```
+</Callout>
 
-## `PRUN-109` Unknown package
+### `PRUN-109` Unknown package
 
-Wrong:
-
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   lisaaBring maths
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
   lisaaBring math
 }
 ```
+</Callout>
 
-## `PRUN-110` Module path failed
+### `PRUN-110` Unknown module
 
-Wrong:
-
+<Callout title="Incorrect" type="error">
 ```priyo
 monalisa {
   lisaaBring "./college.priyoo": college
 }
 ```
-
-Correct:
-
+</Callout>
+<Callout title="Correct" type="success">
 ```priyo
 monalisa {
   lisaaBring "./college.priyo": college
 }
 ```
-
-## How execution works (simple)
-
-When error occurs:
-
-1. Engine adds error code
-2. Adds where it happened (line/column)
-3. Adds tip and docs link
-4. Stops unsafe execution
-
-<Callout title="Need full details?" type="warn">
-  Use `monalisa -explain <ERROR_CODE>` for CLI explanation.
 </Callout>
+
+## Engine Error
+
+### `PENG-001` Internal engine error
+
+This is not a user-code logic mistake. It indicates an internal runtime/compiler/core issue.
+
+Action:
+
+1. Save minimal reproducible `.priyo` code.
+2. Run with `monalisa -trace <file>`.
+3. Report with code, output, and environment details.
+
+<Callout title="Reporting engine failures" type="warn">
+  For `PENG-001`, include the error code, source snippet, CLI command, and PriyoScript version in
+  your report.
+</Callout>
+
+## Practice Questions
+
+<Callout title="Concept Check" type="idea">
+  1. Which stage does `PSYN-002` belong to, and why? 2. What is the difference between `PRUN-109`
+  and `PRUN-110`? 3. When should you treat an error as engine-level (`PENG-001`)?
+</Callout>
+
+## Related Docs
+
+- [Error Handling](../advanced/error-handling)
+- [Modules and Packages](../modules/packages)
+- [CLI](../tools/cli)

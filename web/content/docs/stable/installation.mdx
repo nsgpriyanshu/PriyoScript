@@ -8,6 +8,8 @@ icon: Download
 
 PriyoScript currently supports npm global installation.
 This installs the `monalisa` command so you can run `.priyo` files from any folder.
+Global install is preferred for end users because it keeps usage simple:
+one command to install, one command (`monalisa`) to run.
 
 <Callout title="Recommended choice" type="idea">
   Use npm global install as the official stable path.
@@ -19,6 +21,10 @@ This installs the `monalisa` command so you can run `.priyo` files from any fold
 
 - Node.js 18 or higher
 - npm (comes with Node.js)
+
+<Callout title="Node.js" type="info">
+  You can download Node.js from https://nodejs.org/. Make sure to install version 18 or higher.
+</Callout>
 
 ---
 
@@ -47,6 +53,14 @@ npm install -g priyoscript
 monalisa -h
 monalisa -repl
 ```
+
+- `monalisa -h` confirms CLI command wiring is correct.
+- `monalisa -repl` confirms runtime starts and interactive mode is available.
+
+<Callout title="Installation success" type="success">
+  If both commands work without errors, you have successfully installed PriyoScript!
+  Congratulations!
+</Callout>
 
 ### Run Your First Program
 

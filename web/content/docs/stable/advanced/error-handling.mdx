@@ -1,24 +1,37 @@
 ---
 title: Error Handling
-description: Handle failures safely with try/catch/finally/throw and read diagnostics clearly.
+description: Reliable failure handling with prakritiTry, prakritiCatch, prakritiAtEnd, and prakritiThrow.
 icon: ShieldAlert
 ---
 
-## 1. Theory
+## Theory
 
-Errors are normal in programming.  
-Good software does not ignore them; it handles them clearly.  
-PriyoScript gives structured error handling keywords.  
-`prakritiTry` protects risky code.  
-`prakritiCatch` handles failures.  
-`prakritiAtEnd` runs cleanup code always.  
-`prakritiThrow` creates explicit custom failures.  
-Diagnostics include code, stage, location, and tip for fast recovery.  
-This design helps beginners understand both mistake and fix.
+Error handling is the mechanism that keeps programs safe when unexpected conditions happen. Instead of crashing silently, PriyoScript lets you explicitly guard risky logic (`prakritiTry`), capture failures (`prakritiCatch`), run cleanup (`prakritiAtEnd`), and create your own failures (`prakritiThrow`). Good error handling improves reliability, user experience, and debugging speed.
 
-## 2. Program Examples
+<Callout title="Why this is critical" type="success">
+  Programs are not judged by how they run in ideal cases, but by how safely they fail in real cases.
+</Callout>
 
-### Example 1: Basic try/catch/finally
+## Error Handling API Table
+
+| Keyword         | Syntax                        | Purpose                      |
+| --------------- | ----------------------------- | ---------------------------- |
+| `prakritiTry`   | `prakritiTry { ... }`         | Wrap risky code              |
+| `prakritiCatch` | `prakritiCatch (err) { ... }` | Handle thrown/runtime errors |
+| `prakritiAtEnd` | `prakritiAtEnd { ... }`       | Always run cleanup block     |
+| `prakritiThrow` | `prakritiThrow "message"`     | Create custom error          |
+
+## Error Object Quick View
+
+Inside catch, `err` usually exposes:
+
+| Field         | Meaning                                                     |
+| ------------- | ----------------------------------------------------------- |
+| `err.message` | Human-readable message                                      |
+| `err.code`    | Error code (if available)                                   |
+| `err.stage`   | Stage hint (syntax/compile/runtime) in advanced diagnostics |
+
+## Example 1: Basic `try/catch/finally`
 
 ```priyo
 monalisa {
@@ -32,6 +45,12 @@ monalisa {
 }
 ```
 
+Explanation:
+
+- `prakritiThrow` creates a failure inside `try`.
+- `catch` receives it in `err` and prints user-friendly message.
+- `prakritiAtEnd` runs regardless of success/failure.
+
 Output:
 
 ```text
@@ -39,7 +58,7 @@ Caught: Something failed
 Cleanup done
 ```
 
-### Example 2: Validate Input Before Operation
+## Example 2: Validation before dangerous operation
 
 ```priyo
 monalisa {
@@ -58,151 +77,128 @@ monalisa {
 }
 ```
 
+Explanation:
+
+- Business rule is enforced in function.
+- Caller handles error centrally instead of letting program crash.
+
 Output:
 
 ```text
 Division by zero is not allowed
 ```
 
-### Example 3: Manual Business Rule Error
-
-```priyo
-monalisa {
-  lisaaTask enroll(age) {
-    prakritiIf (age < 18) {
-      prakritiThrow "Minimum age is 18"
-    }
-    priyoGiveBack "Enrolled"
-  }
-
-  prakritiTry {
-    priyoTell(enroll(16))
-  } prakritiCatch (err) {
-    priyoTell.Error(err.message)
-  }
-}
-```
-
-Output:
-
-```text
-Minimum age is 18
-```
-
-### Example 4: Continue Program After Catch
+## Example 3: Continue execution after handled error
 
 ```priyo
 monalisa {
   prakritiTry {
-    prakritiThrow "Network timeout"
+    prakritiThrow "Temporary network timeout"
   } prakritiCatch (err) {
-    priyoTell.Warn("Retry later")
+    priyoTell.Warn("Recovering: " + err.message)
   }
 
-  priyoTell("Program still running")
+  priyoTell("Program continues safely")
 }
 ```
+
+Explanation:
+
+- Error is handled locally.
+- Execution continues after catch block.
 
 Output:
 
 ```text
-Retry later
-Program still running
+Recovering: Temporary network timeout
+Program continues safely
 ```
 
-### Example 5: Inspect Error Metadata
+## Example 4: Inspect metadata (`message`, `code`)
 
 ```priyo
 monalisa {
   prakritiTry {
     prakritiThrow "Custom failure"
   } prakritiCatch (err) {
-    priyoTell(err.message)
-    priyoTell(err.code)
+    priyoTell("Message: " + err.message)
+    priyoTell("Code: " + err.code)
   }
 }
 ```
 
+Explanation:
+
+- Useful for logging and building user-facing diagnostics.
+- `err.code` may vary by error source.
+
 Output:
 
 ```text
-Custom failure
-(implementation-specific code)
+Message: Custom failure
+Code: (implementation-specific)
 ```
 
-## 3. Execution Flow
-
-1. Code inside `prakritiTry` starts.
-2. If no error occurs, `catch` is skipped.
-3. If error occurs, control jumps to `prakritiCatch`.
-4. `err` object carries details like message/code.
-5. `prakritiAtEnd` runs whether error happened or not.
-6. Program continues after handling unless explicitly stopped.
-
-## 4. Comparison With Other Languages
-
-Java:
-
-```java
-try {
-  risky();
-} catch (Exception e) {
-  System.out.println(e.getMessage());
-} finally {
-  cleanup();
-}
-```
-
-JavaScript:
-
-```javascript
-try {
-  risky()
-} catch (e) {
-  console.log(e.message)
-} finally {
-  cleanup()
-}
-```
-
-Python:
-
-```python
-try:
-    risky()
-except Exception as e:
-    print(str(e))
-finally:
-    cleanup()
-```
-
-C:
-
-- C has no native `try/catch`; errors are handled via return codes, `errno`, or `goto` cleanup patterns.
-
-PriyoScript:
+## Example 5: Cleanup with `prakritiAtEnd`
 
 ```priyo
-prakritiTry { ... } prakritiCatch (err) { ... } prakritiAtEnd { ... }
+monalisa {
+  priyoKeep opened = "yes"
+
+  prakritiTry {
+    prakritiThrow "Operation interrupted"
+  } prakritiCatch (err) {
+    priyoTell.Error(err.message)
+  } prakritiAtEnd {
+    opened = "no"
+    priyoTell.Info("Resource closed: " + opened)
+  }
+}
 ```
 
-Difference summary:
+Explanation:
 
-- PriyoScript, Java, JS, Python use structured exception flow.
-- C uses manual error handling patterns.
+- `prakritiAtEnd` is the right place for cleanup logic.
+- Cleanup runs even when error occurs.
 
-## 5. Inspiration and Official References
+Output:
 
-- Java exceptions:  
-  https://docs.oracle.com/javase/tutorial/essential/exceptions/
-- JavaScript `try...catch`:  
-  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch
-- Python exceptions:  
-  https://docs.python.org/3/tutorial/errors.html
-- C error handling basics (`errno`):  
-  https://en.cppreference.com/w/c/error/errno
+```text
+Operation interrupted
+Resource closed: no
+```
 
-<Callout title="Best Practice" type="idea">
-  Throw clear messages, catch close to the failure boundary, and always keep cleanup in
-  `prakritiAtEnd`.
+## Edge Cases
+
+| Case                          | Behavior                                                |
+| ----------------------------- | ------------------------------------------------------- |
+| `catch` without `try`         | Syntax/compile error                                    |
+| `throw` with non-string value | Still handled as throwable value                        |
+| Error inside `catch`          | New error propagates unless nested try/catch handles it |
+| Error inside `prakritiAtEnd`  | Can override earlier handled state and propagate        |
+| No `catch` present            | Error bubbles to runtime/CLI printer                    |
+
+<Callout title="Debug tip" type="warn">
+  Keep `try` blocks small. Catch close to the risky operation so error context remains clear.
 </Callout>
+
+## Comparison With Other Languages
+
+- JavaScript/Python/Java: same conceptual `try-catch-finally` model.
+- C: no native exceptions, usually return-code based error handling.
+- PriyoScript: similar model with humanized diagnostics and code-based explain flow.
+
+## Practice Questions
+
+<Callout title="Concept Check" type="idea">
+  1. When should you use `prakritiAtEnd` instead of placing cleanup after `catch`? 2. Why is
+  throwing a clear message better than generic text like `"failed"`? 3. What happens when an error
+  is thrown but no `catch` handles it?
+</Callout>
+
+## Related Docs
+
+- [Error Reference](../reference/errors-reference)
+- [Control Flow](../basics/control-flow)
+- [Functions](../basics/functions)
+- [CLI](../tools/cli)

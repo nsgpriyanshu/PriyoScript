@@ -1,28 +1,36 @@
 ---
 title: Classes and OOP
-description: Practical OOP in PriyoScript with constructor flow, static members, inheritance, and comparisons.
+description: Complete OOP guide for PriyoScript with instance/static/inheritance and API usage.
 icon: Shapes
 ---
 
-## 1. Theory
+## Theory
 
-OOP means organizing code using objects.  
-An object combines data (state) and methods (behavior).  
-A class is a blueprint used to create objects.  
-Use OOP when multiple things share a common structure.  
-It improves readability and reuse in real applications.  
-Inheritance lets a child class reuse parent behavior.  
-Static members belong to the class, not an object instance.  
-In PriyoScript, constructor-like setup is usually done in `init(...)`.  
-`priyoSelf` refers to the current object, and `priyoParent` calls parent constructor logic.
+Object-Oriented Programming (OOP) organizes code around objects that contain state (data) and behavior (methods). In PriyoScript, classes are declared using `lisaaFamily`, objects are created using `priyoCreate`, current instance is accessed with `priyoSelf`, and inheritance is handled through `lisaaInherit` + `priyoParent`. OOP is useful when you want reusable, real-world models such as students, courses, wallets, accounts, and services.
 
-<Callout title="When to Use OOP" type="idea">
-  Use OOP for real entities: students, accounts, courses, invoices, products.
+<Callout title="Current OOP Features (Stable)" type="success">
+  - Class declaration with `lisaaFamily` - Object creation with `priyoCreate` - Constructor pattern
+  using `init(...)` - Instance members via `priyoSelf` - Inheritance with `lisaaInherit` - Parent
+  constructor/method access via `priyoParent` - Static methods/fields via `lisaaStable` -
+  Public-by-default member access
 </Callout>
 
-## 2. Program Examples
+## OOP API Table
 
-### Example 1: Basic Class + Instance Method
+| Category           | Syntax                                          | Description                        |
+| ------------------ | ----------------------------------------------- | ---------------------------------- |
+| Class              | `lisaaFamily Name { ... }`                      | Declares a class blueprint         |
+| Constructor        | `lisaaTask init(...) { ... }`                   | Initializes object during creation |
+| Instance method    | `lisaaTask method(...) { ... }`                 | Method callable on object instance |
+| Instance field     | `priyoSelf.field = value`                       | Stores object-specific data        |
+| Object creation    | `priyoCreate Name(...)`                         | Creates class instance             |
+| Inheritance        | `lisaaFamily Child lisaaInherit Parent { ... }` | Child class extends parent         |
+| Parent constructor | `priyoParent(...)`                              | Calls parent `init` from child     |
+| Static method      | `lisaaStable lisaaTask method(...)`             | Class-level method                 |
+| Static field usage | `ClassName.field`                               | Class-level state                  |
+| Public access      | `obj.field`, `obj.method()`                     | Members are public by default      |
+
+## Example 1: Basic Class + Instance Method
 
 ```priyo
 monalisa {
@@ -41,13 +49,19 @@ monalisa {
 }
 ```
 
-Output:
+Explanation:
+
+- `Student` class defines one field (`name`) and one instance method (`intro`).
+- `init(name)` runs automatically during `priyoCreate Student("mona")`.
+- `priyoSelf.name` stores the value for this specific object.
+- `s.intro()` reads object state and prints it.
+  Output:
 
 ```text
-I am Mona
+I am mona
 ```
 
-### Example 2: Instance vs Static
+## Example 2: Static vs Instance API
 
 ```priyo
 monalisa {
@@ -67,14 +81,19 @@ monalisa {
 }
 ```
 
-Output:
+Explanation:
+
+- `square` is static, so it is called on class: `MathUtil.square(5)`.
+- `cube` is instance method, so object creation is required.
+- This separation helps keep utility methods static and object-specific behavior instance-based.
+  Output:
 
 ```text
 25
 27
 ```
 
-### Example 3: Inheritance + Parent Call
+## Example 3: Inheritance + Parent Constructor
 
 ```priyo
 monalisa {
@@ -95,48 +114,24 @@ monalisa {
     }
   }
 
-  priyoKeep t = priyoCreate Teacher("Piue", "Math")
+  priyoKeep t = priyoCreate Teacher("piue", "Math")
   t.profile()
 }
 ```
 
-Output:
+Explanation:
+
+- `Teacher` extends `Person`, so it inherits parent behavior.
+- `priyoParent(name)` initializes inherited part first.
+- Child then sets its own field `subject`.
+- Final method combines parent + child data.
+  Output:
 
 ```text
-Piue teaches Math
+piue teaches Math
 ```
 
-### Example 4: Encapsulation Style (Controlled Update)
-
-```priyo
-monalisa {
-  lisaaFamily Wallet {
-    lisaaTask init(balance) {
-      priyoSelf.balance = balance
-    }
-
-    lisaaTask deposit(amount) {
-      priyoSelf.balance = priyoSelf.balance + amount
-    }
-
-    lisaaTask show() {
-      priyoTell(priyoSelf.balance)
-    }
-  }
-
-  priyoKeep w = priyoCreate Wallet(100)
-  w.deposit(50)
-  w.show()
-}
-```
-
-Output:
-
-```text
-150
-```
-
-### Example 5: Real-World Mini Model
+## Example 4: Public Member Access
 
 ```priyo
 monalisa {
@@ -153,83 +148,61 @@ monalisa {
 }
 ```
 
-Output:
+Explanation:
+
+- PriyoScript class members are public by default in current stable model.
+- `c.title` and `c.credits` can be directly read outside class methods.
+  Output:
 
 ```text
 Compiler Design
 4
 ```
 
-## 3. Execution Flow
+## Example 5: Static Field Pattern
 
-1. Class definition is registered first.
-2. `priyoCreate ClassName(...)` allocates a new object.
-3. `init(...)` runs to initialize fields.
-4. `priyoSelf` points to that current object.
-5. Method calls run in object context.
-6. Static methods run directly on class without creating object.
-7. In child class constructors, `priyoParent(...)` initializes parent part first.
+```priyo
+monalisa {
+  lisaaFamily Counter {
+    lisaaStable count = 0
 
-## 4. Comparison With Other Languages
+    lisaaTask init() {
+      Counter.count = Counter.count + 1
+    }
 
-Java (very close conceptually):
+    lisaaStable lisaaTask total() {
+      priyoGiveBack Counter.count
+    }
+  }
 
-```java
-class Student {
-  String name;
-  Student(String name) { this.name = name; }
-  void intro() { System.out.println("I am " + name); }
+  priyoCreate Counter()
+  priyoCreate Counter()
+  priyoTell(Counter.total())
 }
 ```
 
-JavaScript:
+Explanation:
 
-```javascript
-class Student {
-  constructor(name) {
-    this.name = name
-  }
-  intro() {
-    console.log('I am ' + this.name)
-  }
-}
+- `count` is class-level shared state, not per-object state.
+- Each new object increments same static field.
+- `Counter.total()` returns global count.
+  Output:
+
+```text
+2
 ```
 
-Python:
+## Practice Questions
 
-```python
-class Student:
-    def __init__(self, name):
-        self.name = name
-    def intro(self):
-        print("I am " + self.name)
-```
-
-C (manual OOP style):
-
-```c
-typedef struct {
-  char* name;
-} Student;
-```
-
-Difference summary:
-
-- Java/PriyoScript use class-centric explicit OOP.
-- JavaScript/Python are flexible but still class-capable.
-- C has no native class model; patterns are manual.
-
-## 5. Inspiration and Official References
-
-- Java classes, inheritance, static members (primary inspiration):  
-  https://docs.oracle.com/javase/tutorial/java/javaOO/
-- JavaScript classes:  
-  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
-- Python classes:  
-  https://docs.python.org/3/tutorial/classes.html
-- C data modeling with `struct`:  
-  https://en.cppreference.com/w/c/language/struct
-
-<Callout title="Important Constructor Rule" type="error">
-  In a child `init`, call `priyoParent(...)` first and only once.
+<Callout title="Concept Check" type="idea">
+  1. When should a method be `static` instead of instance-level? 2. Why must `priyoParent(...)` be
+  called first in child `init`? 3. What is the practical difference between `priyoSelf.name` and
+  `ClassName.count`?
 </Callout>
+
+## Related Docs
+
+- [Functions](../basics/functions)
+- [Conditions](../basics/condition)
+- [Modules and Packages](../modules/packages)
+- [Error Handling](../advanced/error-handling)
