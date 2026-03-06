@@ -39,11 +39,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const MDX = page.data.body
 
-  // const lastModifiedTime = await getGithubLastEdit({
-  //   owner: 'nsgpriyanshu',
-  //   repo: 'PriyoScript',
-  //   path: `content/docs/${page.path}`,
-  // })
+  const lastModifiedTime = await getGithubLastEdit({
+    owner: 'nsgpriyanshu',
+    repo: 'PriyoScript',
+    path: `web/content/docs/${page.path}`,
+  })
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -57,7 +57,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         />
       </DocsBody>
       {/* Display last updated timestamp */}
-      {/* {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />} */}
+      {lastModifiedTime && <PageLastUpdate date={lastModifiedTime} />}
     </DocsPage>
   )
 }
