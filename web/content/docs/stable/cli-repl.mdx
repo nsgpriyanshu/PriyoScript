@@ -24,6 +24,24 @@ CLI (Command Line Interface) and REPL (Read-Eval-Print Loop) serve different dev
 | `monalisa -errors`             | CLI  | List error codes            |
 | `monalisa -explain <CODE>`     | CLI  | Explain specific error code |
 
+### REPL command summary
+
+| Command          | Purpose                                               |
+| ---------------- | ----------------------------------------------------- |
+| `.help`          | Show REPL command list                                |
+| `.clear`         | Clear current multiline buffer                        |
+| `.editor`        | Enter editor mode (`edit>` prompt)                    |
+| `.run`           | Execute editor buffer (editor mode only)              |
+| `.cancel`        | Discard editor buffer (editor mode only)              |
+| `.reset`         | Reset runtime state and module cache                  |
+| `.load <file>`   | Execute file in current REPL context                  |
+| `.reload [file]` | Reload last loaded file or explicit file              |
+| `.history`       | Show executed snippets history                        |
+| `.save <file>`   | Save snippet history to file                          |
+| `.env`           | Inspect current bindings with kind/type/value preview |
+| `.type <expr>`   | Evaluate expression and print inferred type + value   |
+| `.exit`          | Exit REPL                                             |
+
 ## Program Examples
 
 ### Example 1: Show Help
@@ -141,6 +159,14 @@ Explanation: `priyoBreak(...)` marks checkpoints inside trace output.
 ```text
 priyo> .help
 priyo> .load examples/basics/main.priyo
+priyo> .editor
+edit> priyoKeep n = 10
+edit> priyoTell(n * 5)
+edit> .run
+priyo> .reload
+priyo> .env
+priyo> .type 10 + 32
+priyo> .history
 priyo> .reset
 priyo> .exit
 ```
@@ -150,10 +176,27 @@ Output (short):
 ```text
 REPL commands list...
 Loaded: examples/basics/main.priyo
+Editor mode enabled...
+50
+Reloaded: examples/basics/main.priyo
+Bindings:
+type: number
+value: 42
+REPL history:
 Runtime state reset.
 ```
 
 Explanation: supports structured iteration in interactive mode.
+
+### Example 9: REPL persistence file
+
+PriyoScript REPL saves session history automatically to:
+
+```text
+.priyo_repl_history.json
+```
+
+You can keep this file for continuity or remove it to start with clean persisted history.
 
 ## Execution Flow
 
@@ -170,8 +213,10 @@ REPL flow:
 1. You type one line/snippet.
 2. REPL evaluates it immediately.
 3. State stays in memory for next line.
-4. You repeat until `.exit`.
-5. `.reset` clears state and module cache for clean retry.
+4. History is persisted to `.priyo_repl_history.json` on exit.
+5. You repeat until `.exit`.
+6. `.reset` clears runtime state and module cache for clean retry.
+7. Optional editor mode (`.editor`) lets you draft multi-line snippets before running `.run`.
 
 Trace flow:
 

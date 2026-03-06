@@ -147,6 +147,9 @@ tests/
 | Errors       | Caret span highlighting + keyword typo suggestions + docs links per code             | 100%   |
 | CLI          | Help, syntax help, error list, code explain (`-h`, `-syntax`, `-errors`, `-explain`) | 100%   |
 | CLI          | Interactive REPL (`-repl` and no-arg launch)                                         | 100%   |
+| CLI          | REPL v2 commands (`.reload`, `.env`, `.type`, `.history`, `.save`, `.editor`)        | 100%   |
+| CLI          | REPL editor mode (`.editor`, `edit>` prompt, `.run`, `.cancel`)                      | 100%   |
+| CLI          | REPL persistence + smart UX (history file, autocomplete, smarter multiline parsing)  | 100%   |
 | CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                   | 100%   |
 | Distribution | npm global installation (`npm install -g priyoscript`)                               | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                              | 100%   |
@@ -279,6 +282,12 @@ tests/
     - optional fallbacks: `module`, `module.priyo`, and `module/index.priyo`
   - cycle guard for recursive module graphs
   - REPL `.reset` clears module cache to avoid stale imports during iterative development
+- REPL v2:
+  - expression echo for non-print expressions
+  - command set: `.help`, `.clear`, `.editor`, `.reset`, `.load`, `.reload`, `.history`, `.save`, `.env`, `.type`, `.exit`
+  - editor mode: `edit>` prompt with `.run` and `.cancel`
+  - persisted history file: `.priyo_repl_history.json`
+  - autocomplete across commands, keywords, and in-scope bindings
 - Debug helper:
   - `priyoBreak("label")` emits a traceable breakpoint marker while keeping execution flow
 
