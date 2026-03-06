@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+# [web-v0.11.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.9.0...web-v0.11.0) - (2026-03-06)
+
+## Features
+
+- **replv2:** Repl is upgared with new features ([4a9b03f](https://github.com/nsgpriyanshu/PriyoScript/commit/4a9b03f7e000e1620e89747f4de337b702990199))
+- Add yield concurrency model stage -1 ([4f477fe](https://github.com/nsgpriyanshu/PriyoScript/commit/4f477feda46e507011468e66b5a07b018f82e19a))
+- Extends oop, add interface, implements etc ([4e5799b](https://github.com/nsgpriyanshu/PriyoScript/commit/4e5799b3a40e9c224628cdd6cbde6c82b132b1cb))
+- Implement async and awit concurancy model stage -1 ([fd605ab](https://github.com/nsgpriyanshu/PriyoScript/commit/fd605abf894b6eadc0acb9ce6c50b7fe8d2ae8dc))
+
+## Non Code changes
+
+- **web:** Release PriyoScript Web@0.10.0 ([8612a7d](https://github.com/nsgpriyanshu/PriyoScript/commit/8612a7d4e7d04d74b8955be7b9944b6f396b91f5))
+- Upgrade to latest nextjs version ([64f9e9a](https://github.com/nsgpriyanshu/PriyoScript/commit/64f9e9adffa80072f5f5e2be1f6e196766fda5fb))
+- Fix docs links in errors/docs.js ([875d073](https://github.com/nsgpriyanshu/PriyoScript/commit/875d073194148afbe7d84cc81aaa3dd484aaa500))
+- **web:** Release PriyoScript Web@0.10.0 ([837b4b5](https://github.com/nsgpriyanshu/PriyoScript/commit/837b4b56e6386909b644222f98a1904cb9e642b1))
+
+## Refactor
+
+- Final docs base and style is ready now ([8f81c64](https://github.com/nsgpriyanshu/PriyoScript/commit/8f81c64c1fe49756819db65a8eeab7a2a2d51daf))
+
 # [web-v0.10.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.10.0...web-v0.10.0) - (2026-03-06)
 
 ## Features
