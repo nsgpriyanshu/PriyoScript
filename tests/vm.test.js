@@ -342,4 +342,43 @@ monalisa {
     await runSource(code)
     expect(logSpy).toHaveBeenCalledWith('mona')
   })
+
+  it('should execute generator function and return step objects via next()', async () => {
+    const code = `
+      monalisa {
+        lisaaTask numbers() {
+          prakritiGiveSome 10
+          prakritiGiveSome 20
+        }
+
+        priyoKeep g = numbers()
+        priyoKeep s1 = g.next()
+        priyoKeep s2 = g.next()
+        priyoKeep s3 = g.next()
+
+        priyoTell(s1.value)
+        priyoTell(s1.done)
+        priyoTell(s2.value)
+        priyoTell(s2.done)
+        priyoTell(s3.done)
+      }
+    `
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith(10)
+    expect(logSpy).toHaveBeenCalledWith(false)
+    expect(logSpy).toHaveBeenCalledWith(20)
+    expect(logSpy).toHaveBeenCalledWith(false)
+    expect(logSpy).toHaveBeenCalledWith(true)
+  })
+
+  it('should reject prakritiGiveSome outside function scope', async () => {
+    const code = `
+      monalisa {
+        prakritiGiveSome 5
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      message: expect.stringMatching(/prakritiGiveSome can only be used inside lisaaTask/i),
+    })
+  })
 })

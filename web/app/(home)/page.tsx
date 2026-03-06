@@ -59,7 +59,7 @@ export default async function HomePage() {
         <section className="grid w-full items-start gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
           <div className="min-w-0">
             <p className="inline-flex rounded-full border border-fd-border bg-fd-card px-3 py-1 text-xs font-semibold tracking-[0.12em] text-fd-muted-foreground">
-              v 1.10.0
+              v {require('../../../package.json').version}
             </p>
             <h1 className="mt-4 text-3xl font-bold leading-tight sm:mt-5 sm:text-4xl lg:text-6xl">
               An Emotional

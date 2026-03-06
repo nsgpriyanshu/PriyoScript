@@ -40,6 +40,7 @@
     "throw": "prakritiThrow",
     "async": "prakritiWait",
     "await": "prakritiPause",
+    "yield": "prakritiGiveSome",
 
     "function": "lisaaTask",
     "class": "lisaaFamily",
@@ -61,8 +62,6 @@
     "typeof": "priyoWhatIs",
     "instanceof": "priyoBornFrom",
     "void": "priyoSilent",
-
-    "yield": "prakritiGiveSome",
 
     "with": "priyoWith",
 

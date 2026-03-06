@@ -1,0 +1,11 @@
+monalisa {
+  lisaaTask sequence() {
+    prakritiGiveSome "mona"
+    prakritiGiveSome "piue"
+  }
+
+  priyoKeep gen = sequence()
+  priyoTell(gen.next().value)
+  priyoTell(gen.next().value)
+  priyoTell(gen.next().done)
+}

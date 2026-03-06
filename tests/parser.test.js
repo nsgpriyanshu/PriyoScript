@@ -194,4 +194,21 @@ describe('Parser', () => {
     expect(cls.methods[0].access).toBe('public')
     expect(cls.fields[0].access).toBe('private')
   })
+
+  it('should parse generator function with prakritiGiveSome', () => {
+    const input = `
+      monalisa {
+        lisaaTask series() {
+          prakritiGiveSome 1
+          prakritiGiveSome 2
+        }
+      }
+    `
+    const { program, errors } = parse(input)
+    expect(errors).toHaveLength(0)
+    const func = program.entry.body[0]
+    expect(func.type).toBe('FunctionDeclaration')
+    expect(func.isGenerator).toBe(true)
+    expect(func.body.statements[0].type).toBe('YieldStatement')
+  })
 })

@@ -30,7 +30,13 @@ class VM {
     await this.executeFrame(this.instructions, this.environment, false, '<main>')
   }
 
-  async executeFrame(instructions, frameEnvironment, isFunctionFrame, frameName = '<frame>') {
+  async executeFrame(
+    instructions,
+    frameEnvironment,
+    isFunctionFrame,
+    frameName = '<frame>',
+    executionOptions = {},
+  ) {
     const previousEnvironment = this.environment
     this.environment = frameEnvironment
     this.sourceCallStack.push({
@@ -40,6 +46,9 @@ class VM {
 
     const stack = []
     const tryStack = []
+    const yieldBuffer = Array.isArray(executionOptions.yieldBuffer)
+      ? executionOptions.yieldBuffer
+      : null
     let scopeDepth = 0
     let ip = 0
 
@@ -237,6 +246,7 @@ class VM {
               const fnObj = {
                 type: 'user_function',
                 isAsync: !!instr.operand.isAsync,
+                isGenerator: !!instr.operand.isGenerator,
                 params: instr.operand.params,
                 instructions: instr.operand.instructions,
                 closure: this.environment,
@@ -375,6 +385,15 @@ class VM {
               const value = stack.pop()
               const resolved = await Promise.resolve(value)
               stack.push(resolved == null ? null : resolved)
+              break
+            }
+
+            case OpCode.YIELD_VALUE: {
+              if (!yieldBuffer) {
+                throw new Error('prakritiGiveSome can only be used inside generator functions')
+              }
+              const yieldedValue = stack.pop()
+              yieldBuffer.push(yieldedValue == null ? null : yieldedValue)
               break
             }
 
@@ -609,8 +628,7 @@ class VM {
       callEnv.define(callee.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(callee.instructions, callEnv, true, `fn:${name}`)
-    return result.value
+    return this.executeUserCallable(callee, callEnv, `fn:${name}`)
   }
 
   async callMember(receiver, methodName, args) {
@@ -751,8 +769,7 @@ class VM {
       for (let i = 0; i < callee.params.length; i++) {
         callEnv.define(callee.params[i], args[i], 'let')
       }
-      const result = await this.executeFrame(callee.instructions, callEnv, true)
-      return result.value
+      return this.executeUserCallable(callee, callEnv, 'fn:<callback>')
     }
 
     throw new Error('Expected a callable callback function')
@@ -792,13 +809,11 @@ class VM {
       callEnv.define(method.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(
-      method.instructions,
+    return this.executeUserCallable(
+      method,
       callEnv,
-      true,
       `method:${receiver.classRef.name}.${methodName}`,
     )
-    return result.value
   }
 
   async callStaticMethod(classRef, methodName, args, startClass = null) {
@@ -835,13 +850,50 @@ class VM {
       callEnv.define(method.params[i], args[i], 'let')
     }
 
-    const result = await this.executeFrame(
-      method.instructions,
-      callEnv,
-      true,
-      `static:${classRef.name}.${methodName}`,
-    )
+    return this.executeUserCallable(method, callEnv, `static:${classRef.name}.${methodName}`)
+  }
+
+  async executeUserCallable(callable, callEnv, frameName) {
+    if (callable && callable.isGenerator) {
+      const yieldBuffer = []
+      await this.executeFrame(callable.instructions, callEnv, true, frameName, {
+        yieldBuffer,
+      })
+      return this.createGeneratorHostObject(yieldBuffer)
+    }
+
+    const result = await this.executeFrame(callable.instructions, callEnv, true, frameName)
     return result.value
+  }
+
+  createGeneratorHostObject(yieldedValues) {
+    let cursor = 0
+    const values = Array.isArray(yieldedValues) ? yieldedValues : []
+
+    const makeStep = (value, done) => ({
+      __priyoHostObject: true,
+      value: value == null ? null : value,
+      done: !!done,
+    })
+
+    const generator = {
+      __priyoHostObject: true,
+      next: () => {
+        if (cursor >= values.length) {
+          return makeStep(null, true)
+        }
+        const value = values[cursor]
+        cursor++
+        return makeStep(value, false)
+      },
+      hasNext: () => cursor < values.length,
+      reset: () => {
+        cursor = 0
+        return null
+      },
+    }
+
+    return generator
   }
 
   ensureNumbers(left, right, operation) {
@@ -977,6 +1029,7 @@ class VM {
         type: 'user_method',
         name: method.name,
         isAsync: !!method.isAsync,
+        isGenerator: !!method.isGenerator,
         access: method.access || 'public',
         params: method.params,
         instructions: method.instructions,
@@ -1012,11 +1065,15 @@ class VM {
 
     const currentClass = this.getCurrentAccessClass()
     if (!currentClass || !ownerClass) {
-      throw new Error(`Cannot access ${normalizedAccess} ${memberKind} "${memberName}" from outside class`)
+      throw new Error(
+        `Cannot access ${normalizedAccess} ${memberKind} "${memberName}" from outside class`,
+      )
     }
 
     if (normalizedAccess === 'private' && currentClass !== ownerClass) {
-      throw new Error(`Cannot access private ${memberKind} "${memberName}" outside "${ownerClass.name}"`)
+      throw new Error(
+        `Cannot access private ${memberKind} "${memberName}" outside "${ownerClass.name}"`,
+      )
     }
 
     if (
@@ -1024,7 +1081,9 @@ class VM {
       currentClass !== ownerClass &&
       !this.isSubclassOf(currentClass, ownerClass)
     ) {
-      throw new Error(`Cannot access protected ${memberKind} "${memberName}" outside inheritance chain`)
+      throw new Error(
+        `Cannot access protected ${memberKind} "${memberName}" outside inheritance chain`,
+      )
     }
   }
 
@@ -1069,7 +1128,12 @@ class VM {
 
       const staticMethod = this.findStaticMethod(object, propertyName)
       if (staticMethod) {
-        this.ensureMemberAccess(propertyName, staticMethod.access, staticMethod.ownerClass, 'static method')
+        this.ensureMemberAccess(
+          propertyName,
+          staticMethod.access,
+          staticMethod.ownerClass,
+          'static method',
+        )
         return {
           type: 'bound_static_method',
           classRef: object,
@@ -1134,7 +1198,12 @@ class VM {
 
       const parentMethod = this.findMethod(object.startClass, propertyName)
       if (parentMethod) {
-        this.ensureMemberAccess(propertyName, parentMethod.access, parentMethod.ownerClass, 'method')
+        this.ensureMemberAccess(
+          propertyName,
+          parentMethod.access,
+          parentMethod.ownerClass,
+          'method',
+        )
         return {
           type: 'bound_super_method',
           receiver: object.receiver,

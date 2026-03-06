@@ -97,6 +97,10 @@ class Compiler {
         this.compileReturnStatement(stmt)
         return
 
+      case 'YieldStatement':
+        this.compileYieldStatement(stmt)
+        return
+
       case 'ExpressionStatement':
         this.compileExpression(stmt.expression)
         this.emit(OpCode.POP)
@@ -394,6 +398,7 @@ class Compiler {
     this.emit(OpCode.DEFINE_FUNCTION, {
       name: stmt.name.name,
       isAsync: !!stmt.isAsync,
+      isGenerator: !!stmt.isGenerator,
       params: stmt.params.map(param => param.name),
       instructions: this.compileCallableBody(stmt.body),
     })
@@ -538,6 +543,7 @@ class Compiler {
       .map(method => ({
         name: method.name.name,
         isAsync: !!method.isAsync,
+        isGenerator: !!method.isGenerator,
         access: method.access || 'public',
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
@@ -548,6 +554,7 @@ class Compiler {
       .map(method => ({
         name: method.name.name,
         isAsync: !!method.isAsync,
+        isGenerator: !!method.isGenerator,
         access: method.access || 'public',
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
@@ -603,6 +610,15 @@ class Compiler {
       this.emit(OpCode.PUSH_NULL)
     }
     this.emit(OpCode.RETURN)
+  }
+
+  compileYieldStatement(stmt) {
+    if (stmt.argument) {
+      this.compileExpression(stmt.argument)
+    } else {
+      this.emit(OpCode.PUSH_NULL)
+    }
+    this.emit(OpCode.YIELD_VALUE)
   }
 
   compileExpression(expr) {
@@ -988,7 +1004,9 @@ class Compiler {
     for (const ifaceRef of implementedInterfaces) {
       const iface = this.interfaceTable.get(ifaceRef.name)
       if (!iface) {
-        throw new Error(`Class "${classDeclaration.name.name}" implements unknown interface "${ifaceRef.name}"`)
+        throw new Error(
+          `Class "${classDeclaration.name.name}" implements unknown interface "${ifaceRef.name}"`,
+        )
       }
 
       for (const ifaceMethod of iface.methods || []) {

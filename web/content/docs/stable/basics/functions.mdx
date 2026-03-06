@@ -23,6 +23,7 @@ Functions are reusable blocks of logic that improve readability, reduce duplicat
 | Recursive function         | `name(...)` inside same function | Calls itself until base condition is met.           |
 | Closure function           | returns inner function           | Inner function remembers outer variables.           |
 | Async function (stage-1)   | `prakritiWait lisaaTask ...`     | Enables `prakritiPause` inside the function body.   |
+| Generator-yield (stage-1)  | `prakritiGiveSome value`         | Produces step values consumable via `next()`.       |
 
 ## Syntax Quick Reference
 
@@ -256,6 +257,60 @@ Output:
 
 ```text
 Welcome mona
+```
+
+## 5. Generator Yield (Stage-1)
+
+`prakritiGiveSome` emits sequence values from a function. A yield function returns a generator-like
+object with `next()`, `hasNext()`, and `reset()`.
+
+### Example 1
+
+```priyo
+monalisa {
+  lisaaTask series() {
+    prakritiGiveSome 1
+    prakritiGiveSome 2
+  }
+
+  priyoKeep g = series()
+  priyoTell(g.next().value)
+  priyoTell(g.next().value)
+  priyoTell(g.next().done)
+}
+```
+
+Output:
+
+```text
+1
+2
+priyoTrue
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  lisaaTask names() {
+    prakritiGiveSome "mona"
+    prakritiGiveSome "piue"
+  }
+
+  priyoKeep g = names()
+  priyoTell(g.hasNext())
+  priyoTell(g.next().value)
+  g.reset()
+  priyoTell(g.next().value)
+}
+```
+
+Output:
+
+```text
+priyoTrue
+mona
+mona
 ```
 
 ## Practice Questions

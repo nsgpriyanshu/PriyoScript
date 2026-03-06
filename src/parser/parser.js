@@ -20,6 +20,7 @@ const {
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  YieldStatement,
   ImportStatement,
   ExportStatement,
   TryStatement,
@@ -209,6 +210,7 @@ class Parser {
     if (this.curToken.type === TokenType.CLASS) return this.parseClassDeclaration()
     if (this.curToken.type === TokenType.IMPORT) return this.parseImportStatement()
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
+    if (this.curToken.type === TokenType.YIELD) return this.parseYieldStatement()
     if (this.curToken.type === TokenType.THROW) return this.parseThrowStatement()
     if (this.curToken.type === TokenType.TRY) return this.parseTryStatement()
     if (this.curToken.type === TokenType.ASYNC) return this.parseAsyncFunctionDeclaration()
@@ -277,7 +279,10 @@ class Parser {
         if (this.curToken.type === TokenType.COMMA) {
           this.nextToken()
           if (
-            !this.expectCurrent(TokenType.IDENTIFIER, 'Expected interface name after "," in lisaaFollow')
+            !this.expectCurrent(
+              TokenType.IDENTIFIER,
+              'Expected interface name after "," in lisaaFollow',
+            )
           ) {
             this.nextToken()
             return null
@@ -416,7 +421,10 @@ class Parser {
     this.functionDepth--
     if (!body) return null
 
-    return new MethodDeclaration(name, params, body, isStatic, isAsync, access)
+    const isGenerator = this.blockContainsYield(body)
+    const methodNode = new MethodDeclaration(name, params, body, isStatic, isAsync, access)
+    methodNode.isGenerator = isGenerator
+    return methodNode
   }
 
   parseClassFieldDeclaration(isStatic = false, access = 'public') {
@@ -465,7 +473,8 @@ class Parser {
     const methods = []
     const methodNames = new Set()
     while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
-      if (!this.consumeCurrent(TokenType.FUNCTION, 'Interface members must use lisaaTask')) return null
+      if (!this.consumeCurrent(TokenType.FUNCTION, 'Interface members must use lisaaTask'))
+        return null
       if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected method name in interface')) {
         this.nextToken()
         return null
@@ -478,7 +487,8 @@ class Parser {
       methodNames.add(methodName)
       this.nextToken()
 
-      if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after interface method name')) return null
+      if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after interface method name'))
+        return null
       const params = this.parseParameterList()
       if (!params) return null
       methods.push(new InterfaceMethodSignature(new Identifier(methodName), params))
@@ -523,7 +533,34 @@ class Parser {
     this.functionDepth--
     if (!body) return null
 
-    return new FunctionDeclaration(name, params, body, isAsync)
+    const isGenerator = this.blockContainsYield(body)
+    const functionNode = new FunctionDeclaration(name, params, body, isAsync)
+    functionNode.isGenerator = isGenerator
+    return functionNode
+  }
+
+  parseYieldStatement() {
+    if (this.functionDepth === 0) {
+      this.error('prakritiGiveSome can only be used inside lisaaTask')
+      this.nextToken()
+      return null
+    }
+
+    this.nextToken()
+    let argument = null
+    if (
+      this.curToken.type !== TokenType.RBRACE &&
+      this.curToken.type !== TokenType.EOF &&
+      this.curToken.type !== TokenType.SEMICOLON
+    ) {
+      argument = this.parseExpression()
+      if (!argument) {
+        this.error('Expected expression after prakritiGiveSome')
+        return null
+      }
+    }
+
+    return new YieldStatement(argument)
   }
 
   parseImportStatement() {
@@ -1593,6 +1630,51 @@ class Parser {
       .trim()
     const safe = normalized.replace(/[^a-zA-Z0-9_]/g, '_')
     return safe || 'module'
+  }
+
+  blockContainsYield(block) {
+    if (!block || block.type !== 'BlockStatement') return false
+    return block.statements.some(statement => this.statementContainsYield(statement))
+  }
+
+  statementContainsYield(statement) {
+    if (!statement) return false
+
+    if (statement.type === 'YieldStatement') return true
+
+    if (statement.type === 'BlockStatement') {
+      return statement.statements.some(child => this.statementContainsYield(child))
+    }
+
+    if (statement.type === 'IfStatement') {
+      for (const branch of statement.branches || []) {
+        if (this.blockContainsYield(branch.body)) return true
+      }
+      return this.blockContainsYield(statement.alternate)
+    }
+
+    if (statement.type === 'WhileStatement' || statement.type === 'ForStatement') {
+      return this.blockContainsYield(statement.body)
+    }
+
+    if (statement.type === 'ForEachStatement') {
+      return this.blockContainsYield(statement.body)
+    }
+
+    if (statement.type === 'SwitchStatement') {
+      for (const switchCase of statement.cases || []) {
+        if (this.blockContainsYield(switchCase.consequent)) return true
+      }
+      return this.blockContainsYield(statement.defaultCase)
+    }
+
+    if (statement.type === 'TryStatement') {
+      if (this.blockContainsYield(statement.block)) return true
+      if (statement.handler && this.blockContainsYield(statement.handler.body)) return true
+      return this.blockContainsYield(statement.finalizer)
+    }
+
+    return false
   }
 }
 

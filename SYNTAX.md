@@ -385,6 +385,20 @@ lisaaTask add(a, b) {
 }
 ```
 
+Generator-style yield:
+
+```priyo
+lisaaTask series() {
+  prakritiGiveSome 10
+  prakritiGiveSome 20
+}
+
+priyoKeep g = series()
+priyoTell(g.next().value)   // 10
+priyoTell(g.next().value)   // 20
+priyoTell(g.next().done)    // priyoTrue
+```
+
 Function call:
 
 ```priyo
@@ -545,5 +559,5 @@ lisaaFamily Student lisaaFollow Greeter {
 
 - Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.
 - Async support is staged:
-  - implemented: `prakritiWait` and `prakritiPause`
-  - planned: `yield` and future concurrency primitives
+  - implemented: `prakritiWait`, `prakritiPause`, `prakritiGiveSome`
+  - planned: future concurrency primitives

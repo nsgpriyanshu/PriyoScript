@@ -131,6 +131,13 @@ class ReturnStatement {
   }
 }
 
+class YieldStatement {
+  constructor(argument = null) {
+    this.type = 'YieldStatement'
+    this.argument = argument
+  }
+}
+
 class ImportStatement {
   constructor(source, localName = null, sourceType = 'identifier', namedImports = []) {
     this.type = 'ImportStatement'
@@ -384,6 +391,7 @@ module.exports = {
   ContinueStatement,
   FunctionDeclaration,
   ReturnStatement,
+  YieldStatement,
   ImportStatement,
   ExportStatement,
   TryStatement,

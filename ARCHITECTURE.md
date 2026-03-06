@@ -124,6 +124,7 @@ tests/
 | Control flow | `try / catch / finally / throw`                                                      | 100%   |
 | Functions    | Declaration, return, closures, recursion                                             | 100%   |
 | Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)      | 100%   |
+| Functions    | Generator-style yield (`prakritiGiveSome`) with `.next()` step objects               | 100%   |
 | OOP          | Classes, object creation, `priyoSelf`                                                | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                        | 100%   |
 | OOP          | Static methods/fields and class fields                                               | 100%   |
@@ -202,6 +203,9 @@ tests/
 - Async function declaration: `prakritiWait lisaaTask name(...) { ... }`
 - Return: `priyoGiveBack ...`
 - Await expression: `prakritiPause <expression>`
+- Yield statement: `prakritiGiveSome <expression>`
+  - functions containing `prakritiGiveSome` return a generator-like object
+  - generator object methods: `next()`, `hasNext()`, `reset()`
 - Closures and recursion are supported
 
 ### 4.6 Classes and OOP
@@ -340,8 +344,8 @@ Current language/runtime limitations that still need dedicated implementation:
 - Remaining limitation:
   - no rest/spread destructuring syntax yet
 - Async support is currently staged:
-  - implemented: `prakritiWait` + `prakritiPause`
-  - planned: `yield` and explicit concurrency primitives
+  - implemented: `prakritiWait` + `prakritiPause` + `prakritiGiveSome`
+  - planned: explicit concurrency primitives
 - Type system remains fully dynamic:
   - no static type checker
   - no compile-time type validation
@@ -361,7 +365,7 @@ Current language/runtime limitations that still need dedicated implementation:
 Planned development sequence:
 
 1. Expand async/runtime model further:
-   - add `yield` semantics and explicit concurrency primitives.
+   - add explicit concurrency primitives (task groups, cancellation, scheduling).
 2. Harden distribution pipeline:
    - keep npm global installation and published package reliability production-ready.
    - add standalone installer/binary channels later after package lifecycle stabilizes.

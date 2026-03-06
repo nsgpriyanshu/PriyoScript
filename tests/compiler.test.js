@@ -156,4 +156,20 @@ describe('Compiler', () => {
     `
     expect(() => compileInput(input)).toThrow(/must accept 1 params/i)
   })
+
+  it('should compile generator function metadata and yield opcode', () => {
+    const input = `
+      monalisa {
+        lisaaTask series() {
+          prakritiGiveSome 10
+          prakritiGiveSome 20
+        }
+      }
+    `
+    const instructions = compileInput(input)
+    const defineFn = instructions.find(instr => instr.op === OpCode.DEFINE_FUNCTION)
+    expect(defineFn).toBeTruthy()
+    expect(defineFn.operand.isGenerator).toBe(true)
+    expect(defineFn.operand.instructions.some(instr => instr.op === OpCode.YIELD_VALUE)).toBe(true)
+  })
 })
