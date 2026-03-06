@@ -1,6 +1,6 @@
 {
   "name": "priyoscript",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "An emotional, interpreted programming language.",
   "type": "commonjs",
   "preferGlobal": true,
