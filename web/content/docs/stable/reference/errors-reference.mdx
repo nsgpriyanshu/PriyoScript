@@ -35,24 +35,25 @@ monalisa -explain <ERROR_CODE>
 
 ## Complete Error Code Table
 
-| Code       | Stage   | Category | Meaning                          |
-| ---------- | ------- | -------- | -------------------------------- |
-| `PSYN-001` | syntax  | user     | Parse failed                     |
-| `PSYN-002` | syntax  | user     | Illegal token / unexpected token |
-| `PSYN-003` | syntax  | user     | Reserved/forbidden word usage    |
-| `PCMP-001` | compile | user     | Compile failed                   |
-| `PRUN-000` | runtime | user     | Generic runtime failure          |
-| `PRUN-101` | runtime | user     | Undefined variable               |
-| `PRUN-102` | runtime | user     | Constant reassignment            |
-| `PRUN-103` | runtime | user     | Division by zero                 |
-| `PRUN-104` | runtime | user     | Unknown class                    |
-| `PRUN-105` | runtime | user     | Unknown callable                 |
-| `PRUN-106` | runtime | user     | Property access/assignment error |
-| `PRUN-107` | runtime | user     | Argument mismatch                |
-| `PRUN-108` | runtime | user     | Invalid input                    |
-| `PRUN-109` | runtime | user     | Unknown package                  |
-| `PRUN-110` | runtime | user     | Unknown module                   |
-| `PENG-001` | core    | engine   | Internal engine error            |
+| Code       | Stage   | Category | Meaning                                     |
+| ---------- | ------- | -------- | ------------------------------------------- |
+| `PSYN-001` | syntax  | user     | Parse failed                                |
+| `PSYN-002` | syntax  | user     | Illegal token / unexpected token            |
+| `PSYN-003` | syntax  | user     | Reserved/forbidden word usage               |
+| `PSYN-004` | syntax  | user     | `prakritiPause` used outside async function |
+| `PCMP-001` | compile | user     | Compile failed                              |
+| `PRUN-000` | runtime | user     | Generic runtime failure                     |
+| `PRUN-101` | runtime | user     | Undefined variable                          |
+| `PRUN-102` | runtime | user     | Constant reassignment                       |
+| `PRUN-103` | runtime | user     | Division by zero                            |
+| `PRUN-104` | runtime | user     | Unknown class                               |
+| `PRUN-105` | runtime | user     | Unknown callable                            |
+| `PRUN-106` | runtime | user     | Property access/assignment error            |
+| `PRUN-107` | runtime | user     | Argument mismatch                           |
+| `PRUN-108` | runtime | user     | Invalid input                               |
+| `PRUN-109` | runtime | user     | Unknown package                             |
+| `PRUN-110` | runtime | user     | Unknown module                              |
+| `PENG-001` | core    | engine   | Internal engine error                       |
 
 ## Syntax Errors
 
@@ -100,6 +101,27 @@ monalisa {
 ```priyo
 monalisa {
   priyoKeep class = 10
+}
+```
+</Callout>
+
+### `PSYN-004` Await outside async function
+
+<Callout title="Wrong" type="error">
+```priyo
+monalisa {
+  lisaaTask total(a, b) {
+    priyoGiveBack prakritiPause (a + b)
+  }
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  prakritiWait lisaaTask total(a, b) {
+    priyoGiveBack prakritiPause (a + b)
+  }
 }
 ```
 </Callout>

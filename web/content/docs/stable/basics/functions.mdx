@@ -22,6 +22,7 @@ Functions are reusable blocks of logic that improve readability, reduce duplicat
 | Void-style function        | no `priyoGiveBack`               | Performs side effects (for example output/logging). |
 | Recursive function         | `name(...)` inside same function | Calls itself until base condition is met.           |
 | Closure function           | returns inner function           | Inner function remembers outer variables.           |
+| Async function (stage-1)   | `prakritiWait lisaaTask ...`     | Enables `prakritiPause` inside the function body.   |
 
 ## Syntax Quick Reference
 
@@ -33,6 +34,46 @@ monalisa {
 
   priyoTell(add(2, 3))
 }
+```
+
+## Async Functions and Await (Stage-1)
+
+`prakritiWait` marks a function as async-capable. `prakritiPause` waits for an expression to resolve.
+
+### Example 1
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask addAsync(a, b) {
+    priyoGiveBack prakritiPause (a + b)
+  }
+
+  priyoTell(prakritiPause addAsync(20, 22))
+}
+```
+
+Output:
+
+```text
+42
+```
+
+### Example 2
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask greetLater(name) {
+    priyoGiveBack "Hi " + prakritiPause name
+  }
+
+  priyoTell(prakritiPause greetLater("mona"))
+}
+```
+
+Output:
+
+```text
+Hi mona
 ```
 
 ## 1. Function Without Return Value

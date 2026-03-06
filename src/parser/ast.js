@@ -115,11 +115,12 @@ class ContinueStatement {
 }
 
 class FunctionDeclaration {
-  constructor(name, params, body) {
+  constructor(name, params, body, isAsync = false) {
     this.type = 'FunctionDeclaration'
     this.name = name
     this.params = params
     this.body = body
+    this.isAsync = isAsync
   }
 }
 
@@ -181,12 +182,13 @@ class ClassDeclaration {
 }
 
 class MethodDeclaration {
-  constructor(name, params, body, isStatic = false) {
+  constructor(name, params, body, isStatic = false, isAsync = false) {
     this.type = 'MethodDeclaration'
     this.name = name
     this.params = params
     this.body = body
     this.isStatic = isStatic
+    this.isAsync = isAsync
   }
 }
 
@@ -213,6 +215,13 @@ class UnaryExpression {
   constructor(operator, argument) {
     this.type = 'UnaryExpression'
     this.operator = operator
+    this.argument = argument
+  }
+}
+
+class AwaitExpression {
+  constructor(argument) {
+    this.type = 'AwaitExpression'
     this.argument = argument
   }
 }
@@ -366,6 +375,7 @@ module.exports = {
   ClassFieldDeclaration,
   BinaryExpression,
   UnaryExpression,
+  AwaitExpression,
   ThisExpression,
   SuperExpression,
   MemberExpression,

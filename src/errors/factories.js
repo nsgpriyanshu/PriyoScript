@@ -51,6 +51,9 @@ function createEngineError(message, options = {}) {
 }
 
 function classifySyntaxCode(message) {
+  if (/prakritiPause can only be used inside prakritiWait lisaaTask/i.test(message)) {
+    return ErrorCodes.SYNTAX.AWAIT_OUTSIDE_ASYNC
+  }
   if (/Reserved word/i.test(message)) return ErrorCodes.SYNTAX.RESERVED_WORD
   if (/Could not understand this part|Expected .* but found|Unexpected token/i.test(message)) {
     return ErrorCodes.SYNTAX.ILLEGAL_TOKEN

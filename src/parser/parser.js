@@ -30,6 +30,7 @@ const {
   ClassFieldDeclaration,
   BinaryExpression,
   UnaryExpression,
+  AwaitExpression,
   ThisExpression,
   SuperExpression,
   MemberExpression,
@@ -59,6 +60,7 @@ class Parser {
     this.loopDepth = 0
     this.switchDepth = 0
     this.functionDepth = 0
+    this.asyncDepth = 0
     this.classMethodDepth = 0
 
     this.nextToken()
@@ -206,7 +208,8 @@ class Parser {
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
     if (this.curToken.type === TokenType.THROW) return this.parseThrowStatement()
     if (this.curToken.type === TokenType.TRY) return this.parseTryStatement()
-    if (this.curToken.type === TokenType.FUNCTION) return this.parseFunctionDeclaration()
+    if (this.curToken.type === TokenType.ASYNC) return this.parseAsyncFunctionDeclaration()
+    if (this.curToken.type === TokenType.FUNCTION) return this.parseFunctionDeclaration(false)
     if (this.curToken.type === TokenType.BREAK) return this.parseBreakStatement()
     if (this.curToken.type === TokenType.CONTINUE) return this.parseContinueStatement()
     if (this.curToken.type === TokenType.SWITCH) return this.parseSwitchStatement()
@@ -303,8 +306,17 @@ class Parser {
       this.nextToken()
     }
 
+    if (this.curToken.type === TokenType.ASYNC) {
+      this.nextToken()
+      if (this.curToken.type !== TokenType.FUNCTION) {
+        this.error('Expected lisaaTask after prakritiWait in class member')
+        return null
+      }
+      return this.parseMethodDeclaration(isStatic, true)
+    }
+
     if (this.curToken.type === TokenType.FUNCTION) {
-      return this.parseMethodDeclaration(isStatic)
+      return this.parseMethodDeclaration(isStatic, false)
     }
 
     if (
@@ -319,7 +331,7 @@ class Parser {
     return null
   }
 
-  parseMethodDeclaration(isStatic = false) {
+  parseMethodDeclaration(isStatic = false, isAsync = false) {
     if (!this.consumeCurrent(TokenType.FUNCTION, 'Expected lisaaTask for class method')) return null
 
     if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected method name')) {
@@ -335,14 +347,16 @@ class Parser {
     if (!params) return null
 
     this.functionDepth++
+    if (isAsync) this.asyncDepth++
     // Track class-method context so priyoSelf/priyoParent are validated.
     this.classMethodDepth++
     const body = this.parseBlockStatement()
     this.classMethodDepth--
+    if (isAsync) this.asyncDepth--
     this.functionDepth--
     if (!body) return null
 
-    return new MethodDeclaration(name, params, body, isStatic)
+    return new MethodDeclaration(name, params, body, isStatic, isAsync)
   }
 
   parseClassFieldDeclaration(isStatic = false) {
@@ -377,7 +391,16 @@ class Parser {
     return new ClassFieldDeclaration(name, kind, initializer, isStatic)
   }
 
-  parseFunctionDeclaration() {
+  parseAsyncFunctionDeclaration() {
+    this.nextToken()
+    if (this.curToken.type !== TokenType.FUNCTION) {
+      this.error('Expected lisaaTask after prakritiWait')
+      return null
+    }
+    return this.parseFunctionDeclaration(true)
+  }
+
+  parseFunctionDeclaration(isAsync = false) {
     this.nextToken()
     if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected function name after lisaaTask')) {
       this.nextToken()
@@ -392,11 +415,13 @@ class Parser {
     if (!params) return null
 
     this.functionDepth++
+    if (isAsync) this.asyncDepth++
     const body = this.parseBlockStatement()
+    if (isAsync) this.asyncDepth--
     this.functionDepth--
     if (!body) return null
 
-    return new FunctionDeclaration(name, params, body)
+    return new FunctionDeclaration(name, params, body, isAsync)
   }
 
   parseImportStatement() {
@@ -1102,6 +1127,12 @@ class Parser {
   }
 
   parseUnary() {
+    // Await is parsed as a unary operator so "prakritiPause fn()" and
+    // nested forms like "prakritiPause prakritiPause x" are supported.
+    if (this.curToken.type === TokenType.AWAIT) {
+      return this.parseAwaitExpression()
+    }
+
     if (this.curToken.type === TokenType.BANG) {
       const operator = this.curToken.type
       this.nextToken()
@@ -1118,6 +1149,21 @@ class Parser {
     }
 
     return this.parsePostfixExpression()
+  }
+
+  parseAwaitExpression() {
+    const insideNonAsyncFunction = this.functionDepth > 0 && this.asyncDepth === 0
+    if (insideNonAsyncFunction) {
+      this.error('prakritiPause can only be used inside prakritiWait lisaaTask')
+      return null
+    }
+    this.nextToken()
+    const argument = this.parseUnary()
+    if (!argument) {
+      this.error('Expected expression after prakritiPause')
+      return null
+    }
+    return new AwaitExpression(argument)
   }
 
   parseNewExpression() {

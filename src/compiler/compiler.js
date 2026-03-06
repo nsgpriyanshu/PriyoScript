@@ -386,6 +386,7 @@ class Compiler {
   compileFunctionDeclaration(stmt) {
     this.emit(OpCode.DEFINE_FUNCTION, {
       name: stmt.name.name,
+      isAsync: !!stmt.isAsync,
       params: stmt.params.map(param => param.name),
       instructions: this.compileCallableBody(stmt.body),
     })
@@ -528,6 +529,7 @@ class Compiler {
       .filter(method => !method.isStatic)
       .map(method => ({
         name: method.name.name,
+        isAsync: !!method.isAsync,
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
       }))
@@ -536,6 +538,7 @@ class Compiler {
       .filter(method => method.isStatic)
       .map(method => ({
         name: method.name.name,
+        isAsync: !!method.isAsync,
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
       }))
@@ -670,6 +673,11 @@ class Compiler {
 
       case 'UnaryExpression':
         this.compileUnaryExpression(expr)
+        break
+
+      case 'AwaitExpression':
+        this.compileExpression(expr.argument)
+        this.emit(OpCode.AWAIT_VALUE)
         break
 
       default:

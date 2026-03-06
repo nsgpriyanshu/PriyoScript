@@ -124,4 +124,19 @@ describe('Compiler', () => {
     expect(instructions.some(instr => instr.op === OpCode.GET_PROPERTY)).toBe(true)
     expect(instructions.some(instr => instr.op === OpCode.DEFINE_VARIABLE)).toBe(true)
   })
+
+  it('should compile async function declaration metadata and await opcode', () => {
+    const input = `
+      monalisa {
+        prakritiWait lisaaTask addAsync(a, b) {
+          priyoGiveBack prakritiPause (a + b)
+        }
+      }
+    `
+    const instructions = compileInput(input)
+    const defineFn = instructions.find(instr => instr.op === OpCode.DEFINE_FUNCTION)
+    expect(defineFn).toBeTruthy()
+    expect(defineFn.operand.isAsync).toBe(true)
+    expect(defineFn.operand.instructions.some(instr => instr.op === OpCode.AWAIT_VALUE)).toBe(true)
+  })
 })

@@ -236,6 +236,7 @@ class VM {
             case OpCode.DEFINE_FUNCTION: {
               const fnObj = {
                 type: 'user_function',
+                isAsync: !!instr.operand.isAsync,
                 params: instr.operand.params,
                 instructions: instr.operand.instructions,
                 closure: this.environment,
@@ -364,6 +365,13 @@ class VM {
             case OpCode.DESTRUCTURE_DEFINE: {
               const source = stack.pop()
               this.applyDestructurePattern(instr.operand.pattern, source, instr.operand.kind)
+              break
+            }
+
+            case OpCode.AWAIT_VALUE: {
+              const value = stack.pop()
+              const resolved = await Promise.resolve(value)
+              stack.push(resolved == null ? null : resolved)
               break
             }
 
@@ -958,6 +966,7 @@ class VM {
       methods.set(method.name, {
         type: 'user_method',
         name: method.name,
+        isAsync: !!method.isAsync,
         params: method.params,
         instructions: method.instructions,
         closure: this.environment,

@@ -399,13 +399,40 @@ priyoGiveBack value
 
 `priyoGiveBack` is valid only inside functions.
 
-## 14. Scope Rules
+## 14. Async and Await (Stage-1)
+
+Async function declaration:
+
+```priyo
+prakritiWait lisaaTask addAsync(a, b) {
+  priyoGiveBack prakritiPause (a + b)
+}
+```
+
+Top-level await:
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask total(a, b) {
+    priyoGiveBack a + b
+  }
+  priyoTell(prakritiPause total(20, 22))
+}
+```
+
+Rule:
+
+- `prakritiPause` is valid inside `prakritiWait lisaaTask ...` functions.
+- `prakritiPause` is rejected inside non-async functions.
+- Top-level `prakritiPause` is allowed in `monalisa`/`lisaaBox` blocks.
+
+## 15. Scope Rules
 
 - `priyoChange` / `priyoPromise` are block-scoped.
 - `priyoKeep` is function-scoped.
 - Functions use lexical scope (closures are supported).
 
-## 15. Classes
+## 16. Classes
 
 Class declaration:
 
@@ -491,6 +518,9 @@ lisaaFamily CollegeStudent {
 }
 ```
 
-## 16. Current Limitations
+## 17. Current Limitations
 
 - Many reserved keywords are mapped but not fully implemented in parser/compiler/VM.
+- Async support is staged:
+  - implemented: `prakritiWait` and `prakritiPause`
+  - planned: `yield` and future concurrency primitives

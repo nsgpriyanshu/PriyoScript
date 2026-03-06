@@ -123,6 +123,7 @@ tests/
 | Control flow | `while`, `for`, `break`, `continue`                                                  | 100%   |
 | Control flow | `try / catch / finally / throw`                                                      | 100%   |
 | Functions    | Declaration, return, closures, recursion                                             | 100%   |
+| Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)      | 100%   |
 | OOP          | Classes, object creation, `priyoSelf`                                                | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                        | 100%   |
 | OOP          | Static methods/fields and class fields                                               | 100%   |
@@ -196,7 +197,9 @@ tests/
 ### 4.5 Functions
 
 - Function declaration: `lisaaTask name(...) { ... }`
+- Async function declaration: `prakritiWait lisaaTask name(...) { ... }`
 - Return: `priyoGiveBack ...`
+- Await expression: `prakritiPause <expression>`
 - Closures and recursion are supported
 
 ### 4.6 Classes and OOP
@@ -269,6 +272,10 @@ tests/
 
 - Stack-based bytecode VM with explicit opcodes.
 - Function and method execution use isolated call frames.
+- Stage-1 async runtime support:
+  - async function declarations compile with async metadata
+  - await expressions resolve via VM await opcode (`AWAIT_VALUE`)
+  - top-level await is allowed in entry/module blocks
 - Lexical environments are parent-linked.
 - Scope enter/exit is explicit (`ENTER_SCOPE` / `EXIT_SCOPE`).
 - Loop control jumps carry scope-unwind metadata to prevent leaks.
@@ -322,8 +329,9 @@ Current language/runtime limitations that still need dedicated implementation:
 - Destructuring supports nested/default patterns in declarations.
 - Remaining limitation:
   - no rest/spread destructuring syntax yet
-- No async/concurrency execution model:
-  - `async/await/yield` tokens remain reserved
+- Async support is currently staged:
+  - implemented: `prakritiWait` + `prakritiPause`
+  - planned: `yield` and explicit concurrency primitives
 - Type system remains fully dynamic:
   - no static type checker
   - no compile-time type validation
@@ -342,8 +350,8 @@ Current language/runtime limitations that still need dedicated implementation:
 
 Planned development sequence:
 
-1. Expand async/runtime model:
-   - staged support for `async/await` and future concurrency primitives.
+1. Expand async/runtime model further:
+   - add `yield` semantics and explicit concurrency primitives.
 2. Harden distribution pipeline:
    - keep npm global installation and published package reliability production-ready.
    - add standalone installer/binary channels later after package lifecycle stabilizes.

@@ -88,6 +88,35 @@ describe('Parser', () => {
     expect(func.body.statements[0].type).toBe('ReturnStatement')
   })
 
+  it('should parse async function declarations and await expressions', () => {
+    const input = `
+      monalisa {
+        prakritiWait lisaaTask addAsync(a, b) {
+          priyoGiveBack prakritiPause (a + b)
+        }
+      }
+    `
+    const { program, errors } = parse(input)
+
+    expect(errors).toHaveLength(0)
+    const func = program.entry.body[0]
+    expect(func.type).toBe('FunctionDeclaration')
+    expect(func.isAsync).toBe(true)
+    expect(func.body.statements[0].argument.type).toBe('AwaitExpression')
+  })
+
+  it('should reject await outside async functions', () => {
+    const input = `
+      monalisa {
+        lisaaTask notAsync() {
+          priyoGiveBack prakritiPause 1
+        }
+      }
+    `
+    const { errors } = parse(input)
+    expect(errors[0]).toMatch(/prakritiPause can only be used inside prakritiWait lisaaTask/i)
+  })
+
   it('should parse array destructuring declarations', () => {
     const input = `
       monalisa {

@@ -62,11 +62,13 @@ Syntax is the formal grammar that tells PriyoScript how to read and execute your
 
 ### Functions
 
-| Syntax                        | Description           |
-| ----------------------------- | --------------------- |
-| `lisaaTask name(...) { ... }` | Function declaration. |
-| `priyoGiveBack value`         | Return from function. |
-| `name(arg)`                   | Function call.        |
+| Syntax                        | Description                                                     |
+| ----------------------------- | --------------------------------------------------------------- |
+| `lisaaTask name(...) { ... }` | Function declaration.                                           |
+| `prakritiWait lisaaTask ...`  | Async function declaration (stage-1).                           |
+| `priyoGiveBack value`         | Return from function.                                           |
+| `name(arg)`                   | Function call.                                                  |
+| `prakritiPause expr`          | Await value inside async functions (top-level await supported). |
 
 ### Arrays
 

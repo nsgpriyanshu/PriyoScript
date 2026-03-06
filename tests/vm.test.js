@@ -71,6 +71,35 @@ describe('VM & Runtime', () => {
     expect(logSpy).toHaveBeenCalledWith('hello world')
   })
 
+  it('should evaluate async functions with await', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask addAsync(a, b) {
+          priyoGiveBack prakritiPause (a + b)
+        }
+        priyoTell(prakritiPause addAsync(20, 22))
+      }
+    `
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith(42)
+  })
+
+  it('should reject await usage outside async functions', async () => {
+    const code = `
+      monalisa {
+        lisaaTask badAwait() {
+          priyoGiveBack prakritiPause 10
+        }
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      code: 'PSYN-004',
+      message: expect.stringMatching(
+        /prakritiPause can only be used inside prakritiWait lisaaTask/i,
+      ),
+    })
+  })
+
   it('should evaluate array destructuring declarations', async () => {
     const code = `
       monalisa {

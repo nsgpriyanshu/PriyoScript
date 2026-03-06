@@ -1,0 +1,8 @@
+monalisa {
+  prakritiWait lisaaTask addAsync(a, b) {
+    // Stage-1 async: await can resolve plain values and promise-like results.
+    priyoGiveBack prakritiPause (a + b)
+  }
+
+  priyoTell(prakritiPause addAsync(20, 22))
+}

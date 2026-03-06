@@ -47,6 +47,7 @@ const OpCode = {
   IMPORT_MODULE: 45,
   EXPORT_NAME: 46,
   DESTRUCTURE_DEFINE: 47,
+  AWAIT_VALUE: 48,
 }
 
 module.exports = { OpCode }
