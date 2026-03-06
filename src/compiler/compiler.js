@@ -8,6 +8,7 @@ class Compiler {
     this.breakStack = []
     this.scopeDepth = 0
     this.tempCounter = 0
+    this.interfaceTable = new Map()
   }
 
   compile(program) {
@@ -15,6 +16,8 @@ class Compiler {
     if (!root || (root.type !== 'EntryBlock' && root.type !== 'PackageBlock')) {
       throw new Error('Invalid AST: missing root block')
     }
+
+    this.collectInterfaces(root.body)
 
     for (const stmt of root.body) {
       this.compileStatement(stmt)
@@ -84,6 +87,10 @@ class Compiler {
 
       case 'ClassDeclaration':
         this.compileClassDeclaration(stmt)
+        return
+
+      case 'InterfaceDeclaration':
+        // Interfaces are compile-time contracts only; they do not emit runtime bytecode.
         return
 
       case 'ReturnStatement':
@@ -524,12 +531,14 @@ class Compiler {
 
   compileClassDeclaration(stmt) {
     this.assertConstructorSuperRules(stmt)
+    this.assertImplementsRules(stmt)
 
     const instanceMethods = stmt.methods
       .filter(method => !method.isStatic)
       .map(method => ({
         name: method.name.name,
         isAsync: !!method.isAsync,
+        access: method.access || 'public',
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
       }))
@@ -539,6 +548,7 @@ class Compiler {
       .map(method => ({
         name: method.name.name,
         isAsync: !!method.isAsync,
+        access: method.access || 'public',
         params: method.params.map(param => param.name),
         instructions: this.compileCallableBody(method.body),
       }))
@@ -548,6 +558,7 @@ class Compiler {
       .map(field => ({
         name: field.name.name,
         kind: field.kind,
+        access: field.access || 'public',
         instructions: this.compileInitializerThunk(field.initializer),
       }))
 
@@ -556,6 +567,7 @@ class Compiler {
       .map(field => ({
         name: field.name.name,
         kind: field.kind,
+        access: field.access || 'public',
         instructions: this.compileInitializerThunk(field.initializer),
       }))
 
@@ -879,6 +891,14 @@ class Compiler {
     return `${prefix}_${this.tempCounter}`
   }
 
+  collectInterfaces(statements) {
+    this.interfaceTable.clear()
+    for (const statement of statements) {
+      if (statement.type !== 'InterfaceDeclaration') continue
+      this.interfaceTable.set(statement.name.name, statement)
+    }
+  }
+
   serializeBindingPattern(pattern) {
     if (!pattern) return null
 
@@ -958,6 +978,39 @@ class Compiler {
       throw new Error(
         `Class "${classDeclaration.name.name}" cannot call priyoParent(...) more than once in init`,
       )
+    }
+  }
+
+  assertImplementsRules(classDeclaration) {
+    const implementedInterfaces = classDeclaration.implementedInterfaces || []
+    if (implementedInterfaces.length === 0) return
+
+    for (const ifaceRef of implementedInterfaces) {
+      const iface = this.interfaceTable.get(ifaceRef.name)
+      if (!iface) {
+        throw new Error(`Class "${classDeclaration.name.name}" implements unknown interface "${ifaceRef.name}"`)
+      }
+
+      for (const ifaceMethod of iface.methods || []) {
+        const classMethod = classDeclaration.methods.find(
+          method => !method.isStatic && method.name.name === ifaceMethod.name.name,
+        )
+        if (!classMethod) {
+          throw new Error(
+            `Class "${classDeclaration.name.name}" must implement method "${ifaceMethod.name.name}" from interface "${iface.name.name}"`,
+          )
+        }
+        if ((classMethod.access || 'public') !== 'public') {
+          throw new Error(
+            `Method "${classDeclaration.name.name}.${ifaceMethod.name.name}" must be lisaaOpen to satisfy interface "${iface.name.name}"`,
+          )
+        }
+        if (classMethod.params.length !== ifaceMethod.params.length) {
+          throw new Error(
+            `Method "${classDeclaration.name.name}.${ifaceMethod.name.name}" must accept ${ifaceMethod.params.length} params to satisfy interface "${iface.name.name}"`,
+          )
+        }
+      }
     }
   }
 }

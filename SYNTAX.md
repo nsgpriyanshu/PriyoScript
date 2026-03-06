@@ -474,6 +474,9 @@ Notes:
 - `priyoSelf` is available inside class methods.
 - Methods are declared with `lisaaTask` inside `lisaaFamily`.
 - Inheritance is supported with `lisaaInherit`.
+- Interfaces are supported:
+  - `lisaaAgreement Name { lisaaTask method(args) }`
+  - `lisaaFamily Child lisaaFollow Name { ... }`
 - Parent constructor shorthand is supported with `priyoParent(...)` inside child `init(...)`.
 - In child classes, `priyoParent(...)` must be the first statement of `init(...)`.
 - In child classes, `priyoParent(...)` can appear only once in `init(...)`.
@@ -515,6 +518,26 @@ Class field declarations:
 lisaaFamily CollegeStudent {
   priyoKeep campus = "NSEC"                 // instance field
   lisaaStable priyoKeep portal = "Main"     // static field
+}
+```
+
+Access modifiers on class members:
+
+- `lisaaOpen` (public, default)
+- `lisaaPersonal` (private, class-only access)
+- `lisaaGuarded` (protected, class + subclasses)
+
+Interface example:
+
+```priyo
+lisaaAgreement Greeter {
+  lisaaTask greet(name)
+}
+
+lisaaFamily Student lisaaFollow Greeter {
+  lisaaOpen lisaaTask greet(name) {
+    priyoGiveBack "Hi " + name
+  }
 }
 ```
 

@@ -172,33 +172,52 @@ class ThrowStatement {
 }
 
 class ClassDeclaration {
-  constructor(name, methods, fields = [], superClass = null) {
+  constructor(name, methods, fields = [], superClass = null, implementedInterfaces = []) {
     this.type = 'ClassDeclaration'
     this.name = name
     this.methods = methods
     this.fields = fields
     this.superClass = superClass
+    this.implementedInterfaces = implementedInterfaces
   }
 }
 
 class MethodDeclaration {
-  constructor(name, params, body, isStatic = false, isAsync = false) {
+  constructor(name, params, body, isStatic = false, isAsync = false, access = 'public') {
     this.type = 'MethodDeclaration'
     this.name = name
     this.params = params
     this.body = body
     this.isStatic = isStatic
     this.isAsync = isAsync
+    this.access = access
   }
 }
 
 class ClassFieldDeclaration {
-  constructor(name, kind, initializer, isStatic = false) {
+  constructor(name, kind, initializer, isStatic = false, access = 'public') {
     this.type = 'ClassFieldDeclaration'
     this.name = name
     this.kind = kind
     this.initializer = initializer
     this.isStatic = isStatic
+    this.access = access
+  }
+}
+
+class InterfaceDeclaration {
+  constructor(name, methods = []) {
+    this.type = 'InterfaceDeclaration'
+    this.name = name
+    this.methods = methods
+  }
+}
+
+class InterfaceMethodSignature {
+  constructor(name, params = []) {
+    this.type = 'InterfaceMethodSignature'
+    this.name = name
+    this.params = params
   }
 }
 
@@ -370,6 +389,8 @@ module.exports = {
   TryStatement,
   CatchClause,
   ThrowStatement,
+  InterfaceDeclaration,
+  InterfaceMethodSignature,
   ClassDeclaration,
   MethodDeclaration,
   ClassFieldDeclaration,

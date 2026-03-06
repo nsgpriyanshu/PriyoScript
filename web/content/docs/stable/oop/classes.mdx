@@ -12,7 +12,8 @@ Object-Oriented Programming (OOP) organizes code around objects that contain sta
   - Class declaration with `lisaaFamily` - Object creation with `priyoCreate` - Constructor pattern
   using `init(...)` - Instance members via `priyoSelf` - Inheritance with `lisaaInherit` - Parent
   constructor/method access via `priyoParent` - Static methods/fields via `lisaaStable` -
-  Public-by-default member access
+  Public-by-default member access - Access modifiers (`lisaaOpen`, `lisaaPersonal`, `lisaaGuarded`)
+  - Interface declaration (`lisaaAgreement`) and class contract (`lisaaFollow`)
 </Callout>
 
 ## OOP API Table
@@ -29,6 +30,10 @@ Object-Oriented Programming (OOP) organizes code around objects that contain sta
 | Static method      | `lisaaStable lisaaTask method(...)`             | Class-level method                 |
 | Static field usage | `ClassName.field`                               | Class-level state                  |
 | Public access      | `obj.field`, `obj.method()`                     | Members are public by default      |
+| Private access     | `lisaaPersonal ...`                             | Accessible only inside owner class |
+| Protected access   | `lisaaGuarded ...`                              | Accessible in owner + subclasses   |
+| Interface          | `lisaaAgreement Name { ... }`                   | Declares class behavior contract   |
+| Implements         | `lisaaFamily A lisaaFollow I`                   | Enforces interface methods         |
 
 ## Example 1: Basic Class + Instance Method
 
@@ -190,6 +195,43 @@ Explanation:
 
 ```text
 2
+```
+
+## Example 6: Interface + Access Modifiers
+
+```priyo
+monalisa {
+  lisaaAgreement Greeter {
+    lisaaTask greet(name)
+  }
+
+  lisaaFamily Human lisaaFollow Greeter {
+    lisaaPersonal priyoKeep code = "H-1"
+    lisaaOpen lisaaTask greet(name) {
+      priyoGiveBack "Hi " + name
+    }
+    lisaaOpen lisaaTask revealInside() {
+      priyoGiveBack priyoSelf.code
+    }
+  }
+
+  priyoKeep h = priyoCreate Human()
+  priyoTell(h.greet("mona"))
+  priyoTell(h.revealInside())
+}
+```
+
+Explanation:
+
+- `lisaaAgreement` defines required methods for implementers.
+- `Human lisaaFollow Greeter` must implement `greet(name)` with matching parameter count.
+- `code` is `lisaaPersonal`, so it can only be accessed inside `Human` methods.
+
+Output:
+
+```text
+Hi mona
+H-1
 ```
 
 ## Practice Questions

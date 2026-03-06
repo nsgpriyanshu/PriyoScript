@@ -1,0 +1,19 @@
+monalisa {
+  lisaaAgreement Greeter {
+    lisaaTask greet(name)
+  }
+
+  lisaaFamily Human lisaaFollow Greeter {
+    lisaaPersonal priyoKeep secret = "vault-17"
+    lisaaOpen lisaaTask greet(name) {
+      priyoGiveBack "Hello " + name
+    }
+    lisaaOpen lisaaTask revealInside() {
+      priyoGiveBack priyoSelf.secret
+    }
+  }
+
+  priyoKeep human = priyoCreate Human()
+  priyoTell(human.greet("mona"))
+  priyoTell(human.revealInside())
+}

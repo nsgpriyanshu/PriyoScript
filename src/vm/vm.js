@@ -265,6 +265,8 @@ class VM {
                 staticMethods,
                 staticFields: new Map(),
                 staticFieldKinds: new Map(),
+                staticFieldAccess: new Map(),
+                instanceFieldAccess: new Map(),
                 instanceFieldInitializers: instr.operand.instanceFields || [],
                 strictInstanceFields: false,
                 strictStaticFields: false,
@@ -293,6 +295,7 @@ class VM {
                 classRef: classObj,
                 fields: new Map(),
                 constFields: new Set(),
+                fieldAccess: new Map(),
               }
 
               await this.applyInstanceFieldInitializers(instance)
@@ -923,6 +926,7 @@ class VM {
       const value = await this.evaluateInitializer(field.instructions, classObj, classObj, true)
       classObj.staticFields.set(field.name, value)
       classObj.staticFieldKinds.set(field.name, field.kind)
+      classObj.staticFieldAccess.set(field.name, field.access || 'public')
     }
   }
 
@@ -935,6 +939,12 @@ class VM {
       for (const field of classObj.instanceFieldInitializers || []) {
         const value = await this.evaluateInitializer(field.instructions, classObj, instance, false)
         instance.fields.set(field.name, value)
+        const access = field.access || 'public'
+        instance.fieldAccess.set(field.name, {
+          access,
+          ownerClass: classObj,
+        })
+        classObj.instanceFieldAccess.set(field.name, access)
         if (field.kind === 'const') {
           instance.constFields.add(field.name)
         } else {
@@ -967,6 +977,7 @@ class VM {
         type: 'user_method',
         name: method.name,
         isAsync: !!method.isAsync,
+        access: method.access || 'public',
         params: method.params,
         instructions: method.instructions,
         closure: this.environment,
@@ -976,6 +987,47 @@ class VM {
     return methods
   }
 
+  getCurrentAccessClass() {
+    try {
+      const current = this.environment.get('__priyoCurrentClass')
+      return current && current.type === 'class' ? current : null
+    } catch {
+      return null
+    }
+  }
+
+  isSubclassOf(maybeChildClass, maybeAncestorClass) {
+    if (!maybeChildClass || !maybeAncestorClass) return false
+    let cursor = maybeChildClass
+    while (cursor) {
+      if (cursor === maybeAncestorClass) return true
+      cursor = cursor.superClass
+    }
+    return false
+  }
+
+  ensureMemberAccess(memberName, access, ownerClass, memberKind) {
+    const normalizedAccess = access || 'public'
+    if (normalizedAccess === 'public') return
+
+    const currentClass = this.getCurrentAccessClass()
+    if (!currentClass || !ownerClass) {
+      throw new Error(`Cannot access ${normalizedAccess} ${memberKind} "${memberName}" from outside class`)
+    }
+
+    if (normalizedAccess === 'private' && currentClass !== ownerClass) {
+      throw new Error(`Cannot access private ${memberKind} "${memberName}" outside "${ownerClass.name}"`)
+    }
+
+    if (
+      normalizedAccess === 'protected' &&
+      currentClass !== ownerClass &&
+      !this.isSubclassOf(currentClass, ownerClass)
+    ) {
+      throw new Error(`Cannot access protected ${memberKind} "${memberName}" outside inheritance chain`)
+    }
+  }
+
   resolveProperty(object, propertyName) {
     if (!object) {
       throw new Error(`Property access requires an object for "${propertyName}"`)
@@ -983,10 +1035,16 @@ class VM {
 
     if (object.type === 'instance') {
       if (object.fields.has(propertyName)) {
+        const fieldMeta = object.fieldAccess ? object.fieldAccess.get(propertyName) : null
+        if (fieldMeta) {
+          this.ensureMemberAccess(propertyName, fieldMeta.access, fieldMeta.ownerClass, 'field')
+        }
         return object.fields.get(propertyName)
       }
 
-      if (this.findMethod(object.classRef, propertyName)) {
+      const method = this.findMethod(object.classRef, propertyName)
+      if (method) {
+        this.ensureMemberAccess(propertyName, method.access, method.ownerClass, 'method')
         return {
           type: 'bound_method',
           receiver: object,
@@ -1000,10 +1058,18 @@ class VM {
     if (object.type === 'class') {
       const staticFieldOwner = this.findStaticFieldOwner(object, propertyName)
       if (staticFieldOwner) {
+        this.ensureMemberAccess(
+          propertyName,
+          staticFieldOwner.staticFieldAccess.get(propertyName),
+          staticFieldOwner,
+          'static field',
+        )
         return staticFieldOwner.staticFields.get(propertyName)
       }
 
-      if (this.findStaticMethod(object, propertyName)) {
+      const staticMethod = this.findStaticMethod(object, propertyName)
+      if (staticMethod) {
+        this.ensureMemberAccess(propertyName, staticMethod.access, staticMethod.ownerClass, 'static method')
         return {
           type: 'bound_static_method',
           classRef: object,
@@ -1020,7 +1086,14 @@ class VM {
       }
 
       if (object.isStatic) {
-        if (this.findStaticMethod(object.startClass, propertyName)) {
+        const parentStaticMethod = this.findStaticMethod(object.startClass, propertyName)
+        if (parentStaticMethod) {
+          this.ensureMemberAccess(
+            propertyName,
+            parentStaticMethod.access,
+            parentStaticMethod.ownerClass,
+            'static method',
+          )
           return {
             type: 'bound_static_method',
             classRef: object.receiver,
@@ -1032,6 +1105,12 @@ class VM {
         // priyoParent.someStatic should resolve from parent side, not child side.
         const superFieldOwner = this.findStaticFieldOwner(object.startClass, propertyName)
         if (superFieldOwner) {
+          this.ensureMemberAccess(
+            propertyName,
+            superFieldOwner.staticFieldAccess.get(propertyName),
+            superFieldOwner,
+            'static field',
+          )
           return superFieldOwner.staticFields.get(propertyName)
         }
 
@@ -1039,10 +1118,23 @@ class VM {
       }
 
       if (object.receiver.fields.has(propertyName)) {
+        const receiverFieldMeta = object.receiver.fieldAccess
+          ? object.receiver.fieldAccess.get(propertyName)
+          : null
+        if (receiverFieldMeta) {
+          this.ensureMemberAccess(
+            propertyName,
+            receiverFieldMeta.access,
+            receiverFieldMeta.ownerClass,
+            'field',
+          )
+        }
         return object.receiver.fields.get(propertyName)
       }
 
-      if (this.findMethod(object.startClass, propertyName)) {
+      const parentMethod = this.findMethod(object.startClass, propertyName)
+      if (parentMethod) {
+        this.ensureMemberAccess(propertyName, parentMethod.access, parentMethod.ownerClass, 'method')
         return {
           type: 'bound_super_method',
           receiver: object.receiver,
@@ -1073,6 +1165,10 @@ class VM {
       if (object.classRef.strictInstanceFields && !object.fields.has(propertyName)) {
         throw new Error(`Field "${propertyName}" is not declared on ${object.classRef.name}`)
       }
+      const fieldMeta = object.fieldAccess ? object.fieldAccess.get(propertyName) : null
+      if (fieldMeta) {
+        this.ensureMemberAccess(propertyName, fieldMeta.access, fieldMeta.ownerClass, 'field')
+      }
       if (
         object.constFields &&
         object.constFields.has(propertyName) &&
@@ -1081,10 +1177,25 @@ class VM {
         throw new Error(`Cannot reassign constant field "${propertyName}"`)
       }
       object.fields.set(propertyName, value)
+      if (!fieldMeta && object.fieldAccess) {
+        object.fieldAccess.set(propertyName, {
+          access: 'public',
+          ownerClass: object.classRef,
+        })
+      }
       return
     }
 
     if (object.type === 'class') {
+      const staticFieldOwner = this.findStaticFieldOwner(object, propertyName)
+      if (staticFieldOwner) {
+        this.ensureMemberAccess(
+          propertyName,
+          staticFieldOwner.staticFieldAccess.get(propertyName),
+          staticFieldOwner,
+          'static field',
+        )
+      }
       if (object.strictStaticFields && !this.hasDeclaredStaticField(object, propertyName)) {
         throw new Error(`Static field "${propertyName}" is not declared on ${object.name}`)
       }
@@ -1095,6 +1206,9 @@ class VM {
         throw new Error(`Cannot reassign constant static field "${propertyName}"`)
       }
       object.staticFields.set(propertyName, value)
+      if (!staticFieldOwner && object.staticFieldAccess) {
+        object.staticFieldAccess.set(propertyName, 'public')
+      }
       return
     }
 
@@ -1115,9 +1229,32 @@ class VM {
         ) {
           throw new Error(`Cannot reassign constant static field "${propertyName}"`)
         }
+        const owner = this.findStaticFieldOwner(object.startClass, propertyName)
+        if (owner) {
+          this.ensureMemberAccess(
+            propertyName,
+            owner.staticFieldAccess.get(propertyName),
+            owner,
+            'static field',
+          )
+        }
         // Writes through priyoParent in static context target the parent class storage.
         object.startClass.staticFields.set(propertyName, value)
+        if (!owner && object.startClass.staticFieldAccess) {
+          object.startClass.staticFieldAccess.set(propertyName, 'public')
+        }
         return
+      }
+      const parentFieldMeta = object.receiver.fieldAccess
+        ? object.receiver.fieldAccess.get(propertyName)
+        : null
+      if (parentFieldMeta) {
+        this.ensureMemberAccess(
+          propertyName,
+          parentFieldMeta.access,
+          parentFieldMeta.ownerClass,
+          'field',
+        )
       }
       if (
         object.receiver.constFields &&
@@ -1135,6 +1272,12 @@ class VM {
         )
       }
       object.receiver.fields.set(propertyName, value)
+      if (!parentFieldMeta && object.receiver.fieldAccess) {
+        object.receiver.fieldAccess.set(propertyName, {
+          access: 'public',
+          ownerClass: object.receiver.classRef,
+        })
+      }
       return
     }
 

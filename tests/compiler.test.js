@@ -139,4 +139,21 @@ describe('Compiler', () => {
     expect(defineFn.operand.isAsync).toBe(true)
     expect(defineFn.operand.instructions.some(instr => instr.op === OpCode.AWAIT_VALUE)).toBe(true)
   })
+
+  it('should enforce interface method contracts at compile time', () => {
+    const input = `
+      monalisa {
+        lisaaAgreement Greeter {
+          lisaaTask greet(name)
+        }
+
+        lisaaFamily Student lisaaFollow Greeter {
+          lisaaTask greet() {
+            priyoGiveBack "Hi"
+          }
+        }
+      }
+    `
+    expect(() => compileInput(input)).toThrow(/must accept 1 params/i)
+  })
 })

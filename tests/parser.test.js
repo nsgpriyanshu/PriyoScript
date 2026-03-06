@@ -164,4 +164,34 @@ describe('Parser', () => {
     expect(program.entry.body[1].namedImports).toHaveLength(2)
     expect(program.entry.body[1].namedImports[1].local).toBe('gradeFn')
   })
+
+  it('should parse interface, implements, and access modifiers', () => {
+    const input = `
+      monalisa {
+        lisaaAgreement Greeter {
+          lisaaTask greet(name)
+        }
+
+        lisaaFamily Student lisaaFollow Greeter {
+          lisaaOpen lisaaTask greet(name) {
+            priyoGiveBack "Hi " + name
+          }
+          lisaaPersonal priyoKeep secretCode = "X1"
+        }
+      }
+    `
+    const { program, errors } = parse(input)
+    expect(errors).toHaveLength(0)
+
+    const iface = program.entry.body[0]
+    expect(iface.type).toBe('InterfaceDeclaration')
+    expect(iface.name.name).toBe('Greeter')
+    expect(iface.methods[0].name.name).toBe('greet')
+
+    const cls = program.entry.body[1]
+    expect(cls.type).toBe('ClassDeclaration')
+    expect(cls.implementedInterfaces[0].name).toBe('Greeter')
+    expect(cls.methods[0].access).toBe('public')
+    expect(cls.fields[0].access).toBe('private')
+  })
 })

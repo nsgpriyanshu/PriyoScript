@@ -127,6 +127,8 @@ tests/
 | OOP          | Classes, object creation, `priyoSelf`                                                | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                        | 100%   |
 | OOP          | Static methods/fields and class fields                                               | 100%   |
+| OOP          | Interfaces (`lisaaAgreement`) and class contracts (`lisaaFollow`)                    | 100%   |
+| OOP          | Access modifiers (`lisaaOpen`, `lisaaPersonal`, `lisaaGuarded`)                      | 100%   |
 | OOP          | Constructor-chain validation + stricter declared-member assignment checks            | 100%   |
 | Builtins     | `priyoTell` and color variants                                                       | 100%   |
 | Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                            | 100%   |
@@ -209,6 +211,10 @@ tests/
 - Constructor convention: `init(...)`
 - Instance methods with `priyoSelf`
 - Inheritance: `lisaaInherit`
+- Interfaces:
+  - interface declaration: `lisaaAgreement`
+  - class contract implementation: `lisaaFollow`
+  - compile-time checks ensure required method names/arity are implemented
 - Parent calls:
   - parent constructor shorthand: `priyoParent(...)`
   - parent method: `priyoParent.method(...)`
@@ -222,6 +228,10 @@ tests/
 - Static members:
   - static method declaration: `lisaaStable lisaaTask ...`
   - static field read/write via class object
+- Access modifiers on class members:
+  - `lisaaOpen` (public, default)
+  - `lisaaPersonal` (private, class-only)
+  - `lisaaGuarded` (protected, class + subclass chain)
 - Class fields:
   - instance fields declared directly inside class body
   - static fields declared with `lisaaStable`
@@ -337,7 +347,7 @@ Current language/runtime limitations that still need dedicated implementation:
   - no compile-time type validation
 - OOP semantics are strong but not exhaustive:
   - additional inheritance invariants can still be expanded
-  - access modifiers / interfaces / enums are reserved only
+  - enums remain reserved
 - Standard library is still intentionally small:
   - currently: core builtins + `math` + `decorators`
   - filesystem and system-level utilities are not added yet

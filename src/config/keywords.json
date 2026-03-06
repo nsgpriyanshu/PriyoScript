@@ -44,7 +44,12 @@
     "function": "lisaaTask",
     "class": "lisaaFamily",
     "extends": "lisaaInherit",
-    "static": "lisaaStable"
+    "static": "lisaaStable",
+    "implements": "lisaaFollow",
+    "interface": "lisaaAgreement",
+    "private": "lisaaPersonal",
+    "protected": "lisaaGuarded",
+    "public": "lisaaOpen"
   },
   "planned": {
     "do": "prakritiDo",
@@ -61,12 +66,6 @@
 
     "with": "priyoWith",
 
-    "implements": "lisaaFollow",
-    "interface": "lisaaAgreement",
-
-    "private": "lisaaPersonal",
-    "protected": "lisaaGuarded",
-    "public": "lisaaOpen",
     "enum": "lisaaNumbers"
   }
 }

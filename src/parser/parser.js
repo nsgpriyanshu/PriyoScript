@@ -25,6 +25,8 @@ const {
   TryStatement,
   CatchClause,
   ThrowStatement,
+  InterfaceDeclaration,
+  InterfaceMethodSignature,
   ClassDeclaration,
   MethodDeclaration,
   ClassFieldDeclaration,
@@ -203,6 +205,7 @@ class Parser {
 
   parseStatement() {
     if (this.curToken.type === TokenType.EXPORT) return this.parseExportStatement()
+    if (this.curToken.type === TokenType.INTERFACE) return this.parseInterfaceDeclaration()
     if (this.curToken.type === TokenType.CLASS) return this.parseClassDeclaration()
     if (this.curToken.type === TokenType.IMPORT) return this.parseImportStatement()
     if (this.curToken.type === TokenType.RETURN) return this.parseReturnStatement()
@@ -243,6 +246,7 @@ class Parser {
     this.nextToken()
 
     let superClass = null
+    const implementedInterfaces = []
     if (this.curToken.type === TokenType.EXTENDS) {
       this.nextToken()
       if (
@@ -257,6 +261,31 @@ class Parser {
         return null
       }
       this.nextToken()
+    }
+
+    if (this.curToken.type === TokenType.IMPLEMENTS) {
+      this.nextToken()
+      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected interface name after lisaaFollow')) {
+        this.nextToken()
+        return null
+      }
+
+      while (this.curToken.type === TokenType.IDENTIFIER) {
+        implementedInterfaces.push(new Identifier(this.curToken.literal))
+        this.nextToken()
+
+        if (this.curToken.type === TokenType.COMMA) {
+          this.nextToken()
+          if (
+            !this.expectCurrent(TokenType.IDENTIFIER, 'Expected interface name after "," in lisaaFollow')
+          ) {
+            this.nextToken()
+            return null
+          }
+          continue
+        }
+        break
+      }
     }
 
     if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" after class name')) return null
@@ -296,14 +325,45 @@ class Parser {
     }
 
     if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" to close class')) return null
-    return new ClassDeclaration(name, methods, fields, superClass)
+    return new ClassDeclaration(name, methods, fields, superClass, implementedInterfaces)
   }
 
   parseClassMember() {
     let isStatic = false
-    if (this.curToken.type === TokenType.STATIC) {
-      isStatic = true
-      this.nextToken()
+    let access = 'public'
+    let accessSet = false
+
+    // Class member modifiers can appear in any order:
+    // lisaaOpen/lisaaPersonal/lisaaGuarded + lisaaStable
+    while (true) {
+      if (
+        this.curToken.type === TokenType.PUBLIC ||
+        this.curToken.type === TokenType.PRIVATE ||
+        this.curToken.type === TokenType.PROTECTED
+      ) {
+        if (accessSet) {
+          this.error('Only one access modifier is allowed for a class member')
+          return null
+        }
+        accessSet = true
+        if (this.curToken.type === TokenType.PUBLIC) access = 'public'
+        if (this.curToken.type === TokenType.PRIVATE) access = 'private'
+        if (this.curToken.type === TokenType.PROTECTED) access = 'protected'
+        this.nextToken()
+        continue
+      }
+
+      if (this.curToken.type === TokenType.STATIC) {
+        if (isStatic) {
+          this.error('Duplicate static modifier in class member')
+          return null
+        }
+        isStatic = true
+        this.nextToken()
+        continue
+      }
+
+      break
     }
 
     if (this.curToken.type === TokenType.ASYNC) {
@@ -312,11 +372,11 @@ class Parser {
         this.error('Expected lisaaTask after prakritiWait in class member')
         return null
       }
-      return this.parseMethodDeclaration(isStatic, true)
+      return this.parseMethodDeclaration(isStatic, true, access)
     }
 
     if (this.curToken.type === TokenType.FUNCTION) {
-      return this.parseMethodDeclaration(isStatic, false)
+      return this.parseMethodDeclaration(isStatic, false, access)
     }
 
     if (
@@ -324,14 +384,14 @@ class Parser {
       this.curToken.type === TokenType.LET ||
       this.curToken.type === TokenType.CONST
     ) {
-      return this.parseClassFieldDeclaration(isStatic)
+      return this.parseClassFieldDeclaration(isStatic, access)
     }
 
     this.error('Class member must be a method or field declaration')
     return null
   }
 
-  parseMethodDeclaration(isStatic = false, isAsync = false) {
+  parseMethodDeclaration(isStatic = false, isAsync = false, access = 'public') {
     if (!this.consumeCurrent(TokenType.FUNCTION, 'Expected lisaaTask for class method')) return null
 
     if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected method name')) {
@@ -356,10 +416,10 @@ class Parser {
     this.functionDepth--
     if (!body) return null
 
-    return new MethodDeclaration(name, params, body, isStatic, isAsync)
+    return new MethodDeclaration(name, params, body, isStatic, isAsync, access)
   }
 
-  parseClassFieldDeclaration(isStatic = false) {
+  parseClassFieldDeclaration(isStatic = false, access = 'public') {
     const kindByToken = {
       [TokenType.VAR]: 'var',
       [TokenType.LET]: 'let',
@@ -388,7 +448,49 @@ class Parser {
       return null
     }
 
-    return new ClassFieldDeclaration(name, kind, initializer, isStatic)
+    return new ClassFieldDeclaration(name, kind, initializer, isStatic, access)
+  }
+
+  parseInterfaceDeclaration() {
+    this.nextToken()
+    if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected interface name after lisaaAgreement')) {
+      this.nextToken()
+      return null
+    }
+
+    const name = new Identifier(this.curToken.literal)
+    this.nextToken()
+    if (!this.consumeCurrent(TokenType.LBRACE, 'Expected "{" after interface name')) return null
+
+    const methods = []
+    const methodNames = new Set()
+    while (this.curToken.type !== TokenType.RBRACE && this.curToken.type !== TokenType.EOF) {
+      if (!this.consumeCurrent(TokenType.FUNCTION, 'Interface members must use lisaaTask')) return null
+      if (!this.expectCurrent(TokenType.IDENTIFIER, 'Expected method name in interface')) {
+        this.nextToken()
+        return null
+      }
+      const methodName = this.curToken.literal
+      if (methodNames.has(methodName)) {
+        this.error(`Duplicate method "${methodName}" in interface "${name.name}"`)
+        return null
+      }
+      methodNames.add(methodName)
+      this.nextToken()
+
+      if (!this.consumeCurrent(TokenType.LPAREN, 'Expected "(" after interface method name')) return null
+      const params = this.parseParameterList()
+      if (!params) return null
+      methods.push(new InterfaceMethodSignature(new Identifier(methodName), params))
+
+      // Optional semicolon for signature-only style.
+      if (this.curToken.type === TokenType.SEMICOLON) {
+        this.nextToken()
+      }
+    }
+
+    if (!this.consumeCurrent(TokenType.RBRACE, 'Expected "}" to close interface')) return null
+    return new InterfaceDeclaration(name, methods)
   }
 
   parseAsyncFunctionDeclaration() {

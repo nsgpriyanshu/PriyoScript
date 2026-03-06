@@ -303,4 +303,43 @@ monalisa {
     await runSource(code)
     expect(logSpy).toHaveBeenCalledWith(20)
   })
+
+  it('should enforce private member access outside class', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily Vault {
+          lisaaPersonal priyoKeep pin = 1234
+          lisaaOpen lisaaTask reveal() {
+            priyoGiveBack priyoSelf.pin
+          }
+        }
+        priyoKeep v = priyoCreate Vault()
+        priyoTell(v.pin)
+      }
+    `
+    await expect(runSource(code)).rejects.toMatchObject({
+      message: expect.stringMatching(/Cannot access private field "pin"/i),
+    })
+  })
+
+  it('should allow protected member access in subclasses', async () => {
+    const code = `
+      monalisa {
+        lisaaFamily Person {
+          lisaaGuarded priyoKeep label = "mona"
+        }
+
+        lisaaFamily Student lisaaInherit Person {
+          lisaaTask readLabel() {
+            priyoGiveBack priyoSelf.label
+          }
+        }
+
+        priyoKeep s = priyoCreate Student()
+        priyoTell(s.readLabel())
+      }
+    `
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('mona')
+  })
 })
