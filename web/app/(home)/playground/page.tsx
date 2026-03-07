@@ -7,7 +7,7 @@ export const metadata: Metadata = generateMetadata({
   title: 'PriyoScript Playground',
   description:
     'Write and run small PriyoScript programs directly in your browser with syntax highlighting and humanized diagnostics.',
-  images: ['/og-playground'],
+  images: ['/og/og-playground'],
   canonicalUrl: 'https://nsgpriyanshu.github.io/PriyoScript/playground',
 })
 

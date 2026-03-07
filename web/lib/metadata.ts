@@ -16,8 +16,8 @@ const siteConfig = {
     twitter: '@nsgpriyanshu',
     github: 'https://github.com/nsgpriyanshu/PriyoScript',
     siteUrl: 'https://nsgpriyanshu.github.io/PriyoScript',
-    ogImage: '/og-home',
-    twitterImage:'/og-home',
+    ogImage: '/og/og-home',
+    twitterImage: '/og/og-home',
   },
   themeColors: {
     light: '#ffffff',
