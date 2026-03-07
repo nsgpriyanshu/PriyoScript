@@ -1,5 +1,15 @@
+import type { Metadata } from 'next'
 import Wrapper from '@/components/wrapper'
 import { PlaygroundShell } from '@/components/playground/playground-shell'
+import { generateMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = generateMetadata({
+  title: 'PriyoScript Playground',
+  description:
+    'Write and run small PriyoScript programs directly in your browser with syntax highlighting and humanized diagnostics.',
+  images: ['/og-playground'],
+  canonicalUrl: 'https://nsgpriyanshu.github.io/PriyoScript/playground',
+})
 
 export default function PlaygroundPage() {
   return (

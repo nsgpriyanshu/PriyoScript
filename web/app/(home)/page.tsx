@@ -1,14 +1,19 @@
 import Link from 'next/link'
 import { Boxes, Cpu, Github, ShieldAlert, TerminalSquare } from 'lucide-react'
 import { createHighlighter } from 'shiki'
-import { Footer } from '@/components/footer'
+import type { Metadata } from 'next'
 import { FeaturePill } from '@/components/home/feature-pill'
 import { HomeTabs } from '@/components/home/home-tabs'
 import Wrapper from '@/components/wrapper'
 import { HOME_DEMO_TABS } from '@/lib/home-demos'
+import { generateMetadata } from '@/lib/metadata'
 import { priyoscriptLanguage } from '@/lib/shiki-priyoscript'
 
 const BRAND = '#FF2056'
+
+export const metadata: Metadata = generateMetadata({
+  images: ['/og-home'],
+})
 
 let highlighterPromise: ReturnType<typeof createHighlighter> | null = null
 
