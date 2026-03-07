@@ -12,7 +12,7 @@ import { priyoscriptLanguage } from '@/lib/shiki-priyoscript'
 const BRAND = '#FF2056'
 
 export const metadata: Metadata = generateMetadata({
-  images: ['/og/og-home'],
+  images: ['/og-home.png'],
 })
 
 let highlighterPromise: ReturnType<typeof createHighlighter> | null = null

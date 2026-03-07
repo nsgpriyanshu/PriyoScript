@@ -7,8 +7,8 @@ export const metadata: Metadata = generateMetadata({
   title: 'PriyoScript Playground',
   description:
     'Write and run small PriyoScript programs directly in your browser with syntax highlighting and humanized diagnostics.',
-  images: ['/og/og-playground'],
-  canonicalUrl: 'https://nsgpriyanshu.github.io/PriyoScript/playground',
+  images: ['/og-playground.png'],
+  canonicalUrl: 'https://priyoscript.vercel.app/playground',
 })
 
 export default function PlaygroundPage() {
