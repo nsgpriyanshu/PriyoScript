@@ -1,3 +1,0 @@
-monalisa {
-  priyoPackage.use("analytics")
-}

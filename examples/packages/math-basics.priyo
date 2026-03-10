@@ -4,4 +4,7 @@ monalisa {
   priyoTell("add: " + math.add(5, 7))
   priyoTell("cube: " + math.cube(2))
   priyoTell("areaTriangle: " + math.areaTriangle(12, 5))
+  priyoTell("round: " + math.round(12.78))
+  priyoTell("lerp: " + math.lerp(10, 20, 0.25))
+  priyoTell("gcd: " + math.gcd(24, 18))
 }

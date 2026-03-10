@@ -4,16 +4,23 @@ monalisa {
   priyoTell("=== String Formatting ===")
   priyoTell(decorators.upper("mona and piue"))
   priyoTell(decorators.title("welcome to priyoscript"))
+  priyoTell(decorators.capitalize("mona"))
   priyoTell(decorators.slug("Priyo Script Language"))
+  priyoTell(decorators.snake("Priyo Script Language"))
   priyoTell(decorators.replaceAll("mona likes tea", "tea", "coffee"))
+  priyoTell(decorators.truncate("mona and piue are coding", 12))
+  priyoTell(decorators.formatNumber(1234.5678, 2))
 
   priyoTell("=== Date and Time ===")
+  priyoKeep sessionDate = "2026-03-01T10:30:00.000Z"
   priyoTell("today: " + decorators.today())
   priyoTell("now: " + decorators.timeNow())
   priyoTell("iso: " + decorators.nowISO())
-
-  priyoKeep sessionDate = "2026-03-01T10:30:00.000Z"
+  priyoTell("start day: " + decorators.startOfDay(sessionDate))
+  priyoTell("end day: " + decorators.endOfDay(sessionDate))
   priyoTell(decorators.format(sessionDate, "DD/MM/YYYY HH:mm:ss"))
   priyoTell("after 7 days: " + decorators.addDays(sessionDate, 7))
+  priyoTell("after 3 hours: " + decorators.addHours(sessionDate, 3))
   priyoTell("days diff: " + decorators.diffDays("2026-03-01", "2026-03-21"))
+  priyoTell("is weekend: " + decorators.isWeekend("2026-03-09"))
 }

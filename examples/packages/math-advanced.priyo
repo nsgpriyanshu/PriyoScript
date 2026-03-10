@@ -1,0 +1,10 @@
+monalisa {
+  lisaaBring math
+
+  priyoTell("sum: " + math.sum(1, 2, 3, 4, 5))
+  priyoTell("average: " + math.average(4, 6, 8, 10))
+  priyoTell("max: " + math.max(3, 12, 7, 9))
+  priyoTell("clamp: " + math.clamp(27, 0, 20))
+  priyoTell("percent: " + math.percent(45, 60))
+  priyoTell("factorial: " + math.factorial(5))
+}

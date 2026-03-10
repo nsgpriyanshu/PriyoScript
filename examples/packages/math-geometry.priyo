@@ -1,5 +1,5 @@
 monalisa {
-  priyoKeep math = priyoPackage.use("math")
+  lisaaBring math
 
   priyoTell("Cube: " + math.cube(2))
   priyoTell("Sqrt: " + math.sqrt(81))
