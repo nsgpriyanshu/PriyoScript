@@ -11,9 +11,98 @@ const { ErrorCodes } = require('../src/errors/codes')
 const { version: VERSION } = require('../package.json')
 
 const rawArgs = process.argv.slice(2)
-const traceEnabled = rawArgs.includes('-trace')
-const args = rawArgs.filter(value => value !== '-trace')
+
+function parseArgs(values) {
+  const args = []
+  const traceOptions = {
+    enabled: false,
+    format: 'text',
+    filter: {},
+  }
+
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i]
+    if (value === '-trace') {
+      traceOptions.enabled = true
+      continue
+    }
+    if (value === '-trace-format') {
+      traceOptions.enabled = true
+      traceOptions.format = values[i + 1] || 'text'
+      i++
+      continue
+    }
+    if (value === '-trace-op') {
+      traceOptions.enabled = true
+      traceOptions.filter.opsInclude = String(values[i + 1] || '')
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+      i++
+      continue
+    }
+    if (value === '-trace-op-exclude') {
+      traceOptions.enabled = true
+      traceOptions.filter.opsExclude = String(values[i + 1] || '')
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+      i++
+      continue
+    }
+    if (value === '-trace-file') {
+      traceOptions.enabled = true
+      traceOptions.filter.fileContains = values[i + 1] || ''
+      i++
+      continue
+    }
+    if (value === '-trace-frame') {
+      traceOptions.enabled = true
+      traceOptions.filter.frameContains = values[i + 1] || ''
+      i++
+      continue
+    }
+    if (value === '-trace-stack-min') {
+      traceOptions.enabled = true
+      traceOptions.filter.minStackDepth = Number(values[i + 1])
+      i++
+      continue
+    }
+    if (value === '-trace-stack-max') {
+      traceOptions.enabled = true
+      traceOptions.filter.maxStackDepth = Number(values[i + 1])
+      i++
+      continue
+    }
+    args.push(value)
+  }
+
+  return { args, traceOptions }
+}
+
+function normalizeTraceFilter(filter) {
+  const normalized = { ...filter }
+  if (Array.isArray(normalized.opsInclude)) {
+    normalized.opsInclude = new Set(normalized.opsInclude)
+  }
+  if (Array.isArray(normalized.opsExclude)) {
+    normalized.opsExclude = new Set(normalized.opsExclude)
+  }
+  if (typeof normalized.minStackDepth !== 'number' || Number.isNaN(normalized.minStackDepth)) {
+    delete normalized.minStackDepth
+  }
+  if (typeof normalized.maxStackDepth !== 'number' || Number.isNaN(normalized.maxStackDepth)) {
+    delete normalized.maxStackDepth
+  }
+  return normalized
+}
+
+const { args, traceOptions } = parseArgs(rawArgs)
 const arg = args[0]
+const traceEnabled = traceOptions.enabled
+const traceFilter = normalizeTraceFilter(traceOptions.filter)
+const traceFormat = traceOptions.format === 'json' ? 'json' : 'text'
+const debugSessionId = `monalisa-${Date.now()}`
 
 const ERROR_CODE_HELP = {
   [ErrorCodes.SYNTAX.PARSE_FAILED]:
@@ -52,15 +141,40 @@ PriyoScript CLI
 monalisa is the official PriyoScript runtime.
 It executes .priyo files directly.
 
+  Usage:
+    monalisa <file.priyo>              Execute a PriyoScript file
+    monalisa -repl                     Start interactive REPL
+    monalisa -v | -version             Show CLI version
+    monalisa -h | -help                Show general help
+    monalisa -trace <file.priyo>       Execute a file with opcode trace logs
+    monalisa -th | -trace-help         Show trace filtering options
+    monalisa -s | -syntax              Show quick syntax help
+    monalisa -e | -errors              List error codes and meanings
+    monalisa -x | -explain <CODE>      Explain one specific error code
+`)
+}
+
+function printTraceHelp() {
+  info(`
+PriyoScript Trace Options
+
 Usage:
-  monalisa <file.priyo>              Execute a PriyoScript file
-  monalisa -repl                     Start interactive REPL
-  monalisa -v | -version             Show CLI version
-  monalisa -h | -help                Show general help
-  monalisa -trace <file.priyo>       Execute a file with opcode trace logs
-  monalisa -syntax                   Show quick syntax help
-  monalisa -errors                   List error codes and meanings
-  monalisa -explain <ERROR_CODE>     Explain one specific error code
+  monalisa -trace <file.priyo>
+
+Filters:
+  -trace-format json        Emit trace output as JSON lines
+  -trace-op ADD,SUB         Trace only selected opcodes (comma-separated)
+  -trace-op-exclude HALT    Exclude opcodes from trace
+  -trace-file modules       Trace only matching file path substring
+  -trace-frame <name>       Trace only matching frame name substring
+  -trace-stack-min 2        Trace only when stack depth >= N
+  -trace-stack-max 6        Trace only when stack depth <= N
+
+Examples:
+  monalisa -trace -trace-op CALL_METHOD,RETURN examples/basics/for-loop.priyo
+  monalisa -trace -trace-op-exclude HALT examples/basics/for-loop.priyo
+  monalisa -trace -trace-file modules examples/modules/module-import.priyo
+  monalisa -trace -trace-format json -trace-frame "<main>" examples/basics/for-loop.priyo
 `)
 }
 
@@ -146,18 +260,29 @@ if (arg === '-h' || arg === '-help') {
   process.exit(0)
 }
 
-if (arg === '-syntax') {
+if (arg === '-s' || arg === '-syntax') {
   printSyntaxHelp()
   process.exit(0)
 }
 
-if (arg === '-errors') {
+if (arg === '-trace-help' || arg === '-th') {
+  printTraceHelp()
+  process.exit(0)
+}
+
+if (arg === '-e' || arg === '-errors') {
   printErrorHelpList()
   process.exit(0)
 }
 
 if (arg === '-repl') {
-  startRepl({ logger: { build, info, error }, trace: traceEnabled }).catch(err => {
+  startRepl({
+    logger: { build, info, error },
+    trace: traceEnabled,
+    traceFormat,
+    traceFilter,
+    debugSessionId: `repl-${Date.now()}`,
+  }).catch(err => {
     printPriyoError(err, {
       mode: 'cli',
       logger: {
@@ -171,7 +296,7 @@ if (arg === '-repl') {
   return
 }
 
-if (arg === '-explain') {
+if (arg === '-x' || arg === '-explain') {
   printSingleErrorHelp(args[1])
   process.exit(0)
 }
@@ -181,7 +306,13 @@ if (arg === '-explain') {
 -------------------------- */
 
 if (!arg) {
-  startRepl({ logger: { build, info, error }, trace: traceEnabled }).catch(err => {
+  startRepl({
+    logger: { build, info, error },
+    trace: traceEnabled,
+    traceFormat,
+    traceFilter,
+    debugSessionId: `repl-${Date.now()}`,
+  }).catch(err => {
     printPriyoError(err, {
       mode: 'cli',
       logger: {
@@ -208,6 +339,9 @@ async function main() {
     await runFile(fullPath, {
       trace: traceEnabled,
       traceLogger: line => info(line),
+      traceFormat,
+      traceFilter,
+      debugSessionId,
     })
   } catch (err) {
     printPriyoError(err, {
