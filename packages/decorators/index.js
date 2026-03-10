@@ -60,6 +60,15 @@ function toTitleCase(value) {
   })
 }
 
+function toSnake(value) {
+  return value
+    .trim()
+    .replace(/[\s-]+/g, '_')
+    .replace(/[^\w_]/g, '')
+    .replace(/_+/g, '_')
+    .toLowerCase()
+}
+
 function toSlug(value) {
   return value
     .trim()
@@ -88,14 +97,54 @@ const decoratorsPackage = {
     return value.trim()
   },
 
+  trimStart(value) {
+    ensureString(value, 'trimStart')
+    return value.trimStart()
+  },
+
+  trimEnd(value) {
+    ensureString(value, 'trimEnd')
+    return value.trimEnd()
+  },
+
   title(value) {
     ensureString(value, 'title')
     return toTitleCase(value)
   },
 
+  capitalize(value) {
+    ensureString(value, 'capitalize')
+    if (!value) return value
+    return value.charAt(0).toUpperCase() + value.slice(1)
+  },
+
   slug(value) {
     ensureString(value, 'slug')
     return toSlug(value)
+  },
+
+  snake(value) {
+    ensureString(value, 'snake')
+    return toSnake(value)
+  },
+
+  truncate(value, maxLength, suffix = '...') {
+    ensureString(value, 'truncate')
+    ensureNumber(maxLength, 'truncate', 'maxLength')
+    ensureString(suffix, 'truncate', 'suffix')
+    if (!Number.isInteger(maxLength) || maxLength < 0) {
+      throw new Error('decorators.truncate expects maxLength to be a non-negative integer')
+    }
+    if (value.length <= maxLength) return value
+    if (suffix.length >= maxLength) return suffix.slice(0, maxLength)
+    return value.slice(0, maxLength - suffix.length) + suffix
+  },
+
+  surround(value, prefix = '', suffix = '') {
+    ensureString(value, 'surround')
+    ensureString(prefix, 'surround', 'prefix')
+    ensureString(suffix, 'surround', 'suffix')
+    return `${prefix}${value}${suffix}`
   },
 
   repeat(value, count) {
@@ -131,6 +180,15 @@ const decoratorsPackage = {
     return value.split(searchValue).join(replaceValue)
   },
 
+  formatNumber(value, decimals = 2) {
+    ensureNumber(value, 'formatNumber', 'value')
+    ensureNumber(decimals, 'formatNumber', 'decimals')
+    if (!Number.isInteger(decimals) || decimals < 0) {
+      throw new Error('decorators.formatNumber expects decimals to be a non-negative integer')
+    }
+    return value.toFixed(decimals)
+  },
+
   // Date and time helpers
   nowTimestamp() {
     return Date.now()
@@ -163,6 +221,20 @@ const decoratorsPackage = {
     return date.toISOString()
   },
 
+  addHours(dateValue, hours) {
+    const date = toDate(dateValue, 'addHours')
+    ensureNumber(hours, 'addHours', 'hours')
+    date.setHours(date.getHours() + hours)
+    return date.toISOString()
+  },
+
+  addMinutes(dateValue, minutes) {
+    const date = toDate(dateValue, 'addMinutes')
+    ensureNumber(minutes, 'addMinutes', 'minutes')
+    date.setMinutes(date.getMinutes() + minutes)
+    return date.toISOString()
+  },
+
   addMonths(dateValue, months) {
     const date = toDate(dateValue, 'addMonths')
     ensureNumber(months, 'addMonths', 'months')
@@ -182,6 +254,43 @@ const decoratorsPackage = {
     const end = toDate(endDate, 'diffDays', 'endDate')
     const msPerDay = 24 * 60 * 60 * 1000
     return Math.floor((end.getTime() - start.getTime()) / msPerDay)
+  },
+
+  diffHours(startDate, endDate) {
+    const start = toDate(startDate, 'diffHours', 'startDate')
+    const end = toDate(endDate, 'diffHours', 'endDate')
+    const msPerHour = 60 * 60 * 1000
+    return Math.floor((end.getTime() - start.getTime()) / msPerHour)
+  },
+
+  diffMinutes(startDate, endDate) {
+    const start = toDate(startDate, 'diffMinutes', 'startDate')
+    const end = toDate(endDate, 'diffMinutes', 'endDate')
+    const msPerMinute = 60 * 1000
+    return Math.floor((end.getTime() - start.getTime()) / msPerMinute)
+  },
+
+  isWeekend(dateValue) {
+    const date = toDate(dateValue, 'isWeekend')
+    const day = date.getDay()
+    return day === 0 || day === 6
+  },
+
+  startOfDay(dateValue) {
+    const date = toDate(dateValue, 'startOfDay')
+    date.setHours(0, 0, 0, 0)
+    return date.toISOString()
+  },
+
+  endOfDay(dateValue) {
+    const date = toDate(dateValue, 'endOfDay')
+    date.setHours(23, 59, 59, 999)
+    return date.toISOString()
+  },
+
+  toTimestamp(dateValue) {
+    const date = toDate(dateValue, 'toTimestamp')
+    return date.getTime()
   },
 }
 

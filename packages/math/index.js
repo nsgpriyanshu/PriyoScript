@@ -18,6 +18,12 @@ function ensureNonNegative(value, methodName, argName) {
   }
 }
 
+function ensureInteger(value, methodName, argName) {
+  if (!Number.isInteger(value)) {
+    throw new Error(`math.${methodName} expects ${argName} to be an integer`)
+  }
+}
+
 const mathPackage = {
   __priyoHostObject: true,
 
@@ -102,6 +108,85 @@ const mathPackage = {
   cube(value) {
     ensureNumbers([value], 'cube')
     return value * value * value
+  },
+
+  round(value) {
+    ensureNumbers([value], 'round')
+    return Math.round(value)
+  },
+
+  floor(value) {
+    ensureNumbers([value], 'floor')
+    return Math.floor(value)
+  },
+
+  ceil(value) {
+    ensureNumbers([value], 'ceil')
+    return Math.ceil(value)
+  },
+
+  random(min = 0, max = 1) {
+    ensureNumbers([min, max], 'random')
+    if (max < min) {
+      throw new Error('math.random expects max to be >= min')
+    }
+    return Math.random() * (max - min) + min
+  },
+
+  lerp(start, end, t) {
+    ensureNumbers([start, end, t], 'lerp')
+    return start + (end - start) * t
+  },
+
+  distance2d(x1, y1, x2, y2) {
+    ensureNumbers([x1, y1, x2, y2], 'distance2d')
+    return Math.hypot(x2 - x1, y2 - y1)
+  },
+
+  distance3d(x1, y1, z1, x2, y2, z2) {
+    ensureNumbers([x1, y1, z1, x2, y2, z2], 'distance3d')
+    return Math.hypot(x2 - x1, y2 - y1, z2 - z1)
+  },
+
+  percent(value, total) {
+    ensureNumbers([value, total], 'percent')
+    if (total === 0) {
+      throw new Error('math.percent expects total to be non-zero')
+    }
+    return (value / total) * 100
+  },
+
+  gcd(a, b) {
+    ensureNumbers([a, b], 'gcd')
+    ensureInteger(a, 'gcd', 'a')
+    ensureInteger(b, 'gcd', 'b')
+    let x = Math.abs(a)
+    let y = Math.abs(b)
+    while (y !== 0) {
+      const temp = y
+      y = x % y
+      x = temp
+    }
+    return x
+  },
+
+  lcm(a, b) {
+    ensureNumbers([a, b], 'lcm')
+    ensureInteger(a, 'lcm', 'a')
+    ensureInteger(b, 'lcm', 'b')
+    if (a === 0 || b === 0) return 0
+    return Math.abs(a * b) / mathPackage.gcd(a, b)
+  },
+
+  factorial(value) {
+    ensureNumbers([value], 'factorial')
+    ensureInteger(value, 'factorial', 'value')
+    ensureNonNegative(value, 'factorial', 'value')
+    let result = 1
+    for (let i = 2; i <= value; i++) {
+      result *= i
+    }
+    return result
   },
 
   // Trigonometry (radian-based)
