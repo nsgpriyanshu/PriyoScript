@@ -25,31 +25,46 @@ monalisa {
 
 ### String APIs
 
-| Method       | Signature                                                 | Description                        |
-| ------------ | --------------------------------------------------------- | ---------------------------------- |
-| `upper`      | `decorators.upper(value)`                                 | Converts text to uppercase         |
-| `lower`      | `decorators.lower(value)`                                 | Converts text to lowercase         |
-| `trim`       | `decorators.trim(value)`                                  | Removes leading/trailing spaces    |
-| `title`      | `decorators.title(value)`                                 | Converts words to title case       |
-| `slug`       | `decorators.slug(value)`                                  | Converts text to URL-friendly slug |
-| `repeat`     | `decorators.repeat(value, count)`                         | Repeats string `count` times       |
-| `padStart`   | `decorators.padStart(value, targetLength, fill?)`         | Left pads string                   |
-| `padEnd`     | `decorators.padEnd(value, targetLength, fill?)`           | Right pads string                  |
-| `replaceAll` | `decorators.replaceAll(value, searchValue, replaceValue)` | Replaces all occurrences           |
+| Method         | Signature                                                 | Description                        |
+| -------------- | --------------------------------------------------------- | ---------------------------------- |
+| `upper`        | `decorators.upper(value)`                                 | Converts text to uppercase         |
+| `lower`        | `decorators.lower(value)`                                 | Converts text to lowercase         |
+| `trim`         | `decorators.trim(value)`                                  | Removes leading/trailing spaces    |
+| `trimStart`    | `decorators.trimStart(value)`                             | Removes leading spaces             |
+| `trimEnd`      | `decorators.trimEnd(value)`                               | Removes trailing spaces            |
+| `title`        | `decorators.title(value)`                                 | Converts words to title case       |
+| `capitalize`   | `decorators.capitalize(value)`                            | Capitalizes first letter           |
+| `slug`         | `decorators.slug(value)`                                  | Converts text to URL-friendly slug |
+| `snake`        | `decorators.snake(value)`                                 | Converts text to snake_case        |
+| `truncate`     | `decorators.truncate(value, maxLength, suffix?)`          | Shortens text with suffix          |
+| `surround`     | `decorators.surround(value, prefix, suffix)`              | Wraps text with prefix/suffix      |
+| `repeat`       | `decorators.repeat(value, count)`                         | Repeats string `count` times       |
+| `padStart`     | `decorators.padStart(value, targetLength, fill?)`         | Left pads string                   |
+| `padEnd`       | `decorators.padEnd(value, targetLength, fill?)`           | Right pads string                  |
+| `replaceAll`   | `decorators.replaceAll(value, searchValue, replaceValue)` | Replaces all occurrences           |
+| `formatNumber` | `decorators.formatNumber(value, decimals?)`               | Formats number with decimals       |
 
 ### Date-Time APIs
 
-| Method         | Signature                                 | Description                  |
-| -------------- | ----------------------------------------- | ---------------------------- |
-| `nowTimestamp` | `decorators.nowTimestamp()`               | Current epoch timestamp      |
-| `nowISO`       | `decorators.nowISO()`                     | Current ISO date-time string |
-| `today`        | `decorators.today()`                      | Current date as `YYYY-MM-DD` |
-| `timeNow`      | `decorators.timeNow()`                    | Current time as `HH:mm:ss`   |
-| `format`       | `decorators.format(dateValue, pattern?)`  | Formats date by tokens       |
-| `addDays`      | `decorators.addDays(dateValue, days)`     | Adds days to date            |
-| `addMonths`    | `decorators.addMonths(dateValue, months)` | Adds months to date          |
-| `addYears`     | `decorators.addYears(dateValue, years)`   | Adds years to date           |
-| `diffDays`     | `decorators.diffDays(startDate, endDate)` | Day difference               |
+| Method         | Signature                                    | Description                  |
+| -------------- | -------------------------------------------- | ---------------------------- |
+| `nowTimestamp` | `decorators.nowTimestamp()`                  | Current epoch timestamp      |
+| `nowISO`       | `decorators.nowISO()`                        | Current ISO date-time string |
+| `today`        | `decorators.today()`                         | Current date as `YYYY-MM-DD` |
+| `timeNow`      | `decorators.timeNow()`                       | Current time as `HH:mm:ss`   |
+| `format`       | `decorators.format(dateValue, pattern?)`     | Formats date by tokens       |
+| `addDays`      | `decorators.addDays(dateValue, days)`        | Adds days to date            |
+| `addHours`     | `decorators.addHours(dateValue, hours)`      | Adds hours to date           |
+| `addMinutes`   | `decorators.addMinutes(dateValue, minutes)`  | Adds minutes to date         |
+| `addMonths`    | `decorators.addMonths(dateValue, months)`    | Adds months to date          |
+| `addYears`     | `decorators.addYears(dateValue, years)`      | Adds years to date           |
+| `diffDays`     | `decorators.diffDays(startDate, endDate)`    | Day difference               |
+| `diffHours`    | `decorators.diffHours(startDate, endDate)`   | Hour difference              |
+| `diffMinutes`  | `decorators.diffMinutes(startDate, endDate)` | Minute difference            |
+| `isWeekend`    | `decorators.isWeekend(dateValue)`            | Checks if weekend            |
+| `startOfDay`   | `decorators.startOfDay(dateValue)`           | Start of day ISO             |
+| `endOfDay`     | `decorators.endOfDay(dateValue)`             | End of day ISO               |
+| `toTimestamp`  | `decorators.toTimestamp(dateValue)`          | Date to timestamp            |
 
 ## Format Tokens
 
@@ -72,12 +87,19 @@ monalisa {
   priyoTell(decorators.upper("mona and piue"))
   priyoTell(decorators.lower("HELLO PRIYOSCRIPT"))
   priyoTell(decorators.trim("  hello  "))
+  priyoTell(decorators.trimStart("  hello"))
+  priyoTell(decorators.trimEnd("hello  "))
   priyoTell(decorators.title("welcome to priyoscript"))
+  priyoTell(decorators.capitalize("mona"))
   priyoTell(decorators.slug("Priyo Script Language"))
+  priyoTell(decorators.snake("Priyo Script Language"))
+  priyoTell(decorators.truncate("mona and piue are coding", 12))
+  priyoTell(decorators.surround("mona", "[", "]"))
   priyoTell(decorators.repeat("ha", 3))
   priyoTell(decorators.padStart("7", 3, "0"))
   priyoTell(decorators.padEnd("7", 3, "0"))
   priyoTell(decorators.replaceAll("mona likes tea", "tea", "coffee"))
+  priyoTell(decorators.formatNumber(1234.5678, 2))
 }
 ```
 
@@ -87,12 +109,19 @@ Output:
 MONA AND PIUE
 hello priyoscript
 hello
+hello
+hello
 Welcome To Priyoscript
+Mona
 priyo-script-language
+priyo_script_language
+mona and ...
+[mona]
 hahaha
 007
 700
 mona likes coffee
+1234.57
 ```
 
 ## API Examples (All Date-Time Methods)
@@ -109,9 +138,17 @@ monalisa {
   priyoKeep base = "2026-03-01T10:30:00.000Z"
   priyoTell(decorators.format(base, "DD/MM/YYYY HH:mm:ss"))
   priyoTell(decorators.addDays(base, 7))
+  priyoTell(decorators.addHours(base, 3))
+  priyoTell(decorators.addMinutes(base, 45))
   priyoTell(decorators.addMonths(base, 1))
   priyoTell(decorators.addYears(base, 1))
   priyoTell(decorators.diffDays("2026-03-01", "2026-03-21"))
+  priyoTell(decorators.diffHours("2026-03-01T00:00:00Z", "2026-03-02T12:00:00Z"))
+  priyoTell(decorators.diffMinutes("2026-03-01T00:00:00Z", "2026-03-01T01:30:00Z"))
+  priyoTell(decorators.isWeekend("2026-03-09"))
+  priyoTell(decorators.startOfDay(base))
+  priyoTell(decorators.endOfDay(base))
+  priyoTell(decorators.toTimestamp(base))
 }
 ```
 
@@ -124,9 +161,17 @@ Output:
 (current time)
 01/03/2026 16:00:00
 2026-03-08T10:30:00.000Z
+2026-03-01T13:30:00.000Z
+2026-03-01T11:15:00.000Z
 2026-04-01T10:30:00.000Z
 2027-03-01T10:30:00.000Z
 20
+36
+90
+false
+2026-03-01T00:00:00.000Z
+2026-03-01T23:59:59.999Z
+1456828200000
 ```
 
 ## Error Cases

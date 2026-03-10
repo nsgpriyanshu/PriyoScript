@@ -33,6 +33,36 @@ monalisa -errors
 monalisa -explain <ERROR_CODE>
 ```
 
+## Diagnostics Output Format (What You Will See)
+
+When PriyoScript prints an error now, it includes a richer context block to help you locate issues faster:
+
+- `Type` and `Category` (user vs engine)
+- `Phase` (parse/compile/vm)
+- `Context` with line numbers and a caret span
+- Module import hints like `Import source` and `Tried paths`
+
+Example output (shape only, values vary by error):
+
+```text
+So Rude - The requested module could not be loaded.
+FYI (Tip): Use `./`, `../`, or `/` imports; PriyoScript also tries `path.priyo` and `path/index.priyo`. Ensure module starts with `lisaaBox { ... }` and avoid cyclic imports.
+Code: PRUN-110
+Type: PriyoRuntimeError
+Stage: runtime
+Category: user
+Phase: vm
+Location: /project/examples/modules/main.priyo:3:3
+Context:
+  2 | monalisa {
+> 3 |   lisaaBring "./college.priyoo": college
+    |           ^^^^^^^^^^^^^^^^^^^^^
+  4 | }
+Import source: ./college.priyoo
+Tried paths: /project/examples/modules/college.priyoo, /project/examples/modules/college.priyoo.priyo, /project/examples/modules/college.priyoo/index.priyo
+Docs: https://priyyoscript.vercel.app/docs/stable/reference/errors-reference#prun-110
+```
+
 ## Complete Error Code Table
 
 | Code       | Stage   | Category | Meaning                                     |
@@ -370,6 +400,9 @@ monalisa {
 }
 ```
 </Callout>
+
+Notes:
+The diagnostic now includes `Import source` and a `Tried paths` list so you can see exactly which files were attempted.
 
 ## Engine Error
 

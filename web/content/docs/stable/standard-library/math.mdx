@@ -25,40 +25,49 @@ monalisa {
 
 ### Arithmetic APIs
 
-| Method | Signature                  | Description                 |
-| ------ | -------------------------- | --------------------------- |
-| `add`  | `math.add(a, b)`           | Adds two numbers            |
-| `sub`  | `math.sub(a, b)`           | Subtracts second from first |
-| `mul`  | `math.mul(a, b)`           | Multiplies two numbers      |
-| `div`  | `math.div(a, b)`           | Divides first by second     |
-| `mod`  | `math.mod(a, b)`           | Remainder operation         |
-| `abs`  | `math.abs(value)`          | Absolute value              |
-| `pow`  | `math.pow(base, exponent)` | Exponentiation              |
-| `sqrt` | `math.sqrt(value)`         | Square root                 |
-| `cube` | `math.cube(value)`         | Cube (`value^3`)            |
+| Method  | Signature                  | Description                 |
+| ------- | -------------------------- | --------------------------- |
+| `add`   | `math.add(a, b)`           | Adds two numbers            |
+| `sub`   | `math.sub(a, b)`           | Subtracts second from first |
+| `mul`   | `math.mul(a, b)`           | Multiplies two numbers      |
+| `div`   | `math.div(a, b)`           | Divides first by second     |
+| `mod`   | `math.mod(a, b)`           | Remainder operation         |
+| `abs`   | `math.abs(value)`          | Absolute value              |
+| `pow`   | `math.pow(base, exponent)` | Exponentiation              |
+| `sqrt`  | `math.sqrt(value)`         | Square root                 |
+| `cube`  | `math.cube(value)`         | Cube (`value^3`)            |
+| `round` | `math.round(value)`        | Rounds to nearest integer   |
+| `floor` | `math.floor(value)`        | Rounds down                 |
+| `ceil`  | `math.ceil(value)`         | Rounds up                   |
 
 ### Aggregate APIs
 
-| Method    | Signature                               | Description             |
-| --------- | --------------------------------------- | ----------------------- |
-| `sum`     | `math.sum(...values)`                   | Sum of all values       |
-| `average` | `math.average(...values)`               | Mean value              |
-| `min`     | `math.min(...values)`                   | Smallest value          |
-| `max`     | `math.max(...values)`                   | Largest value           |
-| `clamp`   | `math.clamp(value, minValue, maxValue)` | Bounds a value in range |
+| Method      | Signature                               | Description             |
+| ----------- | --------------------------------------- | ----------------------- |
+| `sum`       | `math.sum(...values)`                   | Sum of all values       |
+| `average`   | `math.average(...values)`               | Mean value              |
+| `min`       | `math.min(...values)`                   | Smallest value          |
+| `max`       | `math.max(...values)`                   | Largest value           |
+| `clamp`     | `math.clamp(value, minValue, maxValue)` | Bounds a value in range |
+| `percent`   | `math.percent(value, total)`            | Value as percent        |
+| `gcd`       | `math.gcd(a, b)`                        | Greatest common divisor |
+| `lcm`       | `math.lcm(a, b)`                        | Least common multiple   |
+| `factorial` | `math.factorial(value)`                 | Factorial (integer)     |
 
 ### Trigonometry APIs (radians)
 
-| Method     | Signature                | Description                 |
-| ---------- | ------------------------ | --------------------------- |
-| `sin`      | `math.sin(radians)`      | Sine                        |
-| `cos`      | `math.cos(radians)`      | Cosine                      |
-| `tan`      | `math.tan(radians)`      | Tangent                     |
-| `asin`     | `math.asin(value)`       | Inverse sine                |
-| `acos`     | `math.acos(value)`       | Inverse cosine              |
-| `atan`     | `math.atan(value)`       | Inverse tangent             |
-| `degToRad` | `math.degToRad(degrees)` | Degree to radian conversion |
-| `radToDeg` | `math.radToDeg(radians)` | Radian to degree conversion |
+| Method       | Signature                                 | Description                 |
+| ------------ | ----------------------------------------- | --------------------------- |
+| `sin`        | `math.sin(radians)`                       | Sine                        |
+| `cos`        | `math.cos(radians)`                       | Cosine                      |
+| `tan`        | `math.tan(radians)`                       | Tangent                     |
+| `asin`       | `math.asin(value)`                        | Inverse sine                |
+| `acos`       | `math.acos(value)`                        | Inverse cosine              |
+| `atan`       | `math.atan(value)`                        | Inverse tangent             |
+| `degToRad`   | `math.degToRad(degrees)`                  | Degree to radian conversion |
+| `radToDeg`   | `math.radToDeg(radians)`                  | Radian to degree conversion |
+| `distance2d` | `math.distance2d(x1, y1, x2, y2)`         | 2D distance                 |
+| `distance3d` | `math.distance3d(x1, y1, z1, x2, y2, z2)` | 3D distance                 |
 
 ### Geometry APIs
 
@@ -87,12 +96,21 @@ monalisa {
   priyoTell(math.pow(2, 4))
   priyoTell(math.sqrt(25))
   priyoTell(math.cube(3))
+  priyoTell(math.round(12.7))
+  priyoTell(math.floor(12.7))
+  priyoTell(math.ceil(12.1))
+  priyoTell(math.random(1, 5))
+  priyoTell(math.lerp(10, 20, 0.25))
 
   priyoTell(math.sum(1, 2, 3, 4))
   priyoTell(math.average(10, 20, 30))
   priyoTell(math.min(9, 2, 7))
   priyoTell(math.max(9, 2, 7))
   priyoTell(math.clamp(27, 0, 20))
+  priyoTell(math.percent(25, 200))
+  priyoTell(math.gcd(24, 18))
+  priyoTell(math.lcm(12, 18))
+  priyoTell(math.factorial(5))
 }
 ```
 
@@ -108,11 +126,20 @@ Output:
 16
 5
 27
+13
+12
+13
+(random between 1 and 5)
+12.5
 10
 20
 2
 9
 20
+12.5
+6
+36
+120
 ```
 
 ### Trigonometry + Conversion
@@ -132,6 +159,8 @@ monalisa {
 
   priyoTell(math.degToRad(180))
   priyoTell(math.radToDeg(3.141592653589793))
+  priyoTell(math.distance2d(0, 0, 3, 4))
+  priyoTell(math.distance3d(0, 0, 0, 1, 2, 2))
 }
 ```
 
@@ -146,6 +175,8 @@ Output:
 0.7853981633974483
 3.141592653589793
 180
+5
+3
 ```
 
 ### Geometry
