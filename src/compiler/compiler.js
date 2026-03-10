@@ -408,6 +408,7 @@ class Compiler {
     if (stmt.sourceType === 'string') {
       this.emit(OpCode.IMPORT_MODULE, {
         source: stmt.source,
+        location: stmt.location || null,
       })
 
       if (stmt.namedImports && stmt.namedImports.length > 0) {

@@ -369,6 +369,9 @@ function savePersistedHistory(filePath, entries) {
 
 async function startRepl(options = {}) {
   const traceEnabled = !!options.trace
+  const traceFormat = options.traceFormat || 'text'
+  const traceFilter = options.traceFilter || null
+  const debugSessionId = options.debugSessionId || `repl-${Date.now()}`
   const logger = options.logger || { build, info, error: console.error }
   const getCompletionCandidates = () => {
     const keywordLexemes = Object.values(activeKeywordConfig)
@@ -421,6 +424,9 @@ async function startRepl(options = {}) {
         moduleCache: moduleRuntime.moduleCache,
         trace: traceEnabled,
         traceLogger: line => (logger.info || console.log)(line),
+        traceFormat,
+        traceFilter,
+        debugSessionId,
       })
       if (executedSnippet) {
         historyEntries.push(executedSnippet)

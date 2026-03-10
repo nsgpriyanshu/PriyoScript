@@ -22,6 +22,18 @@ function extractSourceLine(source, lineNumber) {
   return lines[lineNumber - 1] || null
 }
 
+function extractSourceContext(source, lineNumber, radius = 1) {
+  if (!lineNumber || lineNumber < 1) return null
+  const lines = String(source || '').split('\n')
+  const start = Math.max(1, lineNumber - radius)
+  const end = Math.min(lines.length, lineNumber + radius)
+  const context = []
+  for (let i = start; i <= end; i++) {
+    context.push({ line: i, text: lines[i - 1] || '' })
+  }
+  return context
+}
+
 function firstMeaningfulLocation(source) {
   const lines = String(source || '').split('\n')
   for (let i = 0; i < lines.length; i++) {
@@ -85,6 +97,10 @@ function attachSourceContext(err, { source, filename } = {}) {
 
   if (err.metadata.line && !err.metadata.sourceLine) {
     err.metadata.sourceLine = extractSourceLine(source, err.metadata.line)
+  }
+
+  if (err.metadata.line && !err.metadata.sourceContext) {
+    err.metadata.sourceContext = extractSourceContext(source, err.metadata.line, 1)
   }
 
   if (err.cause && err.cause.stack && !err.metadata.stack) {
@@ -202,7 +218,7 @@ function createModuleRuntime(io = {}) {
   const loadingModules = new Set()
   const projectRoot = io.projectRoot || process.cwd()
 
-  const moduleLoader = async (importSource, importerFile) => {
+  const moduleLoader = async (importSource, importerFile, importLocation = null) => {
     const { modulePath, resolution } = resolveModulePath(importSource, importerFile, projectRoot)
     if (!resolution.isPathImport) {
       throw createRuntimeError(
@@ -213,6 +229,7 @@ function createModuleRuntime(io = {}) {
             importSource,
             importerFile: importerFile || null,
             resolutionMode: resolution.mode,
+            ...(importLocation || {}),
           },
         },
       )
@@ -228,6 +245,7 @@ function createModuleRuntime(io = {}) {
             importerFile: importerFile || null,
             resolutionMode: resolution.mode,
             triedPaths: resolution.candidates,
+            ...(importLocation || {}),
           },
         },
       )
@@ -242,6 +260,7 @@ function createModuleRuntime(io = {}) {
             importSource,
             importerFile: importerFile || null,
             resolvedPath: modulePath,
+            ...(importLocation || {}),
           },
         },
       )
@@ -288,6 +307,9 @@ async function runSource(source, options = {}) {
     printBytecode = false,
     trace = false,
     traceLogger = null,
+    traceFormat = 'text',
+    traceFilter = null,
+    debugSessionId = null,
     debugHooks = null,
     environment = new Environment(null, { isFunctionScope: true }),
     builtins = createBuiltins(options.io),
@@ -347,6 +369,9 @@ async function runSource(source, options = {}) {
       moduleContext: activeModuleContext,
       trace,
       traceLogger,
+      traceFormat,
+      traceFilter,
+      debugSessionId,
       debugHooks,
     })
     await vm.run()

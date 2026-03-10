@@ -578,6 +578,13 @@ class Parser {
 
     const source = this.curToken.literal
     const sourceType = this.curToken.type === TokenType.STRING ? 'string' : 'identifier'
+    const startColumn = this.curToken.column
+    const literalLength = sourceType === 'string' ? source.length + 2 : source.length
+    const location = {
+      line: this.curToken.line,
+      column: startColumn,
+      endColumn: startColumn + Math.max(0, literalLength - 1),
+    }
     let localName =
       sourceType === 'string' ? this.deriveModuleLocalName(source) : this.curToken.literal
     const namedImports = []
@@ -641,7 +648,7 @@ class Parser {
       }
     }
 
-    return new ImportStatement(source, localName, sourceType, namedImports)
+    return new ImportStatement(source, localName, sourceType, namedImports, location)
   }
 
   parseExportStatement() {

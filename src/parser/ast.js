@@ -139,12 +139,19 @@ class YieldStatement {
 }
 
 class ImportStatement {
-  constructor(source, localName = null, sourceType = 'identifier', namedImports = []) {
+  constructor(
+    source,
+    localName = null,
+    sourceType = 'identifier',
+    namedImports = [],
+    location = null,
+  ) {
     this.type = 'ImportStatement'
     this.source = source
     this.localName = localName || source
     this.sourceType = sourceType
     this.namedImports = namedImports
+    this.location = location
   }
 }
 class ExportStatement {

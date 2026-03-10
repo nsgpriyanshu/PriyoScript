@@ -79,7 +79,12 @@ class Lexer {
 
   readNumber() {
     const start = this.position
-    while (/[0-9]/.test(this.ch)) {
+    let seenDot = false
+    while (
+      /[0-9]/.test(this.ch) ||
+      (this.ch === '.' && !seenDot && /[0-9]/.test(this.peekChar()))
+    ) {
+      if (this.ch === '.') seenDot = true
       this.readChar()
     }
     return this.input.slice(start, this.position)

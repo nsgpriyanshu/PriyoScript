@@ -19,7 +19,11 @@ class VM {
     this.moduleContext = options.moduleContext || null
     this.traceEnabled = !!options.trace
     this.traceLogger = typeof options.traceLogger === 'function' ? options.traceLogger : null
+    this.traceFormat = options.traceFormat || 'text'
+    this.traceFilter = options.traceFilter || null
     this.debugHooks = options.debugHooks || {}
+    this.debugSessionId =
+      options.debugSessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     this.sourceCallStack = []
     this.debugSequence = 0
     this.installDebugBuiltins()
@@ -361,7 +365,11 @@ class VM {
               if (!this.moduleLoader) {
                 throw new Error('Module loader is not configured for lisaaBring path imports')
               }
-              const moduleExports = await this.moduleLoader(instr.operand.source, this.currentFile)
+              const moduleExports = await this.moduleLoader(
+                instr.operand.source,
+                this.currentFile,
+                instr.operand.location || null,
+              )
               stack.push(moduleExports)
               break
             }
@@ -1485,6 +1493,8 @@ class VM {
     if (!this.traceEnabled && typeof this.debugHooks.onInstruction !== 'function') return
     const record = {
       seq: ++this.debugSequence,
+      session: this.debugSessionId,
+      ts: Date.now(),
       file: this.currentFile || '<memory>',
       frame: frameName,
       ip,
@@ -1494,13 +1504,21 @@ class VM {
     }
 
     if (this.traceEnabled) {
-      const line =
-        `[TRACE #${record.seq}] ${record.file} ${record.frame} ip=${record.ip} ` +
-        `op=${record.op}` +
-        (record.operand ? ` operand=${record.operand}` : '') +
-        ` stack=${record.stackDepth}`
-      if (this.traceLogger) this.traceLogger(line)
-      else console.log(line)
+      if (this.shouldTrace(record)) {
+        if (this.traceFormat === 'json') {
+          const line = JSON.stringify({ type: 'trace', ...record })
+          if (this.traceLogger) this.traceLogger(line)
+          else console.log(line)
+        } else {
+          const line =
+            `[TRACE #${record.seq}] ${record.file} ${record.frame} ip=${record.ip} ` +
+            `op=${record.op}` +
+            (record.operand ? ` operand=${record.operand}` : '') +
+            ` stack=${record.stackDepth}`
+          if (this.traceLogger) this.traceLogger(line)
+          else console.log(line)
+        }
+      }
     }
 
     if (typeof this.debugHooks.onInstruction === 'function') {
@@ -1511,20 +1529,42 @@ class VM {
   triggerBreakpoint(label) {
     const payload = {
       seq: ++this.debugSequence,
+      session: this.debugSessionId,
+      ts: Date.now(),
       file: this.currentFile || '<memory>',
       frame: this.sourceCallStack[this.sourceCallStack.length - 1]?.frame || '<frame>',
       label: label == null ? '' : String(label),
       sourceStack: this.getSourceStack(),
     }
-    const line =
-      `[BREAK #${payload.seq}] ${payload.file} ${payload.frame}` +
-      (payload.label ? ` label="${payload.label}"` : '')
-    if (this.traceLogger) this.traceLogger(line)
-    else console.log(line)
+    if (this.traceFormat === 'json') {
+      const line = JSON.stringify({ type: 'break', ...payload })
+      if (this.traceLogger) this.traceLogger(line)
+      else console.log(line)
+    } else {
+      const line =
+        `[BREAK #${payload.seq}] ${payload.file} ${payload.frame}` +
+        (payload.label ? ` label="${payload.label}"` : '')
+      if (this.traceLogger) this.traceLogger(line)
+      else console.log(line)
+    }
 
     if (typeof this.debugHooks.onBreakpoint === 'function') {
       this.debugHooks.onBreakpoint(payload)
     }
+  }
+
+  shouldTrace(record) {
+    if (!this.traceFilter) return true
+    const filter = this.traceFilter
+    if (filter.opsInclude && !filter.opsInclude.has(record.op)) return false
+    if (filter.opsExclude && filter.opsExclude.has(record.op)) return false
+    if (filter.fileContains && !String(record.file).includes(filter.fileContains)) return false
+    if (filter.frameContains && !String(record.frame).includes(filter.frameContains)) return false
+    if (typeof filter.minStackDepth === 'number' && record.stackDepth < filter.minStackDepth)
+      return false
+    if (typeof filter.maxStackDepth === 'number' && record.stackDepth > filter.maxStackDepth)
+      return false
+    return true
   }
 
   formatTraceOperand(operand) {
