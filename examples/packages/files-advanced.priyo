@@ -1,0 +1,19 @@
+monalisa {
+  lisaaBring files
+
+  files.ensureDir("workspace")
+
+  priyoKeep lines = ["mona", "piue", "priyo"]
+  files.writeLines("workspace/names.txt", lines)
+  priyoTell(files.readLines("workspace/names.txt"))
+
+  files.writeJson("workspace/profile.json", { name: "mona", level: 3 })
+  priyoKeep profile = files.readJson("workspace/profile.json")
+  priyoTell("profile: " + profile.name)
+
+  files.copy("workspace/names.txt", "workspace/names-copy.txt")
+  files.rename("workspace/names-copy.txt", "names-final.md")
+  priyoTell("copied: " + files.exists("workspace/names-final.md"))
+
+  priyoTell(files.listDirDetailed("workspace"))
+}

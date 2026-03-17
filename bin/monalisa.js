@@ -56,6 +56,21 @@ function parseArgs(values) {
       i++
       continue
     }
+    if (value === '-trace-label') {
+      traceOptions.enabled = true
+      traceOptions.filter.labelContains = values[i + 1] || ''
+      i++
+      continue
+    }
+    if (value === '-trace-type') {
+      traceOptions.enabled = true
+      traceOptions.filter.eventTypes = String(values[i + 1] || '')
+        .split(',')
+        .map(item => item.trim().toLowerCase())
+        .filter(Boolean)
+      i++
+      continue
+    }
     if (value === '-trace-frame') {
       traceOptions.enabled = true
       traceOptions.filter.frameContains = values[i + 1] || ''
@@ -87,6 +102,12 @@ function normalizeTraceFilter(filter) {
   }
   if (Array.isArray(normalized.opsExclude)) {
     normalized.opsExclude = new Set(normalized.opsExclude)
+  }
+  if (Array.isArray(normalized.eventTypes)) {
+    normalized.eventTypes = new Set(normalized.eventTypes)
+    if (normalized.eventTypes.has('all')) {
+      delete normalized.eventTypes
+    }
   }
   if (typeof normalized.minStackDepth !== 'number' || Number.isNaN(normalized.minStackDepth)) {
     delete normalized.minStackDepth
@@ -130,6 +151,7 @@ const ERROR_CODE_HELP = {
   [ErrorCodes.RUNTIME.UNKNOWN_PACKAGE]: 'Package name was not found in built-in package registry.',
   [ErrorCodes.RUNTIME.UNKNOWN_MODULE]:
     'Module path import failed. Check lisaaBring path and ensure module starts with lisaaBox.',
+  [ErrorCodes.RUNTIME.FILE_NOT_FOUND]: 'File was not found at the provided path.',
   [ErrorCodes.ENGINE.INTERNAL]:
     'Engine/internal error. Usually a runtime/compiler bug, not user code.',
 }
@@ -166,6 +188,8 @@ Filters:
   -trace-op ADD,SUB         Trace only selected opcodes (comma-separated)
   -trace-op-exclude HALT    Exclude opcodes from trace
   -trace-file modules       Trace only matching file path substring
+  -trace-label text         Trace only matching breakpoint label substring
+  -trace-type trace,break   Trace event types (trace, break, or all)
   -trace-frame <name>       Trace only matching frame name substring
   -trace-stack-min 2        Trace only when stack depth >= N
   -trace-stack-max 6        Trace only when stack depth <= N
@@ -211,7 +235,7 @@ Modules:
   lisaaBring "./module.priyo"
 
 Debug hook:
-  priyoBreak("label")                Emits a breakpoint event (use with -trace)
+  prakritiThink "label"              Emits a breakpoint event (use with -trace)
 `)
 }
 

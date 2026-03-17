@@ -83,6 +83,7 @@ Docs: https://priyyoscript.vercel.app/docs/stable/reference/errors-reference#pru
 | `PRUN-108` | runtime | user     | Invalid input                               |
 | `PRUN-109` | runtime | user     | Unknown package                             |
 | `PRUN-110` | runtime | user     | Unknown module                              |
+| `PRUN-111` | runtime | user     | File not found                              |
 | `PENG-001` | core    | engine   | Internal engine error                       |
 
 ## Syntax Errors
@@ -403,6 +404,29 @@ monalisa {
 
 Notes:
 The diagnostic now includes `Import source` and a `Tried paths` list so you can see exactly which files were attempted.
+
+### `PRUN-111` File not found
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  lisaaBring files
+  priyoTell(files.readText("missing.txt"))
+}
+```
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  lisaaBring files
+  prakritiIf (files.exists("missing.txt")) {
+    priyoTell(files.readText("missing.txt"))
+  } prakritiElse {
+    priyoTell("File not found")
+  }
+}
+```
+</Callout>
 
 ## Engine Error
 

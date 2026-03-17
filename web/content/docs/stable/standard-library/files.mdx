@@ -1,0 +1,166 @@
+---
+title: files Package
+description: Practical filesystem utilities for reading, writing, and inspecting files.
+icon: FolderOpen
+---
+
+## Theory
+
+The `files` package provides safe, direct access to common filesystem tasks in PriyoScript. It exists so beginners can read and write files without learning Node.js APIs, while still keeping the operations explicit and predictable. The package intentionally focuses on essential tasks only: reading text, writing text, listing files, and basic path helpers. It is not a full OS or networking API.
+
+<Callout title="Safety note" type="warn">
+  `files.remove()` deletes files or folders recursively. Use it carefully and always validate paths.
+</Callout>
+
+## Import
+
+```priyo
+monalisa {
+  lisaaBring files
+}
+```
+
+## API Table
+
+### Path + environment
+
+| Method     | Signature                 | Description                        |
+| ---------- | ------------------------- | ---------------------------------- |
+| `cwd`      | `files.cwd()`             | Returns current working directory. |
+| `join`     | `files.join(...parts)`    | Joins path segments safely.        |
+| `resolve`  | `files.resolve(...parts)` | Resolves to absolute path.         |
+| `dirname`  | `files.dirname(path)`     | Returns parent directory.          |
+| `basename` | `files.basename(path)`    | Returns file name.                 |
+| `extname`  | `files.extname(path)`     | Returns file extension.            |
+
+### Read/write
+
+| Method       | Signature                                         | Description                       |
+| ------------ | ------------------------------------------------- | --------------------------------- |
+| `readText`   | `files.readText(path, encoding?)`                 | Reads file as text.               |
+| `readLines`  | `files.readLines(path, encoding?)`                | Reads file as array of lines.     |
+| `readJson`   | `files.readJson(path, encoding?)`                 | Parses file as JSON object/array. |
+| `writeText`  | `files.writeText(path, text, encoding?)`          | Writes text (overwrites).         |
+| `writeLines` | `files.writeLines(path, lines, encoding?)`        | Writes array of lines.            |
+| `writeJson`  | `files.writeJson(path, data, pretty?, encoding?)` | Writes JSON (pretty by default).  |
+| `appendText` | `files.appendText(path, text, encoding?)`         | Appends text to file.             |
+
+### Directory + existence
+
+| Method            | Signature                     | Description                                    |
+| ----------------- | ----------------------------- | ---------------------------------------------- |
+| `exists`          | `files.exists(path)`          | Returns true if path exists.                   |
+| `listDir`         | `files.listDir(path)`         | Lists directory contents.                      |
+| `listDirDetailed` | `files.listDirDetailed(path)` | Lists directory entries with size/type.        |
+| `makeDir`         | `files.makeDir(path)`         | Creates directory recursively.                 |
+| `ensureDir`       | `files.ensureDir(path)`       | Creates directory if missing.                  |
+| `remove`          | `files.remove(path)`          | Removes file/folder recursively.               |
+| `stat`            | `files.stat(path)`            | Returns size and timestamps.                   |
+| `copy`            | `files.copy(from, to)`        | Copies file.                                   |
+| `move`            | `files.move(from, to)`        | Moves file.                                    |
+| `rename`          | `files.rename(path, newName)` | Renames file in same directory.                |
+| `touch`           | `files.touch(path)`           | Creates file if missing or updates timestamps. |
+
+## Example: Read + Write
+
+```priyo
+monalisa {
+  lisaaBring files
+
+  priyoKeep root = files.cwd()
+  priyoKeep notes = files.join(root, "notes.txt")
+
+  files.writeText(notes, "mona: hello\n")
+  files.appendText(notes, "piue: welcome\n")
+
+  priyoTell(files.readText(notes))
+}
+```
+
+Output (example):
+
+```text
+mona: hello
+piue: welcome
+```
+
+## Example: Directory Listing
+
+```priyo
+monalisa {
+  lisaaBring files
+  priyoKeep items = files.listDir(files.cwd())
+  priyoTell(items)
+}
+```
+
+Output (example):
+
+```text
+[ "src", "examples", "package.json", ... ]
+```
+
+## Example: Inspect File
+
+```priyo
+monalisa {
+  lisaaBring files
+  priyoKeep info = files.stat("notes.txt")
+  priyoTell("size: " + info.size)
+  priyoTell("isFile: " + info.isFile)
+}
+```
+
+## Example: JSON + Lines
+
+```priyo
+monalisa {
+  lisaaBring files
+
+  files.writeLines("todo.txt", ["learn", "build", "share"])
+  priyoTell(files.readLines("todo.txt"))
+
+  files.writeJson("profile.json", { name: "mona", level: 3 })
+  priyoKeep profile = files.readJson("profile.json")
+  priyoTell(profile.name)
+}
+```
+
+## Example: Copy + Rename
+
+```priyo
+monalisa {
+  lisaaBring files
+
+  files.writeText("note.txt", "hello")
+  files.copy("note.txt", "note-copy.txt")
+  files.rename("note-copy.txt", "note-final.txt")
+  priyoTell(files.exists("note-final.txt"))
+}
+```
+
+## Error Example
+
+```priyo
+monalisa {
+  lisaaBring files
+  priyoTell(files.readJson("broken.json"))
+}
+```
+
+Expected error (short):
+
+```text
+files.readJson expects the file to contain valid JSON
+```
+
+<Callout title="Practice" type="idea">
+  1. Write a log file with two lines using `appendText`. 2. Convert a `.txt` file to `.md` by
+  copying and renaming.
+</Callout>
+
+## Related Docs
+
+- [Standard Library Overview](./index)
+- [math Package](./math)
+- [decorators Package](./decorators)

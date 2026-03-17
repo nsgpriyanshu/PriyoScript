@@ -16,11 +16,15 @@ icon: ScrollText
 - Removed `priyoBreak` in favor of `prakritiThink` to keep debugging consistent.
 - Enabled decimal number literals in the lexer (e.g., `12.78`, `0.25`).
 - Improved diagnostics formatting to always show a caret span alongside context lines.
+- Added `files` package for filesystem helpers (read/write/list, JSON, copy/move).
+- Added `PRUN-111` for file-not-found errors in `files` APIs.
 
 ### Tooling and examples
 
 - Added a new `prakritiThink` example under `examples/control-flow/`.
 - Updated CLI/REPL docs to reflect new aliases and debug hook usage.
+- Added advanced filesystem examples under `examples/packages/`.
+- Added new trace filters: `-trace-label` and `-trace-type`.
 
 <Callout title="Compatibility note" type="warn">
   If you previously used `priyoBreak("label")`, replace it with `prakritiThink "label"` or

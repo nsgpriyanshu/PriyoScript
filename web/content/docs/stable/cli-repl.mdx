@@ -39,17 +39,19 @@ CLI (Command Line Interface) and REPL (Read-Eval-Print Loop) serve different dev
 
 #### Trace helpers and filters
 
-| Command                           | Mode | Purpose                          |
-| --------------------------------- | ---- | -------------------------------- |
-| `monalisa -th`                    | CLI  | Trace help (alias)               |
-| `monalisa -trace-help`            | CLI  | Show trace filtering options     |
-| `monalisa -trace-format json`     | CLI  | JSON trace lines for tooling     |
-| `monalisa -trace-op ADD,SUB`      | CLI  | Trace only specific opcodes      |
-| `monalisa -trace-op-exclude HALT` | CLI  | Exclude opcodes from trace       |
-| `monalisa -trace-file modules`    | CLI  | Trace only matching file path    |
-| `monalisa -trace-frame <name>`    | CLI  | Trace only matching frame name   |
-| `monalisa -trace-stack-min 2`     | CLI  | Trace only when stack depth >= N |
-| `monalisa -trace-stack-max 6`     | CLI  | Trace only when stack depth < N  |
+| Command                            | Mode | Purpose                               |
+| ---------------------------------- | ---- | ------------------------------------- |
+| `monalisa -th`                     | CLI  | Trace help (alias)                    |
+| `monalisa -trace-help`             | CLI  | Show trace filtering options          |
+| `monalisa -trace-format json`      | CLI  | JSON trace lines for tooling          |
+| `monalisa -trace-op ADD,SUB`       | CLI  | Trace only specific opcodes           |
+| `monalisa -trace-op-exclude HALT`  | CLI  | Exclude opcodes from trace            |
+| `monalisa -trace-file modules`     | CLI  | Trace only matching file path         |
+| `monalisa -trace-label label`      | CLI  | Trace only matching breakpoint labels |
+| `monalisa -trace-type trace,break` | CLI  | Trace event types (trace, break, all) |
+| `monalisa -trace-frame <name>`     | CLI  | Trace only matching frame name        |
+| `monalisa -trace-stack-min 2`      | CLI  | Trace only when stack depth >= N      |
+| `monalisa -trace-stack-max 6`      | CLI  | Trace only when stack depth < N       |
 
 ### REPL command summary
 

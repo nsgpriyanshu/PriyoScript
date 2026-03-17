@@ -367,8 +367,8 @@ Current language/runtime limitations that still need dedicated implementation:
   - additional inheritance invariants can still be expanded
   - enums remain reserved
 - Standard library is still intentionally small:
-  - currently: core builtins + `math` + `decorators`
-  - filesystem and system-level utilities are not added yet
+  - currently: core builtins + `math` + `decorators` + `files`
+  - system-level utilities are not added yet
 - Browser playground is intentionally constrained:
   - executes only in user browser runtime (no server execution)
   - supports basic statements only (`priyoTell`, variable declarations/assignment, simple expressions)
@@ -386,8 +386,6 @@ Planned development sequence:
 3. Expand module ecosystem:
    - user package publishing and lockfile/version pinning workflow.
 4. Extend standard library:
-   - add core filesystem and system utilities on top of current `math` and `decorators` packages.
-5. Strengthen diagnostics/debug UX:
-   - richer trace filtering, structured debug sessions, and improved stack readability.
-6. Expand docs/release automation:
+   - add core filesystem and system utilities on top of current `math`, `decorators`, and `files` packages.
+5. Expand docs/release automation:
    - CI docs preview deploys and synchronized release notes between root and web changelogs.

@@ -59,6 +59,10 @@ function humanizeError(input) {
       message: 'So Rude - The requested module could not be loaded.',
       tip: 'Use `./`, `../`, or `/` imports; PriyoScript also tries `path.priyo` and `path/index.priyo`. Ensure module starts with `lisaaBox { ... }` and avoid cyclic imports.',
     },
+    [ErrorCodes.RUNTIME.FILE_NOT_FOUND]: {
+      message: 'So Rude - The requested file does not exist.',
+      tip: 'Check the path or use `files.exists(path)` before reading.',
+    },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
       tip: 'Check spelling and make sure the function/method exists before calling it.',

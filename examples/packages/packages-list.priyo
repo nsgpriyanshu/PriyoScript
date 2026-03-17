@@ -3,4 +3,5 @@ monalisa {
   priyoTell(priyoPackage.list())
   priyoTell("Has math? " + priyoPackage.has("math"))
   priyoTell("Has decorators? " + priyoPackage.has("decorators"))
+  priyoTell("Has files? " + priyoPackage.has("files"))
 }

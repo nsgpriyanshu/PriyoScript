@@ -1,0 +1,16 @@
+monalisa {
+  lisaaBring files
+
+  priyoKeep root = files.cwd()
+  priyoKeep notesPath = files.join(root, "notes.txt")
+
+  files.writeText(notesPath, "mona: hello\n")
+  files.appendText(notesPath, "piue: welcome\n")
+
+  priyoTell("exists: " + files.exists(notesPath))
+  priyoTell("content:\n" + files.readText(notesPath))
+  priyoTell("ext: " + files.extname(notesPath))
+
+  priyoKeep info = files.stat(notesPath)
+  priyoTell("size: " + info.size)
+}

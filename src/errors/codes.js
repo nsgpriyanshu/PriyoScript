@@ -32,6 +32,7 @@ const ErrorCodes = {
     INVALID_INPUT: 'PRUN-108',
     UNKNOWN_PACKAGE: 'PRUN-109',
     UNKNOWN_MODULE: 'PRUN-110',
+    FILE_NOT_FOUND: 'PRUN-111',
   },
   ENGINE: {
     INTERNAL: 'PENG-001',

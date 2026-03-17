@@ -84,6 +84,9 @@ function classifyRuntimeFailure(message) {
   ) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_MODULE, category: ErrorCategory.USER }
   }
+  if (/File not found/i.test(message)) {
+    return { code: ErrorCodes.RUNTIME.FILE_NOT_FOUND, category: ErrorCategory.USER }
+  }
   if (/Unknown callable|Unknown builtin function/i.test(message)) {
     return { code: ErrorCodes.RUNTIME.UNKNOWN_CALLABLE, category: ErrorCategory.USER }
   }

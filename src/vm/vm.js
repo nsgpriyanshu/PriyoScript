@@ -24,12 +24,14 @@ class VM {
     this.debugHooks = options.debugHooks || {}
     this.debugSessionId =
       options.debugSessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    this.traceSessionEmitted = false
     this.sourceCallStack = []
     this.debugSequence = 0
     this.registerBuiltinGlobals()
   }
 
   async run() {
+    this.emitTraceSessionHeader()
     await this.executeFrame(this.instructions, this.environment, false, '<main>')
   }
 
@@ -1530,7 +1532,9 @@ class VM {
       frame: this.sourceCallStack[this.sourceCallStack.length - 1]?.frame || '<frame>',
       label: label == null ? '' : String(label),
       sourceStack: this.getSourceStack(),
+      stackDepth: this.sourceCallStack.length,
     }
+    if (!this.shouldEmitBreakpoint(payload)) return
     if (this.traceFormat === 'json') {
       const line = JSON.stringify({ type: 'break', ...payload })
       if (this.traceLogger) this.traceLogger(line)
@@ -1551,6 +1555,7 @@ class VM {
   shouldTrace(record) {
     if (!this.traceFilter) return true
     const filter = this.traceFilter
+    if (filter.eventTypes && !filter.eventTypes.has('trace')) return false
     if (filter.opsInclude && !filter.opsInclude.has(record.op)) return false
     if (filter.opsExclude && filter.opsExclude.has(record.op)) return false
     if (filter.fileContains && !String(record.file).includes(filter.fileContains)) return false
@@ -1560,6 +1565,39 @@ class VM {
     if (typeof filter.maxStackDepth === 'number' && record.stackDepth > filter.maxStackDepth)
       return false
     return true
+  }
+
+  shouldEmitBreakpoint(payload) {
+    if (!this.traceFilter) return true
+    const filter = this.traceFilter
+    if (filter.eventTypes && !filter.eventTypes.has('break')) return false
+    if (filter.fileContains && !String(payload.file).includes(filter.fileContains)) return false
+    if (filter.frameContains && !String(payload.frame).includes(filter.frameContains)) return false
+    if (filter.labelContains && !String(payload.label).includes(filter.labelContains)) return false
+    if (typeof filter.minStackDepth === 'number' && payload.stackDepth < filter.minStackDepth)
+      return false
+    if (typeof filter.maxStackDepth === 'number' && payload.stackDepth > filter.maxStackDepth)
+      return false
+    return true
+  }
+
+  emitTraceSessionHeader() {
+    if (!this.traceEnabled || this.traceSessionEmitted) return
+    this.traceSessionEmitted = true
+    const payload = {
+      session: this.debugSessionId,
+      ts: Date.now(),
+      file: this.currentFile || '<memory>',
+    }
+    if (this.traceFormat === 'json') {
+      const line = JSON.stringify({ type: 'session', ...payload })
+      if (this.traceLogger) this.traceLogger(line)
+      else console.log(line)
+    } else {
+      const line = `[TRACE SESSION] id=${payload.session} file=${payload.file}`
+      if (this.traceLogger) this.traceLogger(line)
+      else console.log(line)
+    }
   }
 
   formatTraceOperand(operand) {
