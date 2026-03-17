@@ -114,6 +114,13 @@ class ContinueStatement {
   }
 }
 
+class DebuggerStatement {
+  constructor(argument = null) {
+    this.type = 'DebuggerStatement'
+    this.argument = argument
+  }
+}
+
 class FunctionDeclaration {
   constructor(name, params, body, isAsync = false) {
     this.type = 'FunctionDeclaration'
@@ -396,6 +403,7 @@ module.exports = {
   SwitchCase,
   BreakStatement,
   ContinueStatement,
+  DebuggerStatement,
   FunctionDeclaration,
   ReturnStatement,
   YieldStatement,

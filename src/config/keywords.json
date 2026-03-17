@@ -41,6 +41,7 @@
     "async": "prakritiWait",
     "await": "prakritiPause",
     "yield": "prakritiGiveSome",
+    "debugger": "prakritiThink",
 
     "function": "lisaaTask",
     "class": "lisaaFamily",
@@ -54,14 +55,10 @@
   },
   "planned": {
     "do": "prakritiDo",
-    "loop": "prakritiRepeat",
-
-    "debugger": "prakritiThink",
 
     "delete": "priyoForget",
     "typeof": "priyoWhatIs",
     "instanceof": "priyoBornFrom",
-    "void": "priyoSilent",
 
     "with": "priyoWith",
 

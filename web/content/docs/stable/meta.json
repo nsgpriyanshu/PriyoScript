@@ -14,8 +14,9 @@
     "advanced",
     "standard-library",
     "reference",
-    "---Tools---",
+    "---Miscellaneous---",
     "cli-repl",
+    "changelog",
     "faq"
   ]
 }

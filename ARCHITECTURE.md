@@ -8,7 +8,7 @@
   - `npm run test:run` passes
 - Major additions in this version:
   - module system v3 (relative/absolute resolution, optional `index.priyo`, clearer not-found diagnostics)
-  - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `priyoBreak(...)` debug hook)
+  - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `prakritiThink(...)` debug hook)
   - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
   - golden CLI/REPL tests and deep module-cycle stress tests
   - web docs app (Next.js + Fumadocs) with stable/canary docs structure
@@ -151,7 +151,7 @@ tests/
 | CLI          | REPL v2 commands (`.reload`, `.env`, `.type`, `.history`, `.save`, `.editor`)       | 100%   |
 | CLI          | REPL editor mode (`.editor`, `edit>` prompt, `.run`, `.cancel`)                     | 100%   |
 | CLI          | REPL persistence + smart UX (history file, autocomplete, smarter multiline parsing) | 100%   |
-| CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`priyoBreak`)                  | 100%   |
+| CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`prakritiThink`)               | 100%   |
 | CLI          | Trace filtering + JSON trace output (`-trace-*`, `-th`)                             | 100%   |
 | Distribution | npm global installation (`npm install -g priyoscript`)                              | 100%   |
 | Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                             | 100%   |
@@ -291,7 +291,7 @@ tests/
   - persisted history file: `.priyo_repl_history.json`
   - autocomplete across commands, keywords, and in-scope bindings
 - Debug helper:
-  - `priyoBreak("label")` emits a traceable breakpoint marker while keeping execution flow
+  - `prakritiThink("label")` emits a traceable breakpoint marker while keeping execution flow
 
 ## 5. Runtime Model
 
@@ -342,7 +342,7 @@ We use **Vitest** for our unit testing framework, providing fast, modular test e
 - **Golden Output Tests** (\`tests/golden-cli-repl.test.js\`): Validate stable CLI and REPL user-facing output for help/errors.
 - **Cycle Stress Tests** (\`tests/module-cycle-stress.test.js\`): Validate module loader behavior under deep cyclic dependency chains.
 - **Module Resolution v3 Tests** (\`tests/module-resolution-v3.test.js\`): Validate path resolution behavior (`./`, `../`, `/`, and `index.priyo` fallback) and actionable not-found diagnostics.
-- **Trace/Debug Tests** (\`tests/trace-debug.test.js\`): Validate `-trace` output and `priyoBreak(...)` debug marker behavior.
+- **Trace/Debug Tests** (\`tests/trace-debug.test.js\`): Validate `-trace` output and `prakritiThink(...)` debug marker behavior.
 
 ## 8. Current Limitations
 

@@ -1,0 +1,32 @@
+---
+title: Changelog
+description: Recent PriyoScript updates that affect the language, runtime, and tooling.
+icon: ScrollText
+---
+
+## Latest changes (2026-03-17)
+
+<Callout title="Current release" type="success">
+  Latest version: 1.12.0
+</Callout>
+
+### Language and runtime
+
+- Added `prakritiThink` as the official debug checkpoint keyword for trace output.
+- Removed `priyoBreak` in favor of `prakritiThink` to keep debugging consistent.
+- Enabled decimal number literals in the lexer (e.g., `12.78`, `0.25`).
+- Improved diagnostics formatting to always show a caret span alongside context lines.
+
+### Tooling and examples
+
+- Added a new `prakritiThink` example under `examples/control-flow/`.
+- Updated CLI/REPL docs to reflect new aliases and debug hook usage.
+
+<Callout title="Compatibility note" type="warn">
+  If you previously used `priyoBreak("label")`, replace it with `prakritiThink "label"` or
+  `prakritiThink("label")`.
+</Callout>
+
+<Callout title="More detail" type="idea">
+  For full historical releases, see the root `CHANGELOG.md` in the repository.
+</Callout>

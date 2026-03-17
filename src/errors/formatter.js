@@ -52,6 +52,13 @@ function formatErrorForUser(err) {
     }))
     details.push('Context:')
     details.push(...formatSourceContext(context, metadata.column, metadata.endColumn))
+    const focus = context.find(entry => entry.isFocus)
+    if (focus) {
+      const caretRange = renderCaretRange(focus.text || '', metadata.column, metadata.endColumn)
+      if (caretRange) {
+        details.push(`Span:   ${caretRange}`)
+      }
+    }
   } else if (metadata.sourceLine) {
     details.push(`Source: ${metadata.sourceLine}`)
     const caretRange = renderCaretRange(metadata.sourceLine, metadata.column, metadata.endColumn)

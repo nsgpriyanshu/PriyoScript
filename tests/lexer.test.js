@@ -37,15 +37,10 @@ describe('Lexer', () => {
 
     tok = lexer.nextToken()
     expect(tok.type).toBe(TokenType.NUMBER)
-    expect(tok.literal).toBe('45') // '.' is dot token if not handled in numbers? wait, priyoscript lexer doesn't parse floats natively in one token?
+    expect(tok.literal).toBe('45.67')
 
     tok = lexer.nextToken()
-    expect(tok.type).toBe(TokenType.DOT)
-    expect(tok.literal).toBe('.')
-
-    tok = lexer.nextToken()
-    expect(tok.type).toBe(TokenType.NUMBER)
-    expect(tok.literal).toBe('67')
+    expect(tok.type).toBe(TokenType.EOF)
   })
 
   it('should tokenize strings', () => {

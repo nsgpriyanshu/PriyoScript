@@ -26,7 +26,6 @@ class VM {
       options.debugSessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     this.sourceCallStack = []
     this.debugSequence = 0
-    this.installDebugBuiltins()
     this.registerBuiltinGlobals()
   }
 
@@ -402,6 +401,12 @@ class VM {
               }
               const yieldedValue = stack.pop()
               yieldBuffer.push(yieldedValue == null ? null : yieldedValue)
+              break
+            }
+
+            case OpCode.DEBUGGER: {
+              const label = instr.operand && instr.operand.usesValue ? stack.pop() : null
+              this.triggerBreakpoint(label)
               break
             }
 
@@ -1476,16 +1481,6 @@ class VM {
       } catch {
         // Ignore redeclare collisions in reused environments.
       }
-    }
-  }
-
-  installDebugBuiltins() {
-    if (typeof this.builtins.priyoBreak !== 'function') {
-      this.builtins.priyoBreak = label => {
-        this.triggerBreakpoint(label)
-        return null
-      }
-      this.builtins.priyoBreak.__priyoHostObject = true
     }
   }
 

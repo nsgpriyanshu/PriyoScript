@@ -18,6 +18,7 @@ const {
   SwitchCase,
   BreakStatement,
   ContinueStatement,
+  DebuggerStatement,
   FunctionDeclaration,
   ReturnStatement,
   YieldStatement,
@@ -217,6 +218,7 @@ class Parser {
     if (this.curToken.type === TokenType.FUNCTION) return this.parseFunctionDeclaration(false)
     if (this.curToken.type === TokenType.BREAK) return this.parseBreakStatement()
     if (this.curToken.type === TokenType.CONTINUE) return this.parseContinueStatement()
+    if (this.curToken.type === TokenType.DEBUGGER) return this.parseDebuggerStatement()
     if (this.curToken.type === TokenType.SWITCH) return this.parseSwitchStatement()
     if (this.curToken.type === TokenType.WHILE) return this.parseWhileStatement()
     if (this.curToken.type === TokenType.FOR) return this.parseForStatement()
@@ -1187,6 +1189,25 @@ class Parser {
     }
     this.nextToken()
     return new ContinueStatement()
+  }
+
+  parseDebuggerStatement() {
+    this.nextToken()
+    if (
+      this.curToken.type === TokenType.RBRACE ||
+      this.curToken.type === TokenType.EOF ||
+      this.curToken.type === TokenType.SEMICOLON
+    ) {
+      return new DebuggerStatement(null)
+    }
+
+    const argument = this.parseExpression()
+    if (!argument) {
+      this.error('Expected label expression after prakritiThink')
+      return null
+    }
+
+    return new DebuggerStatement(argument)
   }
 
   parseForInitializer() {

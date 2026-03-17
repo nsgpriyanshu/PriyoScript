@@ -1,0 +1,5 @@
+monalisa {
+  priyoKeep total = 10
+  prakritiThink "after-total"
+  priyoTell(total)
+}

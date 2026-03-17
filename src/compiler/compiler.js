@@ -65,6 +65,10 @@ class Compiler {
         this.compileContinueStatement()
         return
 
+      case 'DebuggerStatement':
+        this.compileDebuggerStatement(stmt)
+        return
+
       case 'FunctionDeclaration':
         this.compileFunctionDeclaration(stmt)
         return
@@ -392,6 +396,14 @@ class Compiler {
 
     const jumpIndex = this.emit(OpCode.JUMP, -1)
     loopContext.continueJumps.push({ jumpIndex, scopeDepthAtEmit: this.scopeDepth })
+  }
+
+  compileDebuggerStatement(stmt) {
+    const usesValue = Boolean(stmt.argument)
+    if (stmt.argument) {
+      this.compileExpression(stmt.argument)
+    }
+    this.emit(OpCode.DEBUGGER, { usesValue })
   }
 
   compileFunctionDeclaration(stmt) {

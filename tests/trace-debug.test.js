@@ -31,7 +31,7 @@ describe('Trace/debug tooling', () => {
       `
 monalisa {
   priyoKeep x = 10
-  priyoBreak("after-x")
+  prakritiThink "after-x"
   priyoTell(x)
 }
       `,

@@ -16,40 +16,40 @@ CLI (Command Line Interface) and REPL (Read-Eval-Print Loop) serve different dev
 
 #### CLI essentials
 
-| Command                 | Mode | Purpose                       |
-| ----------------------- | ---- | ----------------------------- |
-| `monalisa <file.priyo>` | CLI  | Run a PriyoScript file        |
-| `monalisa -repl`        | REPL | Start interactive shell       |
-| `monalisa -h`           | CLI  | Help and command list (alias) |
-| `monalisa -help`        | CLI  | Help and command list         |
-| `monalisa -v`           | CLI  | Version (alias)               |
-| `monalisa -version`     | CLI  | Version                       |
+| Command                  | Mode | Purpose                     |
+| ------------------------ | ---- | --------------------------- |
+| `monalisa <file.priyo>`  | CLI  | Run a PriyoScript file      |
+| `monalisa -repl`         | REPL | Start interactive shell     |
+| `monalisa -trace <file>` | CLI  | Run with opcode-level trace |
 
 #### Help and diagnostics
 
-| Command                    | Mode | Purpose                     |
-| -------------------------- | ---- | --------------------------- |
-| `monalisa -s`              | CLI  | Syntax quick help (alias)   |
-| `monalisa -syntax`         | CLI  | Syntax quick help           |
-| `monalisa -e`              | CLI  | Error code list (alias)     |
-| `monalisa -errors`         | CLI  | List error codes            |
-| `monalisa -x <CODE>`       | CLI  | Explain error code (alias)  |
-| `monalisa -explain <CODE>` | CLI  | Explain specific error code |
-| `monalisa -trace <file>`   | CLI  | Run with opcode-level trace |
+| Command                    | Mode | Purpose                       |
+| -------------------------- | ---- | ----------------------------- |
+| `monalisa -h`              | CLI  | Help and command list (alias) |
+| `monalisa -help`           | CLI  | Help and command list         |
+| `monalisa -v`              | CLI  | Version (alias)               |
+| `monalisa -version`        | CLI  | Version                       |
+| `monalisa -s`              | CLI  | Syntax quick help (alias)     |
+| `monalisa -syntax`         | CLI  | Syntax quick help             |
+| `monalisa -e`              | CLI  | Error code list (alias)       |
+| `monalisa -errors`         | CLI  | List error codes              |
+| `monalisa -x <CODE>`       | CLI  | Explain error code (alias)    |
+| `monalisa -explain <CODE>` | CLI  | Explain specific error code   |
 
 #### Trace helpers and filters
 
-| Command                           | Mode | Purpose                         |
-| --------------------------------- | ---- | ------------------------------- |
-| `monalisa -th`                    | CLI  | Trace help (alias)              |
-| `monalisa -trace-help`            | CLI  | Show trace filtering options    |
-| `monalisa -trace-format json`     | CLI  | JSON trace lines for tooling    |
-| `monalisa -trace-op ADD,SUB`      | CLI  | Trace only specific opcodes     |
-| `monalisa -trace-op-exclude HALT` | CLI  | Exclude opcodes from trace      |
-| `monalisa -trace-file modules`    | CLI  | Trace only matching file path   |
-| `monalisa -trace-frame <name>`    | CLI  | Trace only matching frame name  |
-| `monalisa -trace-stack-min 2`     | CLI  | Trace only when stack depth ≥ N |
-| `monalisa -trace-stack-max 6`     | CLI  | Trace only when stack depth ≤ N |
+| Command                           | Mode | Purpose                          |
+| --------------------------------- | ---- | -------------------------------- |
+| `monalisa -th`                    | CLI  | Trace help (alias)               |
+| `monalisa -trace-help`            | CLI  | Show trace filtering options     |
+| `monalisa -trace-format json`     | CLI  | JSON trace lines for tooling     |
+| `monalisa -trace-op ADD,SUB`      | CLI  | Trace only specific opcodes      |
+| `monalisa -trace-op-exclude HALT` | CLI  | Exclude opcodes from trace       |
+| `monalisa -trace-file modules`    | CLI  | Trace only matching file path    |
+| `monalisa -trace-frame <name>`    | CLI  | Trace only matching frame name   |
+| `monalisa -trace-stack-min 2`     | CLI  | Trace only when stack depth >= N |
+| `monalisa -trace-stack-max 6`     | CLI  | Trace only when stack depth < N  |
 
 ### REPL command summary
 
@@ -174,7 +174,7 @@ monalisa -trace -trace-format json -trace-frame "<main>" examples/basics/for-loo
 ```priyo
 monalisa {
   priyoKeep total = 10
-  priyoBreak("after-total")
+  prakritiThink("after-total")
   priyoTell(total)
 }
 ```
@@ -182,11 +182,11 @@ monalisa {
 Output (short):
 
 ```text
-[BREAK #1] after-total
+[BREAK #1] label="after-total"
 10
 ```
 
-Explanation: `priyoBreak(...)` marks checkpoints inside trace output.
+Explanation: `prakritiThink(...)` marks checkpoints inside trace output.
 
 ### Example 8: Useful REPL commands
 
@@ -256,7 +256,7 @@ Trace flow:
 
 1. You run with `-trace` (optional `-trace-*` filters).
 2. VM emits execution lines for each instruction.
-3. If `priyoBreak(...)` exists, VM prints a breakpoint marker.
+3. If `prakritiThink(...)` exists, VM prints a breakpoint marker.
 4. On runtime error, PriyoScript includes source-level stack context.
 5. Use trace output to isolate exact failing sequence.
 
@@ -310,5 +310,5 @@ Difference summary:
 
 <Callout title="Debug Tip" type="idea">
   Start with normal run. If behavior is unclear, rerun with `-trace` and place
-  `priyoBreak("checkpoint")` at important points.
+  `prakritiThink("checkpoint")` at important points.
 </Callout>
