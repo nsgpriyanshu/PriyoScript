@@ -84,6 +84,78 @@ describe('VM & Runtime', () => {
     expect(logSpy).toHaveBeenCalledWith(42)
   })
 
+  it('should execute task groups and wait for all task results', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask fetchName(name) {
+          prakritiPause priyoConcurrency.after(5, priyoEmpty)
+          priyoGiveBack name + " done"
+        }
+
+        priyoKeep group = priyoConcurrency.group("names")
+        priyoKeep first = group.run(fetchName, "mona")
+        priyoKeep second = group.run(fetchName, "piue")
+        priyoKeep results = prakritiPause group.all()
+
+        priyoTell(priyoArray.length(results))
+        priyoTell(prakritiPause first.join())
+        priyoTell(prakritiPause second.join())
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith(2)
+    expect(logSpy).toHaveBeenCalledWith('mona done')
+    expect(logSpy).toHaveBeenCalledWith('piue done')
+  })
+
+  it('should support cooperative cancellation through task group tokens', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask worker(name, token) {
+          prakritiPause priyoConcurrency.after(5, priyoEmpty)
+          token.throwIfCancelled()
+          priyoGiveBack name + " finished"
+        }
+
+        priyoKeep group = priyoConcurrency.group("cancel")
+        priyoKeep token = group.token()
+        priyoKeep task = group.run(worker, "mona", token)
+        group.cancel("stop now")
+
+        prakritiTry {
+          priyoTell(prakritiPause task.join())
+        } prakritiCatch (err) {
+          priyoTell(err.code)
+        }
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('PRUN-112')
+  })
+
+  it('should schedule delayed tasks inside a task group', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask greet(name) {
+          priyoGiveBack "Hello " + name
+        }
+
+        priyoKeep group = priyoConcurrency.group("scheduled")
+        priyoKeep task = group.schedule(5, greet, "piue")
+        priyoTell(task.status())
+        priyoTell(prakritiPause task.join())
+        priyoTell(task.status())
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('scheduled')
+    expect(logSpy).toHaveBeenCalledWith('Hello piue')
+    expect(logSpy).toHaveBeenCalledWith('fulfilled')
+  })
+
   it('should reject await usage outside async functions', async () => {
     const code = `
       monalisa {

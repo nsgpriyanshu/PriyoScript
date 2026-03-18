@@ -440,6 +440,33 @@ Rule:
 - `prakritiPause` is rejected inside non-async functions.
 - Top-level `prakritiPause` is allowed in `monalisa`/`lisaaBox` blocks.
 
+Structured concurrency helpers:
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask greet(name) {
+    priyoGiveBack "Hello " + name
+  }
+
+  priyoKeep group = priyoConcurrency.group("welcome")
+  priyoKeep task = group.schedule(10, greet, "mona")
+  priyoTell(prakritiPause task.join())
+}
+```
+
+Available runtime primitives:
+
+- `priyoConcurrency.group(label?)`
+- `group.run(task, ...args)`
+- `group.schedule(ms, task, ...args)`
+- `group.all()`
+- `group.token()`
+- `group.cancel(reason?)`
+- `task.join()`
+- `task.status()`
+- `token.throwIfCancelled()`
+- `priyoConcurrency.after(ms, value?)`
+
 ## 15. Scope Rules
 
 - `priyoChange` / `priyoPromise` are block-scoped.

@@ -2,7 +2,7 @@
 
 ## Current Version Snapshot
 
-- Version: `v1.10.0`
+- Version: `v1.13.0`
 - CI baseline:
   - `npm run lint` passes
   - `npm run test:run` passes
@@ -10,6 +10,7 @@
   - module system v3 (relative/absolute resolution, optional `index.priyo`, clearer not-found diagnostics)
   - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `prakritiThink(...)` debug hook)
   - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
+  - structured concurrency runtime (`priyoConcurrency.group()`, cooperative cancellation tokens, delayed scheduling)
   - golden CLI/REPL tests and deep module-cycle stress tests
   - web docs app (Next.js + Fumadocs) with stable/canary docs structure
   - separate web versioning/changelog flow via Cliff-Jumper
@@ -84,6 +85,8 @@ packages/
     index.js                # Built-in math package (phase-1 package system)
   decorators/
     index.js                # Built-in string/date/time formatting package
+  files/
+    index.js                # Built-in filesystem package
 examples/
   basics/
   io/
@@ -125,6 +128,7 @@ tests/
 | Functions    | Declaration, return, closures, recursion                                            | 100%   |
 | Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)     | 100%   |
 | Functions    | Generator-style yield (`prakritiGiveSome`) with `.next()` step objects              | 100%   |
+| Functions    | Structured concurrency (`priyoConcurrency` task groups, cancellation, scheduling)   | 100%   |
 | OOP          | Classes, object creation, `priyoSelf`                                               | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                       | 100%   |
 | OOP          | Static methods/fields and class fields                                              | 100%   |
@@ -266,6 +270,7 @@ tests/
   - current built-in packages:
     - `math` (arithmetic, stats, geometry, trig, random/rounding helpers)
     - `decorators` (string formatting + date/time helpers + numeric formatting)
+    - `files` (filesystem helpers: text, JSON, lines, copy/move/list/stat)
 - Array helpers:
   - `priyoArray.length(arr)`, `priyoArray.push(arr, value)`, `priyoArray.pop(arr)`
   - `priyoArray.at(arr, index)`, `priyoArray.slice(arr, start?, end?)`
@@ -292,6 +297,21 @@ tests/
   - autocomplete across commands, keywords, and in-scope bindings
 - Debug helper:
   - `prakritiThink("label")` emits a traceable breakpoint marker while keeping execution flow
+- Structured concurrency helper:
+  - `priyoConcurrency.group(label?)` creates a task group
+  - `priyoConcurrency.after(ms, value?)` resolves a value after a delay
+  - `priyoConcurrency.token(reason?)` creates a standalone cancellation token
+  - task group methods:
+    - `group.run(task, ...args)` starts a task immediately
+    - `group.schedule(ms, task, ...args)` starts a task after a delay
+    - `group.all()` waits for all started tasks
+    - `group.token()` returns the shared cancellation token
+    - `group.cancel(reason?)`, `group.isCancelled()`, `group.reason()`
+    - `group.pending()`, `group.doneCount()`, `group.size()`
+  - task handle methods:
+    - `task.join()`, `task.status()`, `task.label()`, `task.error()`, `task.cancel(reason?)`
+  - token methods:
+    - `token.cancel(reason?)`, `token.isCancelled()`, `token.reason()`, `token.throwIfCancelled()`
 
 ## 5. Runtime Model
 
@@ -301,6 +321,10 @@ tests/
   - async function declarations compile with async metadata
   - await expressions resolve via VM await opcode (`AWAIT_VALUE`)
   - top-level await is allowed in entry/module blocks
+- Stage-2 concurrency runtime support:
+  - task groups execute user callables in isolated child VM instances
+  - cancellation is cooperative through shared tokens
+  - delayed scheduling is host-timer based and returns task handles
 - Lexical environments are parent-linked.
 - Scope enter/exit is explicit (`ENTER_SCOPE` / `EXIT_SCOPE`).
 - Loop control jumps carry scope-unwind metadata to prevent leaks.
@@ -359,7 +383,8 @@ Current language/runtime limitations that still need dedicated implementation:
   - no rest/spread destructuring syntax yet
 - Async support is currently staged:
   - implemented: `prakritiWait` + `prakritiPause` + `prakritiGiveSome`
-  - planned: explicit concurrency primitives
+  - implemented: `priyoConcurrency` task groups, cancellation tokens, delayed scheduling
+  - remaining gap: no worker-thread or parallel CPU execution model
 - Type system remains fully dynamic:
   - no static type checker
   - no compile-time type validation
@@ -379,7 +404,7 @@ Current language/runtime limitations that still need dedicated implementation:
 Planned development sequence:
 
 1. Expand async/runtime model further:
-   - add explicit concurrency primitives (task groups, cancellation, scheduling).
+   - add task deadlines/timeouts, bounded queues, and higher-level task combinators.
 2. Harden distribution pipeline:
    - keep npm global installation and published package reliability production-ready.
    - add standalone installer/binary channels later after package lifecycle stabilizes.

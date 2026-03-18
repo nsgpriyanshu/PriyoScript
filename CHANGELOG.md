@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# [1.13.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.12.0...1.13.0) - (2026-03-18)
+
+## Features
+
+- Add structured concurrency runtime with `priyoConcurrency` task groups, cancellation tokens, and delayed scheduling
+- Add task group examples for run/cancel/schedule flows
+- Add `PRUN-112` task-cancelled runtime error
+
+## Non Code changes
+
+- Update architecture and stable docs for concurrency runtime
+- Update docs changelog for `v1.13.0`
+
 # [web-v0.12.0](https://github.com/nsgpriyanshu/PriyoScript/compare/web-v0.11.0...web-v0.12.0) - (2026-03-17)
 
 ## Bug Fixes

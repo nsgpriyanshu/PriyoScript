@@ -4,10 +4,10 @@ description: Recent PriyoScript updates that affect the language, runtime, and t
 icon: ScrollText
 ---
 
-## Latest changes (2026-03-17)
+## Latest changes (2026-03-18)
 
 <Callout title="Current release" type="success">
-  Latest version: 1.12.0
+  Latest version: 1.13.0
 </Callout>
 
 ### Language and runtime
@@ -18,6 +18,9 @@ icon: ScrollText
 - Improved diagnostics formatting to always show a caret span alongside context lines.
 - Added `files` package for filesystem helpers (read/write/list, JSON, copy/move).
 - Added `PRUN-111` for file-not-found errors in `files` APIs.
+- Added stage-2 structured concurrency through `priyoConcurrency`.
+- Added task groups, cooperative cancellation tokens, delayed scheduling, and task handles.
+- Added `PRUN-112` for cancelled task flows.
 
 ### Tooling and examples
 
@@ -25,6 +28,7 @@ icon: ScrollText
 - Updated CLI/REPL docs to reflect new aliases and debug hook usage.
 - Added advanced filesystem examples under `examples/packages/`.
 - Added new trace filters: `-trace-label` and `-trace-type`.
+- Added concurrency examples under `examples/functions/` for task groups, cancellation, and scheduling.
 
 <Callout title="Compatibility note" type="warn">
   If you previously used `priyoBreak("label")`, replace it with `prakritiThink "label"` or

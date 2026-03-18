@@ -193,6 +193,13 @@ function createPriyoArrayHelpers() {
   }
 }
 
+function createPriyoConcurrencyHost() {
+  return {
+    __priyoHostObject: true,
+    __priyoConcurrencyRoot: true,
+  }
+}
+
 function createBuiltins(io = {}) {
   const input = io.stdin || stdin
   const output = io.stdout || stdout
@@ -201,6 +208,7 @@ function createBuiltins(io = {}) {
   const priyoTell = createPriyoTell(logger)
   const priyoPackage = createPackageManager()
   const priyoArray = createPriyoArrayHelpers()
+  const priyoConcurrency = createPriyoConcurrencyHost()
 
   async function askUser(prompt = '') {
     const message = prompt == null ? '' : String(prompt)
@@ -220,6 +228,7 @@ function createBuiltins(io = {}) {
     priyoTell,
     priyoPackage,
     priyoArray,
+    priyoConcurrency,
 
     priyoListenSentence: async (prompt = '') => {
       return askUser(prompt)

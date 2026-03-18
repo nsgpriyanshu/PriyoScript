@@ -39,6 +39,7 @@ PriyoScript was inspired during a Data Analysis and Algorithm lab session. While
 13. Source-aware diagnostics with file/line context, caret span highlighting, typo suggestions, and cleaner stack previews.
 14. Trace tooling with breakpoint labels (`prakritiThink`) and filterable `-trace-*` options.
 15. OOP hardening: stricter constructor-chain validation and declared-member assignment checks.
+16. Structured concurrency primitives with task groups, cooperative cancellation, and delayed scheduling via `priyoConcurrency`.
 
 > [!IMPORTANT]
 > PriyoScript is currently in early development, and the syntax and features are subject to change as I continue to build and refine the language. It still lacks many features and has some quirks, but the core syntax and design principles are in place.
@@ -122,7 +123,7 @@ PriyoScript is inspired by multiple mainstream languages but intentionally avoid
 | Bytecode VM runtime                    | Yes          | No    | Yes (engine) | Yes (JVM) | Yes (custom VM)                     |
 | Built-in package manager               | Yes          | No    | Yes          | Yes       | Yes (phase-1 built-ins)             |
 | Large standard library                 | Yes          | Low   | Yes          | Yes       | No (minimal now)                    |
-| Concurrency model                      | Yes          | Yes   | Yes          | Yes       | Not yet                             |
+| Concurrency model                      | Yes          | Yes   | Yes          | Yes       | Stage-2 structured concurrency      |
 
 ### Design Philosophy
 

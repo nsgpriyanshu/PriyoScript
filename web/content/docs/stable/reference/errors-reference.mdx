@@ -84,6 +84,7 @@ Docs: https://priyyoscript.vercel.app/docs/stable/reference/errors-reference#pru
 | `PRUN-109` | runtime | user     | Unknown package                             |
 | `PRUN-110` | runtime | user     | Unknown module                              |
 | `PRUN-111` | runtime | user     | File not found                              |
+| `PRUN-112` | runtime | user     | Task cancelled                              |
 | `PENG-001` | core    | engine   | Internal engine error                       |
 
 ## Syntax Errors
@@ -426,6 +427,48 @@ monalisa {
   }
 }
 ```
+</Callout>
+
+### `PRUN-112` Task cancelled
+
+<Callout title="Incorrect" type="error">
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(token) {
+    token.throwIfCancelled()
+    priyoGiveBack "done"
+  }
+
+priyoKeep group = priyoConcurrency.group("cancel")
+priyoKeep token = group.token()
+priyoKeep task = group.run(worker, token)
+group.cancel("Stopped by user")
+priyoTell(prakritiPause task.join())
+}
+
+````
+</Callout>
+<Callout title="Correct" type="success">
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(token) {
+    token.throwIfCancelled()
+    priyoGiveBack "done"
+  }
+
+  priyoKeep group = priyoConcurrency.group("cancel")
+  priyoKeep token = group.token()
+  priyoKeep task = group.run(worker, token)
+  group.cancel("Stopped by user")
+
+  prakritiTry {
+    priyoTell(prakritiPause task.join())
+  } prakritiCatch (err) {
+    priyoTell(err.code)
+  }
+}
+````
+
 </Callout>
 
 ## Engine Error

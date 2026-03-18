@@ -24,6 +24,7 @@ Functions are reusable blocks of logic that improve readability, reduce duplicat
 | Closure function           | returns inner function           | Inner function remembers outer variables.           |
 | Async function (stage-1)   | `prakritiWait lisaaTask ...`     | Enables `prakritiPause` inside the function body.   |
 | Generator-yield (stage-1)  | `prakritiGiveSome value`         | Produces step values consumable via `next()`.       |
+| Structured concurrency     | `priyoConcurrency.group(...)`    | Runs async tasks with group wait/cancel semantics.  |
 
 ## Syntax Quick Reference
 
@@ -75,6 +76,91 @@ Output:
 
 ```text
 Hi mona
+```
+
+## Structured Concurrency (Task Groups, Cancellation, Scheduling)
+
+`priyoConcurrency` extends async flow with grouped tasks, cooperative cancellation, and delayed
+task scheduling. A task group keeps related work together so you can wait for all tasks, cancel
+the whole unit, and inspect task state in one place.
+
+### Example 1: Run tasks in a group
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask fetchName(name) {
+    prakritiPause priyoConcurrency.after(5, priyoEmpty)
+    priyoGiveBack name + " done"
+  }
+
+  priyoKeep group = priyoConcurrency.group("names")
+  priyoKeep first = group.run(fetchName, "mona")
+  priyoKeep second = group.run(fetchName, "piue")
+
+  priyoTell(priyoArray.length(prakritiPause group.all()))
+  priyoTell(prakritiPause first.join())
+}
+```
+
+Output:
+
+```text
+2
+mona done
+```
+
+### Example 2: Cooperative cancellation
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(name, token) {
+    prakritiPause priyoConcurrency.after(5, priyoEmpty)
+    token.throwIfCancelled()
+    priyoGiveBack name + " finished"
+  }
+
+  priyoKeep group = priyoConcurrency.group("cancel")
+  priyoKeep token = group.token()
+  priyoKeep task = group.run(worker, "mona", token)
+  group.cancel("stop now")
+
+  prakritiTry {
+    priyoTell(prakritiPause task.join())
+  } prakritiCatch (err) {
+    priyoTell(err.code)
+  }
+}
+```
+
+Output:
+
+```text
+PRUN-112
+```
+
+### Example 3: Delayed scheduling
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask greet(name) {
+    priyoGiveBack "Hello " + name
+  }
+
+  priyoKeep group = priyoConcurrency.group("scheduled")
+  priyoKeep task = group.schedule(5, greet, "piue")
+
+  priyoTell(task.status())
+  priyoTell(prakritiPause task.join())
+  priyoTell(task.status())
+}
+```
+
+Output:
+
+```text
+scheduled
+Hello piue
+fulfilled
 ```
 
 ## 1. Function Without Return Value

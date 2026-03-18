@@ -1,6 +1,7 @@
 const { OpCode } = require('../compiler/opcodes')
 const { Environment } = require('../runtime/environment')
 const { createBuiltins } = require('../runtime/builtins')
+const { createRuntimeError, ErrorCodes } = require('../errors')
 
 class PriyoThrownValue {
   constructor(value) {
@@ -659,6 +660,22 @@ class VM {
       return this.callArrayHigherOrderHelper(methodName, args)
     }
 
+    if (receiver && receiver.__priyoConcurrencyRoot) {
+      return this.callConcurrencyRootMethod(methodName, args)
+    }
+
+    if (receiver && receiver.__priyoConcurrencyKind === 'group') {
+      return this.callConcurrencyGroupMethod(receiver, methodName, args)
+    }
+
+    if (receiver && receiver.__priyoConcurrencyKind === 'task') {
+      return this.callConcurrencyTaskMethod(receiver, methodName, args)
+    }
+
+    if (receiver && receiver.__priyoConcurrencyKind === 'token') {
+      return this.callConcurrencyTokenMethod(receiver, methodName, args)
+    }
+
     if (
       receiver &&
       (receiver.__priyoHostObject || typeof receiver === 'function' || typeof receiver === 'object')
@@ -753,6 +770,309 @@ class VM {
     }
 
     throw new Error(`Unknown priyoArray helper: ${methodName}`)
+  }
+
+  async callConcurrencyRootMethod(methodName, args) {
+    switch (methodName) {
+      case 'group': {
+        const label = args.length > 0 && args[0] != null ? String(args[0]) : ''
+        return this.createTaskGroup(label)
+      }
+      case 'after': {
+        const delayMs = this.normalizeDelayMs(args[0], 'priyoConcurrency.after')
+        const value = args.length >= 2 ? args[1] : null
+        return new Promise(resolve => {
+          setTimeout(() => resolve(value), delayMs)
+        })
+      }
+      case 'token': {
+        const reason = args.length > 0 && args[0] != null ? String(args[0]) : 'Task cancelled'
+        return this.createCancellationToken(reason)
+      }
+      default:
+        throw new Error(`Method "${methodName}" not found on priyoConcurrency`)
+    }
+  }
+
+  async callConcurrencyGroupMethod(group, methodName, args) {
+    switch (methodName) {
+      case 'token':
+        return group.token
+
+      case 'run':
+        return this.startGroupTask(group, args, 0)
+
+      case 'schedule': {
+        const delayMs = this.normalizeDelayMs(args[0], 'group.schedule')
+        return this.startGroupTask(group, args.slice(1), delayMs)
+      }
+
+      case 'all':
+        return Promise.all(group.tasks.map(task => task.promise))
+
+      case 'cancel': {
+        const reason =
+          args.length > 0 && args[0] != null ? String(args[0]) : group.token.defaultReason
+        this.cancelToken(group.token, reason)
+        return null
+      }
+
+      case 'isCancelled':
+        return group.token.cancelled
+
+      case 'reason':
+        return group.token.reason
+
+      case 'pending':
+        return group.tasks.filter(task => task.state === 'pending' || task.state === 'scheduled')
+          .length
+
+      case 'doneCount':
+        return group.tasks.filter(
+          task =>
+            task.state === 'fulfilled' || task.state === 'rejected' || task.state === 'cancelled',
+        ).length
+
+      case 'size':
+        return group.tasks.length
+
+      default:
+        throw new Error(`Method "${methodName}" not found on task group`)
+    }
+  }
+
+  async callConcurrencyTaskMethod(task, methodName, args) {
+    switch (methodName) {
+      case 'join':
+        return task.promise
+      case 'status':
+        return task.state
+      case 'label':
+        return task.label
+      case 'error':
+        return task.error ? this.buildCaughtErrorPayload(task.error) : null
+      case 'cancel': {
+        const reason =
+          args.length > 0 && args[0] != null ? String(args[0]) : task.group.token.defaultReason
+        this.cancelToken(task.group.token, reason)
+        return null
+      }
+      default:
+        throw new Error(`Method "${methodName}" not found on task handle`)
+    }
+  }
+
+  async callConcurrencyTokenMethod(token, methodName, args) {
+    switch (methodName) {
+      case 'cancel': {
+        const reason = args.length > 0 && args[0] != null ? String(args[0]) : token.defaultReason
+        this.cancelToken(token, reason)
+        return null
+      }
+      case 'isCancelled':
+        return token.cancelled
+      case 'reason':
+        return token.reason
+      case 'throwIfCancelled':
+        if (token.cancelled) {
+          throw this.createTaskCancelledError(token.reason, token.label || '')
+        }
+        return null
+      default:
+        throw new Error(`Method "${methodName}" not found on cancellation token`)
+    }
+  }
+
+  createTaskGroup(label = '') {
+    const token = this.createCancellationToken(
+      label ? `Task group "${label}" was cancelled` : 'Task group was cancelled',
+      label,
+    )
+    return {
+      __priyoHostObject: true,
+      __priyoConcurrencyKind: 'group',
+      label,
+      token,
+      tasks: [],
+      createdAt: Date.now(),
+    }
+  }
+
+  createCancellationToken(defaultReason = 'Task cancelled', label = '') {
+    return {
+      __priyoHostObject: true,
+      __priyoConcurrencyKind: 'token',
+      defaultReason,
+      label,
+      cancelled: false,
+      reason: null,
+      cancelledAt: null,
+    }
+  }
+
+  cancelToken(token, reason) {
+    if (token.cancelled) return
+    token.cancelled = true
+    token.reason = reason || token.defaultReason
+    token.cancelledAt = Date.now()
+  }
+
+  startGroupTask(group, args, delayMs) {
+    if (args.length === 0) {
+      throw new Error('Task group run/schedule requires a callable task')
+    }
+
+    const [callable, ...callArgs] = args
+    const task = {
+      __priyoHostObject: true,
+      __priyoConcurrencyKind: 'task',
+      group,
+      label: this.describeTaskCallable(callable),
+      state: delayMs > 0 ? 'scheduled' : 'pending',
+      startedAt: null,
+      finishedAt: null,
+      error: null,
+      result: null,
+      promise: null,
+    }
+
+    const executor = async () => {
+      if (group.token.cancelled) {
+        task.state = 'cancelled'
+        task.finishedAt = Date.now()
+        throw this.createTaskCancelledError(group.token.reason, task.label)
+      }
+
+      task.state = 'pending'
+      task.startedAt = Date.now()
+      try {
+        const result = await this.executeCallableInChild(callable, callArgs, task.label)
+        if (group.token.cancelled) {
+          task.state = 'cancelled'
+          task.finishedAt = Date.now()
+          throw this.createTaskCancelledError(group.token.reason, task.label)
+        }
+        task.state = 'fulfilled'
+        task.result = result == null ? null : result
+        task.finishedAt = Date.now()
+        return task.result
+      } catch (error) {
+        task.error = error
+        task.finishedAt = Date.now()
+        if (task.state !== 'cancelled') {
+          task.state = this.isTaskCancelledError(error) ? 'cancelled' : 'rejected'
+        }
+        throw error
+      }
+    }
+
+    task.promise =
+      delayMs > 0
+        ? new Promise((resolve, reject) => {
+            setTimeout(() => {
+              executor().then(resolve).catch(reject)
+            }, delayMs)
+          })
+        : executor()
+
+    group.tasks.push(task)
+    return task
+  }
+
+  normalizeDelayMs(value, methodName) {
+    if (!Number.isInteger(value) || value < 0) {
+      throw new Error(`${methodName} expects a non-negative integer delay in milliseconds`)
+    }
+    return value
+  }
+
+  describeTaskCallable(callable) {
+    if (callable && callable.type === 'user_function') {
+      return callable.name || 'task'
+    }
+    if (callable && callable.type === 'bound_method') {
+      return callable.methodName || 'task'
+    }
+    if (callable && callable.type === 'bound_super_method') {
+      return callable.methodName || 'task'
+    }
+    if (callable && callable.type === 'bound_static_method') {
+      return callable.methodName || 'task'
+    }
+    if (typeof callable === 'function' && callable.name) {
+      return callable.name
+    }
+    return 'task'
+  }
+
+  createChildVm(environment) {
+    return new VM([], {
+      environment,
+      builtins: this.builtins,
+      moduleLoader: this.moduleLoader,
+      currentFile: this.currentFile,
+      moduleContext: this.moduleContext,
+      trace: this.traceEnabled,
+      traceLogger: this.traceLogger,
+      traceFormat: this.traceFormat,
+      traceFilter: this.traceFilter,
+      debugSessionId: this.debugSessionId,
+      debugHooks: this.debugHooks,
+    })
+  }
+
+  async executeCallableInChild(callee, args, frameLabel) {
+    if (typeof callee === 'function') {
+      return await callee(...args)
+    }
+
+    const child = this.createChildVm(this.environment)
+
+    if (callee && callee.type === 'bound_method') {
+      return child.callMethod(callee.receiver, callee.methodName, args)
+    }
+    if (callee && callee.type === 'bound_super_method') {
+      return child.callMethod(callee.receiver, callee.methodName, args, callee.startClass)
+    }
+    if (callee && callee.type === 'bound_static_method') {
+      return child.callStaticMethod(
+        callee.classRef,
+        callee.methodName,
+        args,
+        callee.startClass || null,
+      )
+    }
+    if (callee && callee.type === 'user_function') {
+      if (args.length !== callee.params.length) {
+        throw new Error(
+          `Function "${frameLabel}" expects ${callee.params.length} args but got ${args.length}`,
+        )
+      }
+      const callEnv = new Environment(callee.closure, { isFunctionScope: true })
+      for (let i = 0; i < callee.params.length; i++) {
+        callEnv.define(callee.params[i], args[i], 'let')
+      }
+      return child.executeUserCallable(callee, callEnv, `task:${frameLabel}`)
+    }
+
+    throw new Error(`Unknown callable: ${frameLabel}`)
+  }
+
+  createTaskCancelledError(reason, label = '') {
+    return createRuntimeError(
+      label ? `Task "${label}" cancelled: ${reason}` : `Task cancelled: ${reason}`,
+      {
+        code: ErrorCodes.RUNTIME.TASK_CANCELLED,
+        metadata: {
+          taskLabel: label || null,
+          reason,
+        },
+      },
+    )
+  }
+
+  isTaskCancelledError(error) {
+    return Boolean(error && error.code === ErrorCodes.RUNTIME.TASK_CANCELLED)
   }
 
   async invokeCallableValue(callee, args) {

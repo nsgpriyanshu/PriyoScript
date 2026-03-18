@@ -1,0 +1,12 @@
+monalisa {
+  prakritiWait lisaaTask greetLater(name) {
+    priyoGiveBack "Hello " + name
+  }
+
+  priyoKeep group = priyoConcurrency.group("scheduled")
+  priyoKeep task = group.schedule(15, greetLater, "piue")
+
+  priyoTell(task.status())
+  priyoTell(prakritiPause task.join())
+  priyoTell(task.status())
+}

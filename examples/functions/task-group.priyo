@@ -1,0 +1,14 @@
+monalisa {
+  prakritiWait lisaaTask fetchScore(name) {
+    prakritiPause priyoConcurrency.after(10, priyoEmpty)
+    priyoGiveBack name + " ready"
+  }
+
+  priyoKeep group = priyoConcurrency.group("scores")
+  priyoKeep first = group.run(fetchScore, "mona")
+  priyoKeep second = group.run(fetchScore, "piue")
+
+  priyoTell(prakritiPause first.join())
+  priyoTell(prakritiPause second.join())
+  priyoTell(priyoArray.length(prakritiPause group.all()))
+}

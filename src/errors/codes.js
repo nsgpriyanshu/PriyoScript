@@ -33,6 +33,7 @@ const ErrorCodes = {
     UNKNOWN_PACKAGE: 'PRUN-109',
     UNKNOWN_MODULE: 'PRUN-110',
     FILE_NOT_FOUND: 'PRUN-111',
+    TASK_CANCELLED: 'PRUN-112',
   },
   ENGINE: {
     INTERNAL: 'PENG-001',

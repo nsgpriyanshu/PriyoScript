@@ -63,6 +63,10 @@ function humanizeError(input) {
       message: 'So Rude - The requested file does not exist.',
       tip: 'Check the path or use `files.exists(path)` before reading.',
     },
+    [ErrorCodes.RUNTIME.TASK_CANCELLED]: {
+      message: 'Task stopped before finishing.',
+      tip: 'Check whether the task group or cancellation token was cancelled before the task completed.',
+    },
     [ErrorCodes.RUNTIME.UNKNOWN_CALLABLE]: {
       message: 'So Disrespectfull - A function or method call could not be resolved.',
       tip: 'Check spelling and make sure the function/method exists before calling it.',
