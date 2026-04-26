@@ -1,0 +1,20 @@
+monalisa {
+  prakritiWait lisaaTask worker(name, token) {
+    prakritiPause priyoConcurrency.after(20, priyoEmpty)
+    token.throwIfCancelled()
+    priyoGiveBack name + " finished"
+  }
+
+  priyoKeep group = priyoConcurrency.group("deadline-demo")
+  priyoKeep token = group.token()
+  group.deadline(5, "Request timed out")
+
+  priyoKeep task = group.run(worker, "sync-job", token)
+
+  prakritiTry {
+    priyoTell(prakritiPause task.join())
+  } prakritiCatch (err) {
+    priyoTell(err.code)
+    priyoTell(group.reason())
+  }
+}

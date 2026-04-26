@@ -457,15 +457,49 @@ monalisa {
 Available runtime primitives:
 
 - `priyoConcurrency.group(label?)`
+- `priyoConcurrency.queue(limit, label?)`
+- `priyoConcurrency.token(reason?)`
+- `priyoConcurrency.after(ms, value?)`
 - `group.run(task, ...args)`
 - `group.schedule(ms, task, ...args)`
 - `group.all()`
+- `group.allSettled()`
+- `group.race()`
+- `group.any()`
+- `group.deadline(ms, reason?)`
 - `group.token()`
 - `group.cancel(reason?)`
+- `group.isCancelled()`
+- `group.reason()`
+- `group.pending()`
+- `group.doneCount()`
+- `group.size()`
+- `queue.run(task, ...args)`
+- `queue.schedule(ms, task, ...args)`
+- `queue.all()`
+- `queue.allSettled()`
+- `queue.race()`
+- `queue.any()`
+- `queue.deadline(ms, reason?)`
+- `queue.token()`
+- `queue.cancel(reason?)`
+- `queue.isCancelled()`
+- `queue.reason()`
+- `queue.pending()`
+- `queue.doneCount()`
+- `queue.size()`
+- `queue.queued()`
+- `queue.active()`
+- `queue.limit()`
 - `task.join()`
 - `task.status()`
+- `task.label()`
+- `task.error()`
+- `task.cancel(reason?)`
+- `token.cancel(reason?)`
+- `token.isCancelled()`
+- `token.reason()`
 - `token.throwIfCancelled()`
-- `priyoConcurrency.after(ms, value?)`
 
 ## 15. Scope Rules
 

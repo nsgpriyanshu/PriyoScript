@@ -156,6 +156,108 @@ describe('VM & Runtime', () => {
     expect(logSpy).toHaveBeenCalledWith('fulfilled')
   })
 
+  it('should support concurrency combinators for groups', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask delayedValue(name, delay) {
+          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          priyoGiveBack name
+        }
+
+        prakritiWait lisaaTask delayedBoom(delay) {
+          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          prakritiThrow "boom"
+        }
+
+        priyoKeep raceGroup = priyoConcurrency.group("race")
+        raceGroup.run(delayedValue, "slow", 10)
+        raceGroup.run(delayedValue, "fast", 1)
+        priyoTell(prakritiPause raceGroup.race())
+
+        priyoKeep anyGroup = priyoConcurrency.group("any")
+        anyGroup.run(delayedBoom, 1)
+        anyGroup.run(delayedValue, "winner", 5)
+        priyoTell(prakritiPause anyGroup.any())
+
+        priyoKeep settleGroup = priyoConcurrency.group("settled")
+        settleGroup.run(delayedValue, "ok", 1)
+        settleGroup.run(delayedBoom, 2)
+        priyoKeep settled = prakritiPause settleGroup.allSettled()
+        priyoTell(settled[0].status)
+        priyoTell(settled[1].status)
+        priyoTell(settled[1].reason.message)
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('fast')
+    expect(logSpy).toHaveBeenCalledWith('winner')
+    expect(logSpy).toHaveBeenCalledWith('fulfilled')
+    expect(logSpy).toHaveBeenCalledWith('rejected')
+    expect(logSpy).toHaveBeenCalledWith('Unhandled throw value: boom')
+  })
+
+  it('should cancel scheduled group tasks immediately when a deadline is reached', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask worker(token) {
+          prakritiPause priyoConcurrency.after(20, priyoEmpty)
+          token.throwIfCancelled()
+          priyoGiveBack "done"
+        }
+
+        priyoKeep group = priyoConcurrency.group("deadline")
+        priyoKeep token = group.token()
+        group.deadline(5, "deadline reached")
+        priyoKeep task = group.schedule(20, worker, token)
+        prakritiPause priyoConcurrency.after(10, priyoEmpty)
+        priyoTell(task.status())
+        priyoTell(group.reason())
+
+        prakritiTry {
+          priyoTell(prakritiPause task.join())
+        } prakritiCatch (err) {
+          priyoTell(err.code)
+        }
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('cancelled')
+    expect(logSpy).toHaveBeenCalledWith('deadline reached')
+    expect(logSpy).toHaveBeenCalledWith('PRUN-112')
+  })
+
+  it('should enforce bounded task queues and expose queue state', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask worker(name, delay) {
+          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          priyoGiveBack name
+        }
+
+        priyoKeep queue = priyoConcurrency.queue(1, "serial")
+        queue.run(worker, "first", 5)
+        queue.run(worker, "second", 5)
+
+        priyoTell(queue.limit())
+        priyoTell(queue.active())
+        priyoTell(queue.queued())
+
+        priyoKeep results = prakritiPause queue.all()
+        priyoTell(results[0] + "-" + results[1])
+        priyoTell(queue.doneCount())
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith(1)
+    expect(logSpy).toHaveBeenCalledWith(1)
+    expect(logSpy).toHaveBeenCalledWith(1)
+    expect(logSpy).toHaveBeenCalledWith('first-second')
+    expect(logSpy).toHaveBeenCalledWith(2)
+  })
+
   it('should reject await usage outside async functions', async () => {
     const code = `
       monalisa {

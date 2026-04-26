@@ -658,6 +658,10 @@ class VM {
       return this.callConcurrencyGroupMethod(receiver, methodName, args)
     }
 
+    if (receiver && receiver.__priyoConcurrencyKind === 'queue') {
+      return this.callConcurrencyQueueMethod(receiver, methodName, args)
+    }
+
     if (receiver && receiver.__priyoConcurrencyKind === 'task') {
       return this.callConcurrencyTaskMethod(receiver, methodName, args)
     }
@@ -768,6 +772,11 @@ class VM {
         const label = args.length > 0 && args[0] != null ? String(args[0]) : ''
         return this.createTaskGroup(label)
       }
+      case 'queue': {
+        const concurrency = this.normalizeQueueConcurrency(args[0])
+        const label = args.length > 1 && args[1] != null ? String(args[1]) : ''
+        return this.createTaskQueue(concurrency, label)
+      }
       case 'after': {
         const delayMs = this.normalizeDelayMs(args[0], 'priyoConcurrency.after')
         const value = args.length >= 2 ? args[1] : null
@@ -800,6 +809,24 @@ class VM {
       case 'all':
         return Promise.all(group.tasks.map(task => task.promise))
 
+      case 'allSettled':
+        return this.waitForAllSettled(group.tasks)
+
+      case 'race':
+        return this.waitForRace(group.tasks, 'group.race')
+
+      case 'any':
+        return this.waitForAny(group.tasks, 'group.any')
+
+      case 'deadline': {
+        const delayMs = this.normalizeDelayMs(args[0], 'group.deadline')
+        const reason =
+          args.length > 1 && args[1] != null
+            ? String(args[1])
+            : `Task group "${group.label || 'group'}" deadline exceeded`
+        return this.scheduleCancellation(group, delayMs, reason)
+      }
+
       case 'cancel': {
         const reason =
           args.length > 0 && args[0] != null ? String(args[0]) : group.token.defaultReason
@@ -828,6 +855,77 @@ class VM {
 
       default:
         throw new Error(`Method "${methodName}" not found on task group`)
+    }
+  }
+
+  async callConcurrencyQueueMethod(queue, methodName, args) {
+    switch (methodName) {
+      case 'token':
+        return queue.token
+
+      case 'run':
+        return this.startQueueTask(queue, args, 0)
+
+      case 'schedule': {
+        const delayMs = this.normalizeDelayMs(args[0], 'queue.schedule')
+        return this.startQueueTask(queue, args.slice(1), delayMs)
+      }
+
+      case 'all':
+        return Promise.all(queue.tasks.map(task => task.promise))
+
+      case 'allSettled':
+        return this.waitForAllSettled(queue.tasks)
+
+      case 'race':
+        return this.waitForRace(queue.tasks, 'queue.race')
+
+      case 'any':
+        return this.waitForAny(queue.tasks, 'queue.any')
+
+      case 'deadline': {
+        const delayMs = this.normalizeDelayMs(args[0], 'queue.deadline')
+        const reason =
+          args.length > 1 && args[1] != null
+            ? String(args[1])
+            : `Task queue "${queue.label || 'queue'}" deadline exceeded`
+        return this.scheduleCancellation(queue, delayMs, reason)
+      }
+
+      case 'cancel': {
+        const reason =
+          args.length > 0 && args[0] != null ? String(args[0]) : queue.token.defaultReason
+        this.cancelToken(queue.token, reason)
+        return null
+      }
+
+      case 'isCancelled':
+        return queue.token.cancelled
+
+      case 'reason':
+        return queue.token.reason
+
+      case 'pending':
+        return queue.tasks.filter(task => task.state === 'pending' || task.state === 'scheduled')
+          .length
+
+      case 'doneCount':
+        return queue.tasks.filter(task => this.isTaskDoneState(task.state)).length
+
+      case 'size':
+        return queue.tasks.length
+
+      case 'queued':
+        return queue.tasks.filter(task => task.state === 'queued').length
+
+      case 'active':
+        return queue.activeCount
+
+      case 'limit':
+        return queue.concurrency
+
+      default:
+        throw new Error(`Method "${methodName}" not found on task queue`)
     }
   }
 
@@ -878,14 +976,38 @@ class VM {
       label ? `Task group "${label}" was cancelled` : 'Task group was cancelled',
       label,
     )
-    return {
+    const group = {
       __priyoHostObject: true,
       __priyoConcurrencyKind: 'group',
       label,
       token,
       tasks: [],
       createdAt: Date.now(),
+      deadlineTimer: null,
     }
+    token.owners.push(group)
+    return group
+  }
+
+  createTaskQueue(concurrency, label = '') {
+    const token = this.createCancellationToken(
+      label ? `Task queue "${label}" was cancelled` : 'Task queue was cancelled',
+      label,
+    )
+    const queue = {
+      __priyoHostObject: true,
+      __priyoConcurrencyKind: 'queue',
+      label,
+      concurrency,
+      token,
+      tasks: [],
+      backlog: [],
+      activeCount: 0,
+      createdAt: Date.now(),
+      deadlineTimer: null,
+    }
+    token.owners.push(queue)
+    return queue
   }
 
   createCancellationToken(defaultReason = 'Task cancelled', label = '') {
@@ -897,6 +1019,7 @@ class VM {
       cancelled: false,
       reason: null,
       cancelledAt: null,
+      owners: [],
     }
   }
 
@@ -905,6 +1028,9 @@ class VM {
     token.cancelled = true
     token.reason = reason || token.defaultReason
     token.cancelledAt = Date.now()
+    for (const owner of token.owners || []) {
+      this.handleTokenCancellationSideEffects(owner, token.reason)
+    }
   }
 
   startGroupTask(group, args, delayMs) {
@@ -924,6 +1050,8 @@ class VM {
       error: null,
       result: null,
       promise: null,
+      timerId: null,
+      rejectJoin: null,
     }
 
     const executor = async () => {
@@ -956,22 +1084,137 @@ class VM {
       }
     }
 
-    task.promise =
-      delayMs > 0
-        ? new Promise((resolve, reject) => {
-            setTimeout(() => {
-              executor().then(resolve).catch(reject)
-            }, delayMs)
-          })
-        : executor()
+    if (delayMs > 0) {
+      task.promise = new Promise((resolve, reject) => {
+        task.rejectJoin = reject
+        task.timerId = setTimeout(() => {
+          task.timerId = null
+          executor().then(resolve).catch(reject)
+        }, delayMs)
+      })
+    } else {
+      task.promise = executor()
+    }
+    task.promise.catch(() => {})
 
     group.tasks.push(task)
     return task
   }
 
+  startQueueTask(queue, args, delayMs) {
+    if (args.length === 0) {
+      throw new Error('Task queue run/schedule requires a callable task')
+    }
+
+    const [callable, ...callArgs] = args
+    const task = {
+      __priyoHostObject: true,
+      __priyoConcurrencyKind: 'task',
+      queue,
+      group: queue,
+      label: this.describeTaskCallable(callable),
+      state: delayMs > 0 ? 'scheduled' : 'queued',
+      startedAt: null,
+      finishedAt: null,
+      error: null,
+      result: null,
+      promise: null,
+      timerId: null,
+      rejectJoin: null,
+    }
+
+    const executor = async () => {
+      if (queue.token.cancelled) {
+        task.state = 'cancelled'
+        task.finishedAt = Date.now()
+        throw this.createTaskCancelledError(queue.token.reason, task.label)
+      }
+
+      queue.activeCount++
+      task.state = 'pending'
+      task.startedAt = Date.now()
+      try {
+        const result = await this.executeCallableInChild(callable, callArgs, task.label)
+        if (queue.token.cancelled) {
+          task.state = 'cancelled'
+          task.finishedAt = Date.now()
+          throw this.createTaskCancelledError(queue.token.reason, task.label)
+        }
+        task.state = 'fulfilled'
+        task.result = result == null ? null : result
+        task.finishedAt = Date.now()
+        return task.result
+      } catch (error) {
+        task.error = error
+        task.finishedAt = Date.now()
+        if (task.state !== 'cancelled') {
+          task.state = this.isTaskCancelledError(error) ? 'cancelled' : 'rejected'
+        }
+        throw error
+      } finally {
+        queue.activeCount = Math.max(0, queue.activeCount - 1)
+        this.pumpTaskQueue(queue)
+      }
+    }
+
+    task.promise = new Promise((resolve, reject) => {
+      task.rejectJoin = reject
+      task.launch = () => {
+        executor().then(resolve).catch(reject)
+      }
+    })
+    task.promise.catch(() => {})
+
+    const enqueue = () => {
+      if (queue.token.cancelled) {
+        task.state = 'cancelled'
+        task.finishedAt = Date.now()
+        if (typeof task.rejectJoin === 'function') {
+          task.rejectJoin(this.createTaskCancelledError(queue.token.reason, task.label))
+          task.rejectJoin = null
+        }
+        return
+      }
+      queue.backlog.push(task)
+      task.state = 'queued'
+      this.pumpTaskQueue(queue)
+    }
+
+    if (delayMs > 0) {
+      task.timerId = setTimeout(() => {
+        task.timerId = null
+        enqueue()
+      }, delayMs)
+    } else {
+      enqueue()
+    }
+
+    queue.tasks.push(task)
+    return task
+  }
+
+  pumpTaskQueue(queue) {
+    while (
+      !queue.token.cancelled &&
+      queue.activeCount < queue.concurrency &&
+      queue.backlog.length > 0
+    ) {
+      const task = queue.backlog.shift()
+      if (!task || task.state === 'cancelled') continue
+      task.launch()
+    }
+  }
+
   normalizeDelayMs(value, methodName) {
     if (!Number.isInteger(value) || value < 0) {
       throw new Error(`${methodName} expects a non-negative integer delay in milliseconds`)
+    }
+    return value
+  }
+
+  normalizeQueueConcurrency(value) {
+    if (!Number.isInteger(value) || value <= 0) {
+      throw new Error('priyoConcurrency.queue expects a positive integer concurrency limit')
     }
     return value
   }
@@ -1063,6 +1306,84 @@ class VM {
 
   isTaskCancelledError(error) {
     return Boolean(error && error.code === ErrorCodes.RUNTIME.TASK_CANCELLED)
+  }
+
+  isTaskDoneState(state) {
+    return state === 'fulfilled' || state === 'rejected' || state === 'cancelled'
+  }
+
+  waitForRace(tasks, methodName) {
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      throw new Error(`${methodName} requires at least one task`)
+    }
+    return Promise.race(tasks.map(task => task.promise))
+  }
+
+  waitForAny(tasks, methodName) {
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      throw new Error(`${methodName} requires at least one task`)
+    }
+    return Promise.any(tasks.map(task => task.promise)).catch(() => {
+      throw new Error(`${methodName} could not find a fulfilled task result`)
+    })
+  }
+
+  waitForAllSettled(tasks) {
+    return Promise.all(
+      tasks.map(task =>
+        task.promise.then(
+          value => ({
+            __priyoHostObject: true,
+            status: 'fulfilled',
+            value: value == null ? null : value,
+            reason: null,
+          }),
+          error => ({
+            __priyoHostObject: true,
+            status: this.isTaskCancelledError(error) ? 'cancelled' : 'rejected',
+            value: null,
+            reason: this.buildCaughtErrorPayload(error),
+          }),
+        ),
+      ),
+    )
+  }
+
+  scheduleCancellation(container, delayMs, reason) {
+    if (container.deadlineTimer) {
+      clearTimeout(container.deadlineTimer)
+    }
+    container.deadlineTimer = setTimeout(() => {
+      container.deadlineTimer = null
+      this.cancelToken(container.token, reason)
+    }, delayMs)
+    return null
+  }
+
+  handleTokenCancellationSideEffects(container, reason) {
+    if (container.deadlineTimer) {
+      clearTimeout(container.deadlineTimer)
+      container.deadlineTimer = null
+    }
+
+    const now = Date.now()
+    for (const task of container.tasks || []) {
+      if (!task || this.isTaskDoneState(task.state) || task.state === 'pending') continue
+      if (task.timerId) {
+        clearTimeout(task.timerId)
+        task.timerId = null
+      }
+      task.state = 'cancelled'
+      task.finishedAt = now
+      if (typeof task.rejectJoin === 'function') {
+        task.rejectJoin(this.createTaskCancelledError(reason, task.label))
+        task.rejectJoin = null
+      }
+    }
+
+    if (container.__priyoConcurrencyKind === 'queue') {
+      container.backlog = container.backlog.filter(task => task && task.state !== 'cancelled')
+    }
   }
 
   async invokeCallableValue(callee, args) {

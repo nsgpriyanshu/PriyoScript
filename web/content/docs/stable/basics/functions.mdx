@@ -25,6 +25,7 @@ Functions are reusable blocks of logic that improve readability, reduce duplicat
 | Async function (stage-1)   | `prakritiWait lisaaTask ...`     | Enables `prakritiPause` inside the function body.   |
 | Generator-yield (stage-1)  | `prakritiGiveSome value`         | Produces step values consumable via `next()`.       |
 | Structured concurrency     | `priyoConcurrency.group(...)`    | Runs async tasks with group wait/cancel semantics.  |
+| Bounded concurrency queue  | `priyoConcurrency.queue(...)`    | Limits how many async tasks run at the same time.   |
 
 ## Syntax Quick Reference
 
@@ -78,11 +79,13 @@ Output:
 Hi mona
 ```
 
-## Structured Concurrency (Task Groups, Cancellation, Scheduling)
+## Structured Concurrency (Groups, Queues, Cancellation, Scheduling)
 
-`priyoConcurrency` extends async flow with grouped tasks, cooperative cancellation, and delayed
-task scheduling. A task group keeps related work together so you can wait for all tasks, cancel
-the whole unit, and inspect task state in one place.
+`priyoConcurrency` extends async flow with grouped tasks, bounded queues, cooperative
+cancellation, deadlines, combinators, and delayed task scheduling. A task group keeps related
+work together so you can wait for all tasks, cancel the whole unit, and inspect task state in one
+place. A queue adds the same task-handle model but caps active work with a fixed concurrency
+limit.
 
 ### Example 1: Run tasks in a group
 
@@ -162,6 +165,116 @@ scheduled
 Hello piue
 fulfilled
 ```
+
+### Example 4: Deadline-driven cancellation
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(token) {
+    prakritiPause priyoConcurrency.after(20, priyoEmpty)
+    token.throwIfCancelled()
+    priyoGiveBack "done"
+  }
+
+  priyoKeep group = priyoConcurrency.group("deadline")
+  priyoKeep token = group.token()
+  group.deadline(5, "deadline reached")
+  priyoKeep task = group.run(worker, token)
+
+  prakritiTry {
+    priyoTell(prakritiPause task.join())
+  } prakritiCatch (err) {
+    priyoTell(err.code)
+  }
+}
+```
+
+Output:
+
+```text
+PRUN-112
+```
+
+### Example 5: Race, any, and allSettled
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask delayedValue(name, delay) {
+    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    priyoGiveBack name
+  }
+
+  prakritiWait lisaaTask delayedBoom(delay) {
+    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiThrow "boom"
+  }
+
+  priyoKeep raceGroup = priyoConcurrency.group("race")
+  raceGroup.run(delayedValue, "slow", 10)
+  raceGroup.run(delayedValue, "fast", 1)
+  priyoTell(prakritiPause raceGroup.race())
+
+  priyoKeep anyGroup = priyoConcurrency.group("any")
+  anyGroup.run(delayedBoom, 1)
+  anyGroup.run(delayedValue, "winner", 5)
+  priyoTell(prakritiPause anyGroup.any())
+}
+```
+
+Output:
+
+```text
+fast
+winner
+```
+
+### Example 6: Bounded task queues
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(name, delay) {
+    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    priyoGiveBack name
+  }
+
+  priyoKeep queue = priyoConcurrency.queue(1, "serial")
+  queue.run(worker, "first", 5)
+  queue.run(worker, "second", 5)
+
+  priyoTell(queue.limit())
+  priyoTell(queue.active())
+  priyoTell(queue.queued())
+  priyoTell(prakritiPause queue.all())
+}
+```
+
+Output:
+
+```text
+1
+1
+1
+[first, second]
+```
+
+### Concurrency API quick reference
+
+| API                                                           | Purpose                                        |
+| ------------------------------------------------------------- | ---------------------------------------------- |
+| `priyoConcurrency.group(label?)`                              | Create a task group.                           |
+| `priyoConcurrency.queue(limit, label?)`                       | Create a bounded task queue.                   |
+| `priyoConcurrency.after(ms, value?)`                          | Resolve a value after a delay.                 |
+| `group.run(...)` / `queue.run(...)`                           | Start a task now.                              |
+| `group.schedule(...)` / `queue.schedule(...)`                 | Start or enqueue a task after a delay.         |
+| `group.all()` / `queue.all()`                                 | Wait for all started tasks.                    |
+| `group.allSettled()` / `queue.allSettled()`                   | Collect task outcomes without failing fast.    |
+| `group.race()` / `queue.race()`                               | Settle on the first completed task.            |
+| `group.any()` / `queue.any()`                                 | Resolve with the first fulfilled task.         |
+| `group.deadline(ms, reason?)` / `queue.deadline(ms, reason?)` | Auto-cancel after a timeout.                   |
+| `group.pending()` / `queue.pending()`                         | Count active pending tasks.                    |
+| `queue.active()` / `queue.queued()` / `queue.limit()`         | Inspect queue capacity and backlog.            |
+| `task.join()` / `task.status()` / `task.error()`              | Inspect and await a specific task handle.      |
+| `token.cancel()` / `token.throwIfCancelled()`                 | Cancel and cooperatively observe cancellation. |
 
 ## 1. Function Without Return Value
 

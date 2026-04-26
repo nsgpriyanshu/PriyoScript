@@ -1,0 +1,16 @@
+monalisa {
+  prakritiWait lisaaTask worker(name, delay) {
+    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    priyoGiveBack name
+  }
+
+  priyoKeep queue = priyoConcurrency.queue(2, "downloads")
+  queue.run(worker, "a", 10)
+  queue.run(worker, "b", 10)
+  queue.run(worker, "c", 10)
+
+  priyoTell(queue.limit())
+  priyoTell(queue.active())
+  priyoTell(queue.queued())
+  priyoTell(prakritiPause queue.all())
+}

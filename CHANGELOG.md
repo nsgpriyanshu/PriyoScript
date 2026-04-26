@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Features
+
+- Extend `priyoConcurrency` with bounded queues, deadlines, `allSettled`, `race`, and `any`
+- Tighten cancellation so scheduled and queued tasks fail eagerly when their owner is cancelled
+- Add examples for task queues, task deadlines, and task combinators
+
+### Non Code changes
+
+- Update root docs, architecture notes, and stable web docs for the expanded concurrency runtime
+
 # [1.13.0](https://github.com/nsgpriyanshu/PriyoScript/compare/1.12.0...1.13.0) - (2026-03-18)
 
 ## Features

@@ -10,7 +10,7 @@
   - module system v3 (relative/absolute resolution, optional `index.priyo`, clearer not-found diagnostics)
   - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `prakritiThink(...)` debug hook)
   - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
-  - structured concurrency runtime (`priyoConcurrency.group()`, cooperative cancellation tokens, delayed scheduling)
+  - structured concurrency runtime (`priyoConcurrency.group()`, `priyoConcurrency.queue()`, cooperative cancellation, deadlines, and task combinators)
   - golden CLI/REPL tests and deep module-cycle stress tests
   - web docs app (Next.js + Fumadocs) with stable/canary docs structure
   - separate web versioning/changelog flow via Cliff-Jumper
@@ -128,7 +128,7 @@ tests/
 | Functions    | Declaration, return, closures, recursion                                            | 100%   |
 | Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)     | 100%   |
 | Functions    | Generator-style yield (`prakritiGiveSome`) with `.next()` step objects              | 100%   |
-| Functions    | Structured concurrency (`priyoConcurrency` task groups, cancellation, scheduling)   | 100%   |
+| Functions    | Structured concurrency (`priyoConcurrency` groups, queues, deadlines, combinators)  | 100%   |
 | OOP          | Classes, object creation, `priyoSelf`                                               | 100%   |
 | OOP          | Inheritance and parent access (`priyoParent`)                                       | 100%   |
 | OOP          | Static methods/fields and class fields                                              | 100%   |
@@ -299,15 +299,25 @@ tests/
   - `prakritiThink("label")` emits a traceable breakpoint marker while keeping execution flow
 - Structured concurrency helper:
   - `priyoConcurrency.group(label?)` creates a task group
+  - `priyoConcurrency.queue(limit, label?)` creates a bounded task queue
   - `priyoConcurrency.after(ms, value?)` resolves a value after a delay
   - `priyoConcurrency.token(reason?)` creates a standalone cancellation token
   - task group methods:
     - `group.run(task, ...args)` starts a task immediately
     - `group.schedule(ms, task, ...args)` starts a task after a delay
     - `group.all()` waits for all started tasks
+    - `group.allSettled()`, `group.race()`, `group.any()` provide higher-level task coordination
+    - `group.deadline(ms, reason?)` cancels pending work after a timeout window
     - `group.token()` returns the shared cancellation token
     - `group.cancel(reason?)`, `group.isCancelled()`, `group.reason()`
     - `group.pending()`, `group.doneCount()`, `group.size()`
+  - task queue methods:
+    - `queue.run(task, ...args)` starts work subject to a concurrency limit
+    - `queue.schedule(ms, task, ...args)` enqueues delayed work
+    - `queue.all()`, `queue.allSettled()`, `queue.race()`, `queue.any()`
+    - `queue.deadline(ms, reason?)`
+    - `queue.token()`, `queue.cancel(reason?)`, `queue.isCancelled()`, `queue.reason()`
+    - `queue.pending()`, `queue.doneCount()`, `queue.size()`, `queue.queued()`, `queue.active()`, `queue.limit()`
   - task handle methods:
     - `task.join()`, `task.status()`, `task.label()`, `task.error()`, `task.cancel(reason?)`
   - token methods:
@@ -324,8 +334,10 @@ tests/
   - top-level await is allowed in entry/module blocks
 - Stage-2 concurrency runtime support:
   - task groups execute user callables in isolated child VM instances
+  - bounded task queues cap concurrent task execution while preserving task handles
   - cancellation is cooperative through shared tokens
-  - delayed scheduling is host-timer based and returns task handles
+  - delayed scheduling and deadlines are host-timer based and return task handles
+  - `all`, `allSettled`, `race`, and `any` are promise-backed host combinators over Priyo task handles
 - Lexical environments are parent-linked.
 - Scope enter/exit is explicit (`ENTER_SCOPE` / `EXIT_SCOPE`).
 - Loop control jumps carry scope-unwind metadata to prevent leaks.
@@ -361,7 +373,7 @@ We use **Vitest** for our unit testing framework, providing fast, modular test e
 
 - **Lexer Tests** (\`tests/lexer.test.js\`): Verify tokenizer correctly segments raw source code into streams of tokens and handles custom PriyoScript keywords (e.g. \`priyoKeep\`, \`lisaaTask\`).
 - **Parser Tests** (\`tests/parser.test.js\`): Ensure AST structures are properly generated, validating expressions, bindings, and control flow nodes.
-- **Compiler Tests** (\`tests/compiler.test.js\`): Verify the AST is successfully lowered into expected linear bytecode instructions (\`OpCodes\`). Checks stack discipline and correct branch patching for \`JUMP\` instructions.
+- **Compiler Tests** (\`tests/compiler.test.js\`): Verify the AST is successfully lowered into expected register bytecode instructions (\`OpCodes\`). Checks operand layout, register reuse, and correct branch patching for \`JUMP\` instructions.
 - **VM/Runtime Tests** (\`tests/vm.test.js\`): End-to-end integration tests executing source code through the pipeline into the actual \`VM\`. Validates language features and output via \`priyoTell\` by spying on the host environment output logger.
 - **Diagnostics Tests** (\`tests/diagnostics.test.js\`): Verify span highlighting, typo suggestions, and docs links for syntax/compile/runtime error formatting.
 - **Golden Output Tests** (\`tests/golden-cli-repl.test.js\`): Validate stable CLI and REPL user-facing output for help/errors.
@@ -384,7 +396,7 @@ Current language/runtime limitations that still need dedicated implementation:
   - no rest/spread destructuring syntax yet
 - Async support is currently staged:
   - implemented: `prakritiWait` + `prakritiPause` + `prakritiGiveSome`
-  - implemented: `priyoConcurrency` task groups, cancellation tokens, delayed scheduling
+  - implemented: `priyoConcurrency` task groups, bounded queues, cancellation tokens, deadlines, combinators, delayed scheduling
   - remaining gap: no worker-thread or parallel CPU execution model
 - Type system remains fully dynamic:
   - no static type checker
@@ -405,7 +417,7 @@ Current language/runtime limitations that still need dedicated implementation:
 Planned development sequence:
 
 1. Expand async/runtime model further:
-   - add task deadlines/timeouts, bounded queues, and higher-level task combinators.
+   - explore worker-thread or process-backed parallel execution after the cooperative concurrency model stabilizes.
 2. Harden distribution pipeline:
    - keep npm global installation and published package reliability production-ready.
    - add standalone installer/binary channels later after package lifecycle stabilizes.
