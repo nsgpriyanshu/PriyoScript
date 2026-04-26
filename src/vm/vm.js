@@ -37,12 +37,14 @@ class VM {
   }
 
   async executeFrame(
-    instructions,
+    bytecode,
     frameEnvironment,
     isFunctionFrame,
     frameName = '<frame>',
     executionOptions = {},
   ) {
+    const normalizedBytecode = this.normalizeBytecode(bytecode)
+    const instructions = normalizedBytecode.instructions
     const previousEnvironment = this.environment
     this.environment = frameEnvironment
     this.sourceCallStack.push({
@@ -50,7 +52,7 @@ class VM {
       frame: frameName,
     })
 
-    const stack = []
+    const registers = new Array(normalizedBytecode.maxRegisters || 0).fill(null)
     const tryStack = []
     const yieldBuffer = Array.isArray(executionOptions.yieldBuffer)
       ? executionOptions.yieldBuffer
@@ -61,181 +63,178 @@ class VM {
     try {
       while (ip < instructions.length) {
         const instr = instructions[ip]
-        this.traceInstruction(ip, instr, stack, frameName)
+        this.traceInstruction(ip, instr, registers, frameName)
 
         try {
           switch (instr.op) {
-            case OpCode.PUSH_STRING:
-            case OpCode.PUSH_NUMBER:
-            case OpCode.PUSH_BOOLEAN:
-              stack.push(instr.operand)
-              break
-
-            case OpCode.PUSH_NULL:
-              stack.push(null)
+            case OpCode.LOAD_CONST:
+              registers[instr.operand.dest] = instr.operand.value
               break
 
             case OpCode.BUILD_ARRAY: {
-              const elementCount = instr.operand || 0
-              if (elementCount === 0) {
-                stack.push([])
-                break
-              }
-              // Keep literal order stable: [a, b, c] should remain [a, b, c].
-              stack.push(stack.splice(-elementCount))
+              const { dest, elements } = instr.operand
+              registers[dest] = Array.isArray(elements) ? elements.map(reg => registers[reg]) : []
               break
             }
 
             case OpCode.DEFINE_VARIABLE: {
-              const value = stack.pop()
-              const { name, kind } = instr.operand
+              const { name, kind, src } = instr.operand
+              const value = registers[src]
               this.environment.define(name, value, kind)
               break
             }
 
             case OpCode.LOAD_VARIABLE: {
-              const value = this.environment.get(instr.operand)
-              stack.push(value)
+              const { dest, name } = instr.operand
+              registers[dest] = this.environment.get(name)
               break
             }
 
             case OpCode.SET_VARIABLE: {
-              const value = stack.pop()
-              this.environment.set(instr.operand, value)
+              const { name, src } = instr.operand
+              this.environment.set(name, registers[src])
               break
             }
 
             case OpCode.ADD: {
-              const right = stack.pop()
-              const left = stack.pop()
-              if (typeof left === 'string' || typeof right === 'string') {
-                stack.push(String(left) + String(right))
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              if (typeof leftValue === 'string' || typeof rightValue === 'string') {
+                registers[dest] = String(leftValue) + String(rightValue)
                 break
               }
-              this.ensureNumbers(left, right, 'ADD')
-              stack.push(left + right)
+              this.ensureNumbers(leftValue, rightValue, 'ADD')
+              registers[dest] = leftValue + rightValue
               break
             }
 
             case OpCode.SUB: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'SUB')
-              stack.push(left - right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'SUB')
+              registers[dest] = leftValue - rightValue
               break
             }
 
             case OpCode.MUL: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'MUL')
-              stack.push(left * right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'MUL')
+              registers[dest] = leftValue * rightValue
               break
             }
 
             case OpCode.DIV: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'DIV')
-              if (right === 0) throw new Error('Division by zero')
-              stack.push(left / right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'DIV')
+              if (rightValue === 0) throw new Error('Division by zero')
+              registers[dest] = leftValue / rightValue
               break
             }
 
             case OpCode.MOD: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'MOD')
-              if (right === 0) throw new Error('Modulo by zero')
-              stack.push(left % right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'MOD')
+              if (rightValue === 0) throw new Error('Modulo by zero')
+              registers[dest] = leftValue % rightValue
               break
             }
 
             case OpCode.EQ: {
-              const right = stack.pop()
-              const left = stack.pop()
-              stack.push(left === right)
+              const { dest, left, right } = instr.operand
+              registers[dest] = registers[left] === registers[right]
               break
             }
 
             case OpCode.NOT_EQ: {
-              const right = stack.pop()
-              const left = stack.pop()
-              stack.push(left !== right)
+              const { dest, left, right } = instr.operand
+              registers[dest] = registers[left] !== registers[right]
               break
             }
 
             case OpCode.LT: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'LT')
-              stack.push(left < right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'LT')
+              registers[dest] = leftValue < rightValue
               break
             }
 
             case OpCode.LTE: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'LTE')
-              stack.push(left <= right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'LTE')
+              registers[dest] = leftValue <= rightValue
               break
             }
 
             case OpCode.GT: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'GT')
-              stack.push(left > right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'GT')
+              registers[dest] = leftValue > rightValue
               break
             }
 
             case OpCode.GTE: {
-              const right = stack.pop()
-              const left = stack.pop()
-              this.ensureNumbers(left, right, 'GTE')
-              stack.push(left >= right)
+              const { dest, left, right } = instr.operand
+              const leftValue = registers[left]
+              const rightValue = registers[right]
+              this.ensureNumbers(leftValue, rightValue, 'GTE')
+              registers[dest] = leftValue >= rightValue
               break
             }
 
             case OpCode.AND: {
-              const right = stack.pop()
-              const left = stack.pop()
-              stack.push(this.isTruthy(left) && this.isTruthy(right))
+              const { dest, left, right } = instr.operand
+              registers[dest] = this.isTruthy(registers[left]) && this.isTruthy(registers[right])
               break
             }
 
             case OpCode.OR: {
-              const right = stack.pop()
-              const left = stack.pop()
-              stack.push(this.isTruthy(left) || this.isTruthy(right))
+              const { dest, left, right } = instr.operand
+              registers[dest] = this.isTruthy(registers[left]) || this.isTruthy(registers[right])
               break
             }
 
             case OpCode.NOT: {
-              const value = stack.pop()
-              stack.push(!this.isTruthy(value))
+              const { dest, src } = instr.operand
+              registers[dest] = !this.isTruthy(registers[src])
               break
             }
 
             case OpCode.JUMP_IF_FALSE: {
-              const condition = stack.pop()
+              const condition = registers[instr.operand.condition]
               if (!this.isTruthy(condition)) {
-                ip = instr.operand
+                ip = instr.operand.target
                 continue
               }
               break
             }
 
-            case OpCode.JUMP:
-              if (typeof instr.operand === 'object' && instr.operand !== null) {
-                const unwind = instr.operand.unwind || 0
+            case OpCode.JUMP: {
+              const target =
+                instr.operand && typeof instr.operand === 'object' ? instr.operand : null
+              if (target) {
+                const unwind = target.unwind || 0
                 this.unwindScopes(unwind)
                 scopeDepth -= unwind
-                ip = instr.operand.target
+                ip = target.target
                 continue
               }
               ip = instr.operand
               continue
+            }
 
             case OpCode.ENTER_SCOPE:
               this.environment = new Environment(this.environment, { isFunctionScope: false })
@@ -251,6 +250,7 @@ class VM {
             case OpCode.DEFINE_FUNCTION: {
               const fnObj = {
                 type: 'user_function',
+                name: instr.operand.name,
                 isAsync: !!instr.operand.isAsync,
                 isGenerator: !!instr.operand.isGenerator,
                 params: instr.operand.params,
@@ -279,6 +279,8 @@ class VM {
                 name: instr.operand.name,
                 methods,
                 staticMethods,
+                resolvedMethodCache: new Map(),
+                resolvedStaticMethodCache: new Map(),
                 staticFields: new Map(),
                 staticFieldKinds: new Map(),
                 staticFieldAccess: new Map(),
@@ -299,8 +301,8 @@ class VM {
             }
 
             case OpCode.CREATE_INSTANCE: {
-              const { name, argc } = instr.operand
-              const args = argc === 0 ? [] : stack.splice(-argc)
+              const { dest, name, argRegs } = instr.operand
+              const args = Array.isArray(argRegs) ? argRegs.map(reg => registers[reg]) : []
               const classObj = this.environment.get(name)
               if (!classObj || classObj.type !== 'class') {
                 throw new Error(`Unknown class: ${name}`)
@@ -322,44 +324,41 @@ class VM {
                 throw new Error(`Class "${name}" does not define init(${args.length} args)`)
               }
 
-              stack.push(instance)
+              registers[dest] = instance
               break
             }
 
             case OpCode.GET_PROPERTY: {
-              const object = stack.pop()
-              const resolved = this.resolveProperty(object, instr.operand)
-              stack.push(resolved)
+              const { dest, object, name } = instr.operand
+              registers[dest] = this.resolveProperty(registers[object], name)
               break
             }
 
             case OpCode.SET_PROPERTY: {
-              const value = stack.pop()
-              const object = stack.pop()
-              this.setProperty(object, instr.operand, value)
+              const { object, name, src } = instr.operand
+              this.setProperty(registers[object], name, registers[src])
               break
             }
 
             case OpCode.GET_INDEX: {
-              const index = stack.pop()
-              const target = stack.pop()
-              stack.push(this.getIndexValue(target, index))
+              const { dest, target, index } = instr.operand
+              registers[dest] = this.getIndexValue(registers[target], registers[index])
               break
             }
 
             case OpCode.SET_INDEX: {
-              const value = stack.pop()
-              const index = stack.pop()
-              const target = stack.pop()
-              this.setIndexValue(target, index, value)
+              const { target, index, src } = instr.operand
+              this.setIndexValue(registers[target], registers[index], registers[src])
               break
             }
 
             case OpCode.SLICE_ARRAY: {
-              const end = stack.pop()
-              const start = stack.pop()
-              const target = stack.pop()
-              stack.push(this.sliceArrayValue(target, start, end))
+              const { dest, target, start, end } = instr.operand
+              registers[dest] = this.sliceArrayValue(
+                registers[target],
+                registers[start],
+                registers[end],
+              )
               break
             }
 
@@ -367,12 +366,11 @@ class VM {
               if (!this.moduleLoader) {
                 throw new Error('Module loader is not configured for lisaaBring path imports')
               }
-              const moduleExports = await this.moduleLoader(
+              registers[instr.operand.dest] = await this.moduleLoader(
                 instr.operand.source,
                 this.currentFile,
                 instr.operand.location || null,
               )
-              stack.push(moduleExports)
               break
             }
 
@@ -380,21 +378,22 @@ class VM {
               if (!this.moduleContext || !this.moduleContext.exports) {
                 throw new Error('lisaaShare can only be used inside lisaaBox modules')
               }
-              const value = stack.pop()
-              this.moduleContext.exports[instr.operand] = value
+              this.moduleContext.exports[instr.operand.name] = registers[instr.operand.src]
               break
             }
 
-            case OpCode.DESTRUCTURE_DEFINE: {
-              const source = stack.pop()
-              this.applyDestructurePattern(instr.operand.pattern, source, instr.operand.kind)
+            case OpCode.DESTRUCTURE_DEFINE:
+              this.applyDestructurePattern(
+                instr.operand.pattern,
+                registers[instr.operand.src],
+                instr.operand.kind,
+              )
               break
-            }
 
             case OpCode.AWAIT_VALUE: {
-              const value = stack.pop()
-              const resolved = await Promise.resolve(value)
-              stack.push(resolved == null ? null : resolved)
+              const { dest, src } = instr.operand
+              const resolved = await Promise.resolve(registers[src])
+              registers[dest] = resolved == null ? null : resolved
               break
             }
 
@@ -402,49 +401,47 @@ class VM {
               if (!yieldBuffer) {
                 throw new Error('prakritiGiveSome can only be used inside generator functions')
               }
-              const yieldedValue = stack.pop()
+              const yieldedValue = registers[instr.operand.src]
               yieldBuffer.push(yieldedValue == null ? null : yieldedValue)
               break
             }
 
             case OpCode.DEBUGGER: {
-              const label = instr.operand && instr.operand.usesValue ? stack.pop() : null
+              const label =
+                instr.operand && instr.operand.usesValue ? registers[instr.operand.src] : null
               this.triggerBreakpoint(label)
               break
             }
 
             case OpCode.CALL_NAMED: {
-              const { name, argc } = instr.operand
-              const args = argc === 0 ? [] : stack.splice(-argc)
-              const result = await this.callNamed(name, args)
-              stack.push(result == null ? null : result)
+              const args = this.readRegisterList(registers, instr.operand.argRegs)
+              const result = await this.callNamed(instr.operand.name, args)
+              registers[instr.operand.dest] = result == null ? null : result
               break
             }
 
             case OpCode.CALL_METHOD: {
-              const { name, argc } = instr.operand
-              const args = argc === 0 ? [] : stack.splice(-argc)
-              const receiver = stack.pop()
-              const result = await this.callMember(receiver, name, args)
-              stack.push(result == null ? null : result)
+              const args = this.readRegisterList(registers, instr.operand.argRegs)
+              const receiver = registers[instr.operand.receiver]
+              const result = await this.callMember(receiver, instr.operand.name, args)
+              registers[instr.operand.dest] = result == null ? null : result
               break
             }
 
             case OpCode.CALL_SUPER_METHOD: {
-              const { name, argc } = instr.operand
-              const args = argc === 0 ? [] : stack.splice(-argc)
+              const args = this.readRegisterList(registers, instr.operand.argRegs)
               const receiver = this.environment.get('priyoSelf')
               const currentMethod = this.environment.get('__priyoCurrentMethod')
               const currentOwner = this.environment.get('__priyoCurrentClass')
               if (!currentOwner || currentOwner.type !== 'class') {
                 throw new Error('priyoParent call outside class method')
               }
-              if (name === 'init' && currentMethod !== 'init') {
+              if (instr.operand.name === 'init' && currentMethod !== 'init') {
                 throw new Error(
                   'priyoParent(...) constructor call is only allowed inside init as the first statement',
                 )
               }
-              if (receiver && receiver.type === 'class' && name === 'init') {
+              if (receiver && receiver.type === 'class' && instr.operand.name === 'init') {
                 throw new Error(
                   'priyoParent(...) constructor call is not allowed inside static methods',
                 )
@@ -455,9 +452,9 @@ class VM {
               }
               const result =
                 receiver && receiver.type === 'class'
-                  ? await this.callStaticMethod(receiver, name, args, superClass)
-                  : await this.callMethod(receiver, name, args, superClass)
-              stack.push(result == null ? null : result)
+                  ? await this.callStaticMethod(receiver, instr.operand.name, args, superClass)
+                  : await this.callMethod(receiver, instr.operand.name, args, superClass)
+              registers[instr.operand.dest] = result == null ? null : result
               break
             }
 
@@ -465,13 +462,9 @@ class VM {
               if (!isFunctionFrame) {
                 throw new Error('Return statement cannot execute outside function')
               }
-              const returnValue = stack.pop()
+              const returnValue = registers[instr.operand.src]
               return { returned: true, value: returnValue == null ? null : returnValue }
             }
-
-            case OpCode.POP:
-              stack.pop()
-              break
 
             case OpCode.HALT:
               return { returned: false, value: null }
@@ -520,10 +513,8 @@ class VM {
               break
             }
 
-            case OpCode.THROW: {
-              const thrownValue = stack.pop()
-              throw new PriyoThrownValue(thrownValue)
-            }
+            case OpCode.THROW:
+              throw new PriyoThrownValue(registers[instr.operand.src])
 
             default:
               throw new Error(`Unknown opcode: ${instr.op}`)
@@ -540,7 +531,6 @@ class VM {
               this.unwindScopes(unwind)
               scopeDepth = handler.scopeDepth
             }
-            stack.length = 0
 
             if (handler.state === 'try') {
               if (handler.catchTarget != null) {
@@ -1251,23 +1241,49 @@ class VM {
   }
 
   findMethod(classObj, methodName) {
+    if (!classObj) return null
+    if (classObj.resolvedMethodCache && classObj.resolvedMethodCache.has(methodName)) {
+      return classObj.resolvedMethodCache.get(methodName)
+    }
+
     let cursor = classObj
     while (cursor) {
       if (cursor.methods.has(methodName)) {
-        return cursor.methods.get(methodName)
+        const method = cursor.methods.get(methodName)
+        if (classObj.resolvedMethodCache) {
+          classObj.resolvedMethodCache.set(methodName, method)
+        }
+        return method
       }
       cursor = cursor.superClass
+    }
+
+    if (classObj.resolvedMethodCache) {
+      classObj.resolvedMethodCache.set(methodName, null)
     }
     return null
   }
 
   findStaticMethod(classObj, methodName) {
+    if (!classObj) return null
+    if (classObj.resolvedStaticMethodCache && classObj.resolvedStaticMethodCache.has(methodName)) {
+      return classObj.resolvedStaticMethodCache.get(methodName)
+    }
+
     let cursor = classObj
     while (cursor) {
       if (cursor.staticMethods && cursor.staticMethods.has(methodName)) {
-        return cursor.staticMethods.get(methodName)
+        const method = cursor.staticMethods.get(methodName)
+        if (classObj.resolvedStaticMethodCache) {
+          classObj.resolvedStaticMethodCache.set(methodName, method)
+        }
+        return method
       }
       cursor = cursor.superClass
+    }
+
+    if (classObj.resolvedStaticMethodCache) {
+      classObj.resolvedStaticMethodCache.set(methodName, null)
     }
     return null
   }
@@ -1796,6 +1812,30 @@ class VM {
       .slice(0, 8)
   }
 
+  normalizeBytecode(bytecode) {
+    if (Array.isArray(bytecode)) {
+      return {
+        instructions: bytecode,
+        maxRegisters: bytecode.maxRegisters || 0,
+      }
+    }
+
+    return {
+      instructions: Array.isArray(bytecode && bytecode.instructions) ? bytecode.instructions : [],
+      maxRegisters:
+        bytecode && typeof bytecode.maxRegisters === 'number' ? bytecode.maxRegisters : 0,
+    }
+  }
+
+  readRegisterList(registers, indexes) {
+    if (!Array.isArray(indexes) || indexes.length === 0) return []
+    const args = new Array(indexes.length)
+    for (let i = 0; i < indexes.length; i++) {
+      args[i] = registers[indexes[i]]
+    }
+    return args
+  }
+
   registerBuiltinGlobals() {
     for (const [name, fn] of Object.entries(this.builtins)) {
       try {
@@ -1806,7 +1846,7 @@ class VM {
     }
   }
 
-  traceInstruction(ip, instr, stack, frameName) {
+  traceInstruction(ip, instr, registers, frameName) {
     if (!this.traceEnabled && typeof this.debugHooks.onInstruction !== 'function') return
     const record = {
       seq: ++this.debugSequence,
@@ -1817,7 +1857,8 @@ class VM {
       ip,
       op: instr.op,
       operand: this.formatTraceOperand(instr.operand),
-      stackDepth: stack.length,
+      registerCount: Array.isArray(registers) ? registers.length : 0,
+      stackDepth: Array.isArray(registers) ? registers.length : 0,
     }
 
     if (this.traceEnabled) {
@@ -1831,7 +1872,7 @@ class VM {
             `[TRACE #${record.seq}] ${record.file} ${record.frame} ip=${record.ip} ` +
             `op=${record.op}` +
             (record.operand ? ` operand=${record.operand}` : '') +
-            ` stack=${record.stackDepth}`
+            ` regs=${record.registerCount}`
           if (this.traceLogger) this.traceLogger(line)
           else console.log(line)
         }
@@ -1990,47 +2031,53 @@ class VM {
 
   evaluateDefaultPatternValue(instructions) {
     if (!instructions) return null
+    const bytecode = this.normalizeBytecode(instructions)
     const defaultEnv = new Environment(this.environment, { isFunctionScope: true })
     const previous = this.environment
     this.environment = defaultEnv
     try {
-      let stack = []
-      for (const instruction of instructions) {
-        if (instruction.op === OpCode.PUSH_STRING) stack.push(instruction.operand)
-        else if (instruction.op === OpCode.PUSH_NUMBER) stack.push(instruction.operand)
-        else if (instruction.op === OpCode.PUSH_BOOLEAN) stack.push(instruction.operand)
-        else if (instruction.op === OpCode.PUSH_NULL) stack.push(null)
-        else if (instruction.op === OpCode.LOAD_VARIABLE)
-          stack.push(this.environment.get(instruction.operand))
-        else if (instruction.op === OpCode.RETURN) return stack.pop()
-        else if (instruction.op === OpCode.ADD) {
-          const right = stack.pop()
-          const left = stack.pop()
-          stack.push(
-            typeof left === 'string' || typeof right === 'string'
-              ? String(left) + String(right)
-              : left + right,
-          )
-        } else if (instruction.op === OpCode.SUB) {
-          const right = stack.pop()
-          const left = stack.pop()
-          stack.push(left - right)
-        } else if (instruction.op === OpCode.MUL) {
-          const right = stack.pop()
-          const left = stack.pop()
-          stack.push(left * right)
-        } else if (instruction.op === OpCode.DIV) {
-          const right = stack.pop()
-          const left = stack.pop()
-          if (right === 0) throw new Error('Division by zero')
-          stack.push(left / right)
-        } else if (instruction.op === OpCode.MOD) {
-          const right = stack.pop()
-          const left = stack.pop()
-          if (right === 0) throw new Error('Modulo by zero')
-          stack.push(left % right)
-        } else {
-          throw new Error('Unsupported expression in destructuring default value')
+      const registers = new Array(bytecode.maxRegisters || 0).fill(null)
+      for (const instruction of bytecode.instructions) {
+        switch (instruction.op) {
+          case OpCode.LOAD_CONST:
+            registers[instruction.operand.dest] = instruction.operand.value
+            break
+          case OpCode.LOAD_VARIABLE:
+            registers[instruction.operand.dest] = this.environment.get(instruction.operand.name)
+            break
+          case OpCode.ADD: {
+            const left = registers[instruction.operand.left]
+            const right = registers[instruction.operand.right]
+            registers[instruction.operand.dest] =
+              typeof left === 'string' || typeof right === 'string'
+                ? String(left) + String(right)
+                : left + right
+            break
+          }
+          case OpCode.SUB:
+            registers[instruction.operand.dest] =
+              registers[instruction.operand.left] - registers[instruction.operand.right]
+            break
+          case OpCode.MUL:
+            registers[instruction.operand.dest] =
+              registers[instruction.operand.left] * registers[instruction.operand.right]
+            break
+          case OpCode.DIV: {
+            const divisor = registers[instruction.operand.right]
+            if (divisor === 0) throw new Error('Division by zero')
+            registers[instruction.operand.dest] = registers[instruction.operand.left] / divisor
+            break
+          }
+          case OpCode.MOD: {
+            const divisor = registers[instruction.operand.right]
+            if (divisor === 0) throw new Error('Modulo by zero')
+            registers[instruction.operand.dest] = registers[instruction.operand.left] % divisor
+            break
+          }
+          case OpCode.RETURN:
+            return registers[instruction.operand.src]
+          default:
+            throw new Error('Unsupported expression in destructuring default value')
         }
       }
       return null

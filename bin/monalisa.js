@@ -191,8 +191,8 @@ Filters:
   -trace-label text         Trace only matching breakpoint label substring
   -trace-type trace,break   Trace event types (trace, break, or all)
   -trace-frame <name>       Trace only matching frame name substring
-  -trace-stack-min 2        Trace only when stack depth >= N
-  -trace-stack-max 6        Trace only when stack depth <= N
+  -trace-stack-min 2        Trace only when register count >= N
+  -trace-stack-max 6        Trace only when register count <= N
 
 Examples:
   monalisa -trace -trace-op CALL_METHOD,RETURN examples/basics/for-loop.priyo

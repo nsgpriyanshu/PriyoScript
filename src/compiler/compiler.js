@@ -9,6 +9,9 @@ class Compiler {
     this.scopeDepth = 0
     this.tempCounter = 0
     this.interfaceTable = new Map()
+    this.freeRegisters = []
+    this.nextRegister = 0
+    this.maxRegisters = 0
   }
 
   compile(program) {
@@ -24,95 +27,97 @@ class Compiler {
     }
 
     this.emit(OpCode.HALT)
-    return this.instructions
+    return this.finalizeInstructions()
   }
 
   compileStatement(stmt) {
-    switch (stmt.type) {
-      case 'VariableDeclaration':
-        this.compileVariableDeclaration(stmt)
-        return
+    this.withRegisterScope(() => {
+      switch (stmt.type) {
+        case 'VariableDeclaration':
+          this.compileVariableDeclaration(stmt)
+          return
 
-      case 'AssignmentStatement':
-        this.compileAssignmentStatement(stmt)
-        return
+        case 'AssignmentStatement':
+          this.compileAssignmentStatement(stmt)
+          return
 
-      case 'IfStatement':
-        this.compileIfStatement(stmt)
-        return
+        case 'IfStatement':
+          this.compileIfStatement(stmt)
+          return
 
-      case 'WhileStatement':
-        this.compileWhileStatement(stmt)
-        return
+        case 'WhileStatement':
+          this.compileWhileStatement(stmt)
+          return
 
-      case 'ForStatement':
-        this.compileForStatement(stmt)
-        return
+        case 'ForStatement':
+          this.compileForStatement(stmt)
+          return
 
-      case 'ForEachStatement':
-        this.compileForEachStatement(stmt)
-        return
+        case 'ForEachStatement':
+          this.compileForEachStatement(stmt)
+          return
 
-      case 'SwitchStatement':
-        this.compileSwitchStatement(stmt)
-        return
+        case 'SwitchStatement':
+          this.compileSwitchStatement(stmt)
+          return
 
-      case 'BreakStatement':
-        this.compileBreakStatement()
-        return
+        case 'BreakStatement':
+          this.compileBreakStatement()
+          return
 
-      case 'ContinueStatement':
-        this.compileContinueStatement()
-        return
+        case 'ContinueStatement':
+          this.compileContinueStatement()
+          return
 
-      case 'DebuggerStatement':
-        this.compileDebuggerStatement(stmt)
-        return
+        case 'DebuggerStatement':
+          this.compileDebuggerStatement(stmt)
+          return
 
-      case 'FunctionDeclaration':
-        this.compileFunctionDeclaration(stmt)
-        return
+        case 'FunctionDeclaration':
+          this.compileFunctionDeclaration(stmt)
+          return
 
-      case 'ImportStatement':
-        this.compileImportStatement(stmt)
-        return
+        case 'ImportStatement':
+          this.compileImportStatement(stmt)
+          return
 
-      case 'ExportStatement':
-        this.compileExportStatement(stmt)
-        return
+        case 'ExportStatement':
+          this.compileExportStatement(stmt)
+          return
 
-      case 'TryStatement':
-        this.compileTryStatement(stmt)
-        return
+        case 'TryStatement':
+          this.compileTryStatement(stmt)
+          return
 
-      case 'ThrowStatement':
-        this.compileThrowStatement(stmt)
-        return
+        case 'ThrowStatement':
+          this.compileThrowStatement(stmt)
+          return
 
-      case 'ClassDeclaration':
-        this.compileClassDeclaration(stmt)
-        return
+        case 'ClassDeclaration':
+          this.compileClassDeclaration(stmt)
+          return
 
-      case 'InterfaceDeclaration':
-        // Interfaces are compile-time contracts only; they do not emit runtime bytecode.
-        return
+        case 'InterfaceDeclaration':
+          return
 
-      case 'ReturnStatement':
-        this.compileReturnStatement(stmt)
-        return
+        case 'ReturnStatement':
+          this.compileReturnStatement(stmt)
+          return
 
-      case 'YieldStatement':
-        this.compileYieldStatement(stmt)
-        return
+        case 'YieldStatement':
+          this.compileYieldStatement(stmt)
+          return
 
-      case 'ExpressionStatement':
-        this.compileExpression(stmt.expression)
-        this.emit(OpCode.POP)
-        return
+        case 'ExpressionStatement': {
+          const resultReg = this.compileExpression(stmt.expression)
+          this.releaseRegister(resultReg)
+          return
+        }
 
-      default:
-        throw new Error(`Unknown statement type: ${stmt.type}`)
-    }
+        default:
+          throw new Error(`Unknown statement type: ${stmt.type}`)
+      }
+    })
   }
 
   compileVariableDeclaration(stmt) {
@@ -121,40 +126,61 @@ class Compiler {
       return
     }
 
-    this.compileExpression(stmt.initializer)
+    const initializerReg = this.compileExpression(stmt.initializer)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: stmt.identifier.name,
       kind: stmt.kind,
+      src: initializerReg,
     })
+    this.releaseRegister(initializerReg)
   }
 
   compileDestructuringDeclaration(stmt) {
-    this.compileExpression(stmt.initializer)
+    const initializerReg = this.compileExpression(stmt.initializer)
     this.emit(OpCode.DESTRUCTURE_DEFINE, {
       kind: stmt.kind,
       pattern: this.serializeBindingPattern(stmt.identifier),
+      src: initializerReg,
     })
+    this.releaseRegister(initializerReg)
   }
 
   compileAssignmentStatement(stmt) {
     if (stmt.identifier.type === 'Identifier') {
-      this.compileExpression(stmt.value)
-      this.emit(OpCode.SET_VARIABLE, stmt.identifier.name)
+      const valueReg = this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_VARIABLE, {
+        name: stmt.identifier.name,
+        src: valueReg,
+      })
+      this.releaseRegister(valueReg)
       return
     }
 
     if (stmt.identifier.type === 'MemberExpression') {
-      this.compileExpression(stmt.identifier.object)
-      this.compileExpression(stmt.value)
-      this.emit(OpCode.SET_PROPERTY, stmt.identifier.property.name)
+      const objectReg = this.compileExpression(stmt.identifier.object)
+      const valueReg = this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_PROPERTY, {
+        object: objectReg,
+        name: stmt.identifier.property.name,
+        src: valueReg,
+      })
+      this.releaseRegister(objectReg)
+      this.releaseRegister(valueReg)
       return
     }
 
     if (stmt.identifier.type === 'IndexExpression') {
-      this.compileExpression(stmt.identifier.object)
-      this.compileExpression(stmt.identifier.index)
-      this.compileExpression(stmt.value)
-      this.emit(OpCode.SET_INDEX)
+      const objectReg = this.compileExpression(stmt.identifier.object)
+      const indexReg = this.compileExpression(stmt.identifier.index)
+      const valueReg = this.compileExpression(stmt.value)
+      this.emit(OpCode.SET_INDEX, {
+        target: objectReg,
+        index: indexReg,
+        src: valueReg,
+      })
+      this.releaseRegister(objectReg)
+      this.releaseRegister(indexReg)
+      this.releaseRegister(valueReg)
       return
     }
 
@@ -177,12 +203,15 @@ class Compiler {
     const endJumps = []
 
     for (const branch of stmt.branches) {
-      this.compileExpression(branch.condition)
-      const jumpIfFalseIndex = this.emit(OpCode.JUMP_IF_FALSE, -1)
+      const conditionReg = this.compileExpression(branch.condition)
+      const jumpIfFalseIndex = this.emit(OpCode.JUMP_IF_FALSE, {
+        condition: conditionReg,
+        target: -1,
+      })
+      this.releaseRegister(conditionReg)
 
       this.compileBlockStatement(branch.body)
       endJumps.push(this.emit(OpCode.JUMP, -1))
-
       this.patchJump(jumpIfFalseIndex, this.instructions.length)
     }
 
@@ -204,8 +233,12 @@ class Compiler {
       loopScopeDepth: this.scopeDepth,
     })
 
-    this.compileExpression(stmt.condition)
-    const exitJump = this.emit(OpCode.JUMP_IF_FALSE, -1)
+    const conditionReg = this.compileExpression(stmt.condition)
+    const exitJump = this.emit(OpCode.JUMP_IF_FALSE, {
+      condition: conditionReg,
+      target: -1,
+    })
+    this.releaseRegister(conditionReg)
 
     this.compileBlockStatement(stmt.body)
     this.emit(OpCode.JUMP, loopStart)
@@ -227,11 +260,15 @@ class Compiler {
       continueTargetScopeDepth: null,
       loopScopeDepth: this.scopeDepth,
     })
-    let exitJump = null
 
+    let exitJump = null
     if (stmt.condition) {
-      this.compileExpression(stmt.condition)
-      exitJump = this.emit(OpCode.JUMP_IF_FALSE, -1)
+      const conditionReg = this.compileExpression(stmt.condition)
+      exitJump = this.emit(OpCode.JUMP_IF_FALSE, {
+        condition: conditionReg,
+        target: -1,
+      })
+      this.releaseRegister(conditionReg)
     }
 
     this.compileBlockStatement(stmt.body)
@@ -258,18 +295,21 @@ class Compiler {
     const arrayTempName = this.nextTempName('__forEachArray')
     const indexTempName = this.nextTempName('__forEachIndex')
 
-    // Resolve iterable once before loop so expression side-effects run only once.
-    this.compileExpression(stmt.iterable)
+    const iterableReg = this.compileExpression(stmt.iterable)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: arrayTempName,
       kind: 'const',
+      src: iterableReg,
     })
+    this.releaseRegister(iterableReg)
 
-    this.emit(OpCode.PUSH_NUMBER, 0)
+    const zeroReg = this.emitLoadConst(0)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: indexTempName,
       kind: 'let',
+      src: zeroReg,
     })
+    this.releaseRegister(zeroReg)
 
     const loopStart = this.instructions.length
     const loopContext = this.enterLoop({
@@ -278,23 +318,42 @@ class Compiler {
       loopScopeDepth: this.scopeDepth,
     })
 
-    // index < iterable.length
-    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
-    this.emit(OpCode.LOAD_VARIABLE, arrayTempName)
-    this.emit(OpCode.GET_PROPERTY, 'length')
-    this.emit(OpCode.LT)
-    const exitJump = this.emit(OpCode.JUMP_IF_FALSE, -1)
+    const indexReg = this.emitLoadVariable(indexTempName)
+    const arrayReg = this.emitLoadVariable(arrayTempName)
+    const lengthReg = this.allocateRegister()
+    this.emit(OpCode.GET_PROPERTY, {
+      dest: lengthReg,
+      object: arrayReg,
+      name: 'length',
+    })
+    this.releaseRegister(arrayReg)
 
-    // Per-iteration scope: expose loop item as const binding.
+    const conditionReg = this.emitBinaryRegisterOp(OpCode.LT, indexReg, lengthReg)
+    const exitJump = this.emit(OpCode.JUMP_IF_FALSE, {
+      condition: conditionReg,
+      target: -1,
+    })
+    this.releaseRegister(conditionReg)
+
     this.emit(OpCode.ENTER_SCOPE)
     this.scopeDepth++
-    this.emit(OpCode.LOAD_VARIABLE, arrayTempName)
-    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
-    this.emit(OpCode.GET_INDEX)
+
+    const loopArrayReg = this.emitLoadVariable(arrayTempName)
+    const loopIndexReg = this.emitLoadVariable(indexTempName)
+    const itemReg = this.allocateRegister()
+    this.emit(OpCode.GET_INDEX, {
+      dest: itemReg,
+      target: loopArrayReg,
+      index: loopIndexReg,
+    })
+    this.releaseRegister(loopArrayReg)
+    this.releaseRegister(loopIndexReg)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: stmt.item.name,
       kind: 'const',
+      src: itemReg,
     })
+    this.releaseRegister(itemReg)
 
     for (const bodyStatement of stmt.body.statements) {
       this.compileStatement(bodyStatement)
@@ -306,11 +365,15 @@ class Compiler {
     const updateStart = this.instructions.length
     this.patchLoopContinues(loopContext, updateStart, this.scopeDepth)
 
-    // index = index + 1
-    this.emit(OpCode.LOAD_VARIABLE, indexTempName)
-    this.emit(OpCode.PUSH_NUMBER, 1)
-    this.emit(OpCode.ADD)
-    this.emit(OpCode.SET_VARIABLE, indexTempName)
+    const currentIndexReg = this.emitLoadVariable(indexTempName)
+    const oneReg = this.emitLoadConst(1)
+    const nextIndexReg = this.emitBinaryRegisterOp(OpCode.ADD, currentIndexReg, oneReg)
+    this.emit(OpCode.SET_VARIABLE, {
+      name: indexTempName,
+      src: nextIndexReg,
+    })
+    this.releaseRegister(nextIndexReg)
+
     this.emit(OpCode.JUMP, loopStart)
 
     const endAddress = this.instructions.length
@@ -325,11 +388,13 @@ class Compiler {
     this.scopeDepth++
 
     const switchTempName = this.nextTempName('__switchValue')
-    this.compileExpression(stmt.discriminant)
+    const discriminantReg = this.compileExpression(stmt.discriminant)
     this.emit(OpCode.DEFINE_VARIABLE, {
       name: switchTempName,
       kind: 'const',
+      src: discriminantReg,
     })
+    this.releaseRegister(discriminantReg)
 
     const switchContext = this.enterSwitch({
       breakTargetScopeDepth: enclosingScopeDepth,
@@ -344,10 +409,14 @@ class Compiler {
         this.patchJump(pendingCaseFalseJump, caseCheckStart)
       }
 
-      this.emit(OpCode.LOAD_VARIABLE, switchTempName)
-      this.compileExpression(switchCase.test)
-      this.emit(OpCode.EQ)
-      const jumpIfFalse = this.emit(OpCode.JUMP_IF_FALSE, -1)
+      const switchValueReg = this.emitLoadVariable(switchTempName)
+      const testReg = this.compileExpression(switchCase.test)
+      const compareReg = this.emitBinaryRegisterOp(OpCode.EQ, switchValueReg, testReg)
+      const jumpIfFalse = this.emit(OpCode.JUMP_IF_FALSE, {
+        condition: compareReg,
+        target: -1,
+      })
+      this.releaseRegister(compareReg)
       pendingCaseFalseJump = jumpIfFalse
 
       this.compileBlockStatement(switchCase.consequent)
@@ -399,11 +468,12 @@ class Compiler {
   }
 
   compileDebuggerStatement(stmt) {
-    const usesValue = Boolean(stmt.argument)
-    if (stmt.argument) {
-      this.compileExpression(stmt.argument)
-    }
-    this.emit(OpCode.DEBUGGER, { usesValue })
+    const sourceReg = stmt.argument ? this.compileExpression(stmt.argument) : null
+    this.emit(OpCode.DEBUGGER, {
+      src: sourceReg,
+      usesValue: Boolean(stmt.argument),
+    })
+    this.releaseRegister(sourceReg)
   }
 
   compileFunctionDeclaration(stmt) {
@@ -418,68 +488,85 @@ class Compiler {
 
   compileImportStatement(stmt) {
     if (stmt.sourceType === 'string') {
+      const moduleReg = this.allocateRegister()
       this.emit(OpCode.IMPORT_MODULE, {
+        dest: moduleReg,
         source: stmt.source,
         location: stmt.location || null,
       })
 
       if (stmt.namedImports && stmt.namedImports.length > 0) {
-        const moduleTempName = this.nextTempName('__importModule')
-        this.emit(OpCode.DEFINE_VARIABLE, {
-          name: moduleTempName,
-          kind: 'const',
-        })
-
         for (const specifier of stmt.namedImports) {
-          this.emit(OpCode.LOAD_VARIABLE, moduleTempName)
-          this.emit(OpCode.GET_PROPERTY, specifier.imported)
+          const propertyReg = this.allocateRegister()
+          this.emit(OpCode.GET_PROPERTY, {
+            dest: propertyReg,
+            object: moduleReg,
+            name: specifier.imported,
+          })
           this.emit(OpCode.DEFINE_VARIABLE, {
             name: specifier.local,
             kind: 'const',
+            src: propertyReg,
           })
+          this.releaseRegister(propertyReg)
         }
+        this.releaseRegister(moduleReg)
       } else {
         this.emit(OpCode.DEFINE_VARIABLE, {
           name: stmt.localName,
           kind: 'const',
+          src: moduleReg,
         })
+        this.releaseRegister(moduleReg)
       }
       return
     }
 
-    // lisaaBring math
-    // -> const math = priyoPackage.use("math")
-    this.emit(OpCode.LOAD_VARIABLE, 'priyoPackage')
-    this.emit(OpCode.PUSH_STRING, stmt.source)
+    const packageReg = this.emitLoadVariable('priyoPackage')
+    const sourceReg = this.emitLoadConst(stmt.source)
+    const importReg = this.allocateRegister()
     this.emit(OpCode.CALL_METHOD, {
+      dest: importReg,
+      receiver: packageReg,
       name: 'use',
-      argc: 1,
+      argRegs: [sourceReg],
     })
+    this.releaseRegister(packageReg)
+    this.releaseRegister(sourceReg)
+
     if (stmt.namedImports && stmt.namedImports.length > 0) {
-      const packageTempName = this.nextTempName('__importPackage')
-      this.emit(OpCode.DEFINE_VARIABLE, {
-        name: packageTempName,
-        kind: 'const',
-      })
       for (const specifier of stmt.namedImports) {
-        this.emit(OpCode.LOAD_VARIABLE, packageTempName)
-        this.emit(OpCode.GET_PROPERTY, specifier.imported)
+        const propertyReg = this.allocateRegister()
+        this.emit(OpCode.GET_PROPERTY, {
+          dest: propertyReg,
+          object: importReg,
+          name: specifier.imported,
+        })
         this.emit(OpCode.DEFINE_VARIABLE, {
           name: specifier.local,
           kind: 'const',
+          src: propertyReg,
         })
+        this.releaseRegister(propertyReg)
       }
+      this.releaseRegister(importReg)
     } else {
       this.emit(OpCode.DEFINE_VARIABLE, {
         name: stmt.localName,
         kind: 'const',
+        src: importReg,
       })
+      this.releaseRegister(importReg)
     }
   }
 
   compileExportStatement(stmt) {
-    this.emit(OpCode.LOAD_VARIABLE, stmt.identifier.name)
-    this.emit(OpCode.EXPORT_NAME, stmt.identifier.name)
+    const valueReg = this.emitLoadVariable(stmt.identifier.name)
+    this.emit(OpCode.EXPORT_NAME, {
+      name: stmt.identifier.name,
+      src: valueReg,
+    })
+    this.releaseRegister(valueReg)
   }
 
   compileTryStatement(stmt) {
@@ -536,15 +623,15 @@ class Compiler {
       this.patchJump(jumpAfterCatch, finallyStart)
     }
 
-    // Ensure switch-style contexts can jump here cleanly.
     if (endAddress == null) {
       throw new Error('Failed to compile try/catch/finally end label')
     }
   }
 
   compileThrowStatement(stmt) {
-    this.compileExpression(stmt.argument)
-    this.emit(OpCode.THROW)
+    const argumentReg = this.compileExpression(stmt.argument)
+    this.emit(OpCode.THROW, { src: argumentReg })
+    this.releaseRegister(argumentReg)
   }
 
   compileClassDeclaration(stmt) {
@@ -604,122 +691,130 @@ class Compiler {
   compileCallableBody(bodyBlock) {
     const callableCompiler = new Compiler()
     callableCompiler.compileBlockStatement(bodyBlock)
-    callableCompiler.emit(OpCode.PUSH_NULL)
-    callableCompiler.emit(OpCode.RETURN)
-    return callableCompiler.instructions
+    const nullReg = callableCompiler.emitLoadConst(null)
+    callableCompiler.emit(OpCode.RETURN, { src: nullReg })
+    callableCompiler.releaseRegister(nullReg)
+    return callableCompiler.finalizeInstructions()
   }
 
   compileInitializerThunk(initializerExpression) {
     const initializerCompiler = new Compiler()
-    initializerCompiler.compileExpression(initializerExpression)
-    initializerCompiler.emit(OpCode.RETURN)
-    return initializerCompiler.instructions
+    const valueReg = initializerCompiler.compileExpression(initializerExpression)
+    initializerCompiler.emit(OpCode.RETURN, { src: valueReg })
+    initializerCompiler.releaseRegister(valueReg)
+    return initializerCompiler.finalizeInstructions()
   }
 
   compileReturnStatement(stmt) {
-    if (stmt.argument) {
-      this.compileExpression(stmt.argument)
-    } else {
-      this.emit(OpCode.PUSH_NULL)
-    }
-    this.emit(OpCode.RETURN)
+    const valueReg = stmt.argument
+      ? this.compileExpression(stmt.argument)
+      : this.emitLoadConst(null)
+    this.emit(OpCode.RETURN, { src: valueReg })
+    this.releaseRegister(valueReg)
   }
 
   compileYieldStatement(stmt) {
-    if (stmt.argument) {
-      this.compileExpression(stmt.argument)
-    } else {
-      this.emit(OpCode.PUSH_NULL)
-    }
-    this.emit(OpCode.YIELD_VALUE)
+    const valueReg = stmt.argument
+      ? this.compileExpression(stmt.argument)
+      : this.emitLoadConst(null)
+    this.emit(OpCode.YIELD_VALUE, { src: valueReg })
+    this.releaseRegister(valueReg)
   }
 
   compileExpression(expr) {
     switch (expr.type) {
       case 'StringLiteral':
-        this.emit(OpCode.PUSH_STRING, expr.value)
-        break
-
       case 'NumberLiteral':
-        this.emit(OpCode.PUSH_NUMBER, expr.value)
-        break
-
       case 'BooleanLiteral':
-        this.emit(OpCode.PUSH_BOOLEAN, expr.value)
-        break
+        return this.emitLoadConst(expr.value)
 
       case 'NullLiteral':
-        this.emit(OpCode.PUSH_NULL)
-        break
+        return this.emitLoadConst(null)
 
-      case 'ArrayLiteral':
-        // Stack layout before BUILD_ARRAY: [..., el1, el2, ..., elN]
-        // BUILD_ARRAY(N) packs the last N stack values into one JS array.
-        for (const element of expr.elements) {
-          this.compileExpression(element)
+      case 'ArrayLiteral': {
+        const elementRegs = expr.elements.map(element => this.compileExpression(element))
+        const dest = this.allocateRegister()
+        this.emit(OpCode.BUILD_ARRAY, {
+          dest,
+          elements: elementRegs,
+        })
+        for (const reg of elementRegs) {
+          this.releaseRegister(reg)
         }
-        this.emit(OpCode.BUILD_ARRAY, expr.elements.length)
-        break
+        return dest
+      }
 
       case 'Identifier':
-        this.emit(OpCode.LOAD_VARIABLE, expr.name)
-        break
+        return this.emitLoadVariable(expr.name)
 
       case 'ThisExpression':
-        this.emit(OpCode.LOAD_VARIABLE, 'priyoSelf')
-        break
+        return this.emitLoadVariable('priyoSelf')
 
       case 'SuperExpression':
-        this.emit(OpCode.LOAD_VARIABLE, '__priyoSuperMarker')
-        break
+        return this.emitLoadVariable('__priyoSuperMarker')
 
-      case 'MemberExpression':
-        this.compileExpression(expr.object)
-        this.emit(OpCode.GET_PROPERTY, expr.property.name)
-        break
+      case 'MemberExpression': {
+        const objectReg = this.compileExpression(expr.object)
+        const dest = this.allocateRegister()
+        this.emit(OpCode.GET_PROPERTY, {
+          dest,
+          object: objectReg,
+          name: expr.property.name,
+        })
+        this.releaseRegister(objectReg)
+        return dest
+      }
 
-      case 'IndexExpression':
-        // Evaluate target and index, then delegate bounds/type checks to VM.
-        this.compileExpression(expr.object)
-        this.compileExpression(expr.index)
-        this.emit(OpCode.GET_INDEX)
-        break
+      case 'IndexExpression': {
+        const objectReg = this.compileExpression(expr.object)
+        const indexReg = this.compileExpression(expr.index)
+        const dest = this.allocateRegister()
+        this.emit(OpCode.GET_INDEX, {
+          dest,
+          target: objectReg,
+          index: indexReg,
+        })
+        this.releaseRegister(objectReg)
+        this.releaseRegister(indexReg)
+        return dest
+      }
 
-      case 'SliceExpression':
-        this.compileExpression(expr.object)
-        if (expr.start) {
-          this.compileExpression(expr.start)
-        } else {
-          this.emit(OpCode.PUSH_NULL)
-        }
-        if (expr.end) {
-          this.compileExpression(expr.end)
-        } else {
-          this.emit(OpCode.PUSH_NULL)
-        }
-        this.emit(OpCode.SLICE_ARRAY)
-        break
+      case 'SliceExpression': {
+        const objectReg = this.compileExpression(expr.object)
+        const startReg = expr.start ? this.compileExpression(expr.start) : this.emitLoadConst(null)
+        const endReg = expr.end ? this.compileExpression(expr.end) : this.emitLoadConst(null)
+        const dest = this.allocateRegister()
+        this.emit(OpCode.SLICE_ARRAY, {
+          dest,
+          target: objectReg,
+          start: startReg,
+          end: endReg,
+        })
+        this.releaseRegister(objectReg)
+        this.releaseRegister(startReg)
+        this.releaseRegister(endReg)
+        return dest
+      }
 
       case 'CallExpression':
-        this.compileCallExpression(expr)
-        break
+        return this.compileCallExpression(expr)
 
       case 'NewExpression':
-        this.compileNewExpression(expr)
-        break
+        return this.compileNewExpression(expr)
 
       case 'BinaryExpression':
-        this.compileBinaryExpression(expr)
-        break
+        return this.compileBinaryExpression(expr)
 
       case 'UnaryExpression':
-        this.compileUnaryExpression(expr)
-        break
+        return this.compileUnaryExpression(expr)
 
-      case 'AwaitExpression':
-        this.compileExpression(expr.argument)
-        this.emit(OpCode.AWAIT_VALUE)
-        break
+      case 'AwaitExpression': {
+        const sourceReg = this.compileExpression(expr.argument)
+        const dest = this.allocateRegister()
+        this.emit(OpCode.AWAIT_VALUE, { dest, src: sourceReg })
+        this.releaseRegister(sourceReg)
+        return dest
+      }
 
       default:
         throw new Error(`Unknown expression type: ${expr.type}`)
@@ -728,48 +823,54 @@ class Compiler {
 
   compileCallExpression(expr) {
     if (expr.callee.type === 'Identifier') {
-      for (const arg of expr.arguments) {
-        this.compileExpression(arg)
-      }
+      const argRegs = expr.arguments.map(arg => this.compileExpression(arg))
+      const dest = this.allocateRegister()
       this.emit(OpCode.CALL_NAMED, {
+        dest,
         name: expr.callee.name,
-        argc: expr.arguments.length,
+        argRegs,
       })
-      return
+      this.releaseRegisters(argRegs)
+      return dest
     }
 
     if (expr.callee.type === 'SuperExpression') {
-      for (const arg of expr.arguments) {
-        this.compileExpression(arg)
-      }
+      const argRegs = expr.arguments.map(arg => this.compileExpression(arg))
+      const dest = this.allocateRegister()
       this.emit(OpCode.CALL_SUPER_METHOD, {
+        dest,
         name: 'init',
-        argc: expr.arguments.length,
+        argRegs,
       })
-      return
+      this.releaseRegisters(argRegs)
+      return dest
     }
 
     if (expr.callee.type === 'MemberExpression') {
       if (expr.callee.object.type === 'SuperExpression') {
-        for (const arg of expr.arguments) {
-          this.compileExpression(arg)
-        }
+        const argRegs = expr.arguments.map(arg => this.compileExpression(arg))
+        const dest = this.allocateRegister()
         this.emit(OpCode.CALL_SUPER_METHOD, {
+          dest,
           name: expr.callee.property.name,
-          argc: expr.arguments.length,
+          argRegs,
         })
-        return
+        this.releaseRegisters(argRegs)
+        return dest
       }
 
-      this.compileExpression(expr.callee.object)
-      for (const arg of expr.arguments) {
-        this.compileExpression(arg)
-      }
+      const receiverReg = this.compileExpression(expr.callee.object)
+      const argRegs = expr.arguments.map(arg => this.compileExpression(arg))
+      const dest = this.allocateRegister()
       this.emit(OpCode.CALL_METHOD, {
+        dest,
+        receiver: receiverReg,
         name: expr.callee.property.name,
-        argc: expr.arguments.length,
+        argRegs,
       })
-      return
+      this.releaseRegister(receiverReg)
+      this.releaseRegisters(argRegs)
+      return dest
     }
 
     throw new Error(`Unsupported call target: ${expr.callee.type}`)
@@ -780,19 +881,20 @@ class Compiler {
       throw new Error('Class constructor must be an identifier')
     }
 
-    for (const arg of expr.arguments) {
-      this.compileExpression(arg)
-    }
-
+    const argRegs = expr.arguments.map(arg => this.compileExpression(arg))
+    const dest = this.allocateRegister()
     this.emit(OpCode.CREATE_INSTANCE, {
+      dest,
       name: expr.callee.name,
-      argc: expr.arguments.length,
+      argRegs,
     })
+    this.releaseRegisters(argRegs)
+    return dest
   }
 
   compileBinaryExpression(expr) {
-    this.compileExpression(expr.left)
-    this.compileExpression(expr.right)
+    const leftReg = this.compileExpression(expr.left)
+    const rightReg = this.compileExpression(expr.right)
 
     const opcodeByOperator = {
       [TokenType.PLUS]: OpCode.ADD,
@@ -814,11 +916,12 @@ class Compiler {
     if (opcode == null) {
       throw new Error(`Unsupported binary operator: ${expr.operator}`)
     }
-    this.emit(opcode)
+
+    return this.emitBinaryRegisterOp(opcode, leftReg, rightReg)
   }
 
   compileUnaryExpression(expr) {
-    this.compileExpression(expr.argument)
+    const argumentReg = this.compileExpression(expr.argument)
     const opcodeByOperator = {
       [TokenType.BANG]: OpCode.NOT,
     }
@@ -826,7 +929,11 @@ class Compiler {
     if (opcode == null) {
       throw new Error(`Unsupported unary operator: ${expr.operator}`)
     }
-    this.emit(opcode)
+
+    const dest = this.allocateRegister()
+    this.emit(opcode, { dest, src: argumentReg })
+    this.releaseRegister(argumentReg)
+    return dest
   }
 
   emit(op, operand = null) {
@@ -834,7 +941,82 @@ class Compiler {
     return this.instructions.length - 1
   }
 
+  finalizeInstructions() {
+    this.instructions.maxRegisters = this.maxRegisters
+    return this.instructions
+  }
+
+  withRegisterScope(fn) {
+    const snapshot = this.captureRegisterState()
+    const result = fn()
+    this.restoreRegisterState(snapshot)
+    return result
+  }
+
+  emitLoadConst(value) {
+    const dest = this.allocateRegister()
+    this.emit(OpCode.LOAD_CONST, { dest, value })
+    return dest
+  }
+
+  emitLoadVariable(name) {
+    const dest = this.allocateRegister()
+    this.emit(OpCode.LOAD_VARIABLE, { dest, name })
+    return dest
+  }
+
+  emitBinaryRegisterOp(opcode, leftReg, rightReg) {
+    const dest = this.allocateRegister()
+    this.emit(opcode, {
+      dest,
+      left: leftReg,
+      right: rightReg,
+    })
+    this.releaseRegister(leftReg)
+    this.releaseRegister(rightReg)
+    return dest
+  }
+
+  allocateRegister() {
+    const reg = this.freeRegisters.length > 0 ? this.freeRegisters.pop() : this.nextRegister++
+    if (reg + 1 > this.maxRegisters) {
+      this.maxRegisters = reg + 1
+    }
+    return reg
+  }
+
+  releaseRegister(reg) {
+    if (typeof reg !== 'number') return
+    this.freeRegisters.push(reg)
+  }
+
+  releaseRegisters(registers) {
+    for (const reg of registers || []) {
+      this.releaseRegister(reg)
+    }
+  }
+
+  captureRegisterState() {
+    return {
+      freeRegisters: [...this.freeRegisters],
+      nextRegister: this.nextRegister,
+      maxRegisters: this.maxRegisters,
+    }
+  }
+
+  restoreRegisterState(snapshot) {
+    if (!snapshot) return
+    this.maxRegisters = Math.max(this.maxRegisters, snapshot.maxRegisters)
+    this.freeRegisters = [...snapshot.freeRegisters]
+    this.nextRegister = snapshot.nextRegister
+  }
+
   patchJump(index, target) {
+    const operand = this.instructions[index].operand
+    if (operand && typeof operand === 'object' && !Array.isArray(operand)) {
+      operand.target = target
+      return
+    }
     this.instructions[index].operand = target
   }
 
@@ -989,7 +1171,6 @@ class Compiler {
       )
     }
 
-    // Child init must delegate to parent exactly once.
     let parentConstructorCallCount = 0
     for (const statement of initMethod.body.statements) {
       if (

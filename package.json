@@ -21,6 +21,7 @@
   "scripts": {
     "start": "node src/index.js examples/basics/main.priyo",
     "run:examples": "node scripts/run-all.js",
+    "benchmark:vm": "node scripts/benchmark-vm.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:check": "prettier . --check",

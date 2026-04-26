@@ -29,11 +29,9 @@ describe('Compiler', () => {
     `
     const instructions = compileInput(input)
 
-    // expression statement pushes then pops.
-    expect(instructions[0].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[0].operand).toBe(10)
-    expect(instructions[1].op).toBe(OpCode.POP)
-    expect(instructions[2].op).toBe(OpCode.HALT)
+    expect(instructions[0].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[0].operand).toEqual({ dest: 0, value: 10 })
+    expect(instructions[1].op).toBe(OpCode.HALT)
   })
 
   it('should compile variable declarations', () => {
@@ -44,10 +42,10 @@ describe('Compiler', () => {
     `
     const instructions = compileInput(input)
 
-    expect(instructions[0].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[0].operand).toBe(42)
+    expect(instructions[0].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[0].operand).toEqual({ dest: 0, value: 42 })
     expect(instructions[1].op).toBe(OpCode.DEFINE_VARIABLE)
-    expect(instructions[1].operand).toEqual({ name: 'x', kind: 'let' })
+    expect(instructions[1].operand).toEqual({ name: 'x', kind: 'let', src: 0 })
     expect(instructions[2].op).toBe(OpCode.HALT)
   })
 
@@ -59,16 +57,27 @@ describe('Compiler', () => {
     `
     const instructions = compileInput(input)
 
-    expect(instructions[0].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[0].operand).toBe(1) // left
-    expect(instructions[1].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[1].operand).toBe(2) // right.left
-    expect(instructions[2].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[2].operand).toBe(3) // right.right
+    expect(instructions[0].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[0].operand).toEqual({ dest: 0, value: 1 })
+    expect(instructions[1].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[1].operand).toEqual({ dest: 1, value: 2 })
+    expect(instructions[2].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[2].operand).toEqual({ dest: 2, value: 3 })
     expect(instructions[3].op).toBe(OpCode.MUL)
+    expect(instructions[3].operand).toEqual(
+      expect.objectContaining({
+        left: 1,
+        right: 2,
+      }),
+    )
     expect(instructions[4].op).toBe(OpCode.ADD)
-    expect(instructions[5].op).toBe(OpCode.POP)
-    expect(instructions[6].op).toBe(OpCode.HALT)
+    expect(instructions[4].operand).toEqual(
+      expect.objectContaining({
+        left: 0,
+        right: instructions[3].operand.dest,
+      }),
+    )
+    expect(instructions[5].op).toBe(OpCode.HALT)
   })
 
   it('should compile if statements', () => {
@@ -81,23 +90,23 @@ describe('Compiler', () => {
     `
     const instructions = compileInput(input)
 
-    expect(instructions[0].op).toBe(OpCode.PUSH_BOOLEAN)
-    expect(instructions[0].operand).toBe(true)
+    expect(instructions[0].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[0].operand).toEqual({ dest: 0, value: true })
 
     expect(instructions[1].op).toBe(OpCode.JUMP_IF_FALSE)
+    expect(instructions[1].operand).toEqual({ condition: 0, target: 6 })
 
     expect(instructions[2].op).toBe(OpCode.ENTER_SCOPE)
-    expect(instructions[3].op).toBe(OpCode.PUSH_NUMBER)
-    expect(instructions[3].operand).toBe(10)
-    expect(instructions[4].op).toBe(OpCode.POP)
-    expect(instructions[5].op).toBe(OpCode.EXIT_SCOPE)
+    expect(instructions[3].op).toBe(OpCode.LOAD_CONST)
+    expect(instructions[3].operand).toEqual({ dest: 0, value: 10 })
+    expect(instructions[4].op).toBe(OpCode.EXIT_SCOPE)
 
-    expect(instructions[6].op).toBe(OpCode.JUMP)
-    expect(instructions[7].op).toBe(OpCode.HALT)
+    expect(instructions[5].op).toBe(OpCode.JUMP)
+    expect(instructions[6].op).toBe(OpCode.HALT)
 
     // Verify jumps are patched
-    expect(instructions[1].operand).toBe(7) // Jump over if block and JUMP instruction
-    expect(instructions[6].operand).toBe(7) // Forward JUMP points to HALT
+    expect(instructions[1].operand.target).toBe(6)
+    expect(instructions[5].operand).toBe(6)
   })
 
   it('should compile array destructuring declarations', () => {
@@ -123,6 +132,22 @@ describe('Compiler', () => {
     expect(instructions[0].operand.source).toBe('./profile.priyo')
     expect(instructions.some(instr => instr.op === OpCode.GET_PROPERTY)).toBe(true)
     expect(instructions.some(instr => instr.op === OpCode.DEFINE_VARIABLE)).toBe(true)
+  })
+
+  it('should reuse registers across independent statements and branches', () => {
+    const input = `
+      monalisa {
+        priyoTell(1)
+        priyoTell(2)
+        prakritiIf (priyoTrue) {
+          priyoTell(1 + 2)
+        } prakritiElse {
+          priyoTell(3 + 4)
+        }
+      }
+    `
+    const instructions = compileInput(input)
+    expect(instructions.maxRegisters).toBe(3)
   })
 
   it('should compile async function declaration metadata and await opcode', () => {

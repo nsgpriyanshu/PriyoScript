@@ -315,7 +315,8 @@ tests/
 
 ## 5. Runtime Model
 
-- Stack-based bytecode VM with explicit opcodes.
+- Register-based bytecode VM with explicit opcodes.
+- The compiler now emits register-addressed bytecode directly, so there is no post-pass stack-to-register lowering stage.
 - Function and method execution use isolated call frames.
 - Stage-1 async runtime support:
   - async function declarations compile with async metadata
@@ -328,8 +329,8 @@ tests/
 - Lexical environments are parent-linked.
 - Scope enter/exit is explicit (`ENTER_SCOPE` / `EXIT_SCOPE`).
 - Loop control jumps carry scope-unwind metadata to prevent leaks.
-- Optional VM tracing mode prints opcode-level execution (`-trace`) with frame + stack depth context.
-- Trace filtering supports op, file, frame, and stack depth limits; JSON lines available for structured debug sessions.
+- Optional VM tracing mode prints opcode-level execution (`-trace`) with frame + register-count context.
+- Trace filtering supports op, file, frame, and register-count limits; JSON lines available for structured debug sessions.
 - Class runtime stores:
   - instance methods
   - static methods
