@@ -5,7 +5,7 @@ monalisa {
   priyoKeep notesPath = files.join(root, "notes.txt")
 
   files.writeText(notesPath, "mona: hello\n")
-  files.appendText(notesPath, "piue: welcome\n")
+  files.appendText(notesPath, "lisaa: welcome\n")
 
   priyoTell("exists: " + files.exists(notesPath))
   priyoTell("content:\n" + files.readText(notesPath))

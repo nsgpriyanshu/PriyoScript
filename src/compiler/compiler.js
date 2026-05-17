@@ -816,6 +816,9 @@ class Compiler {
         return dest
       }
 
+      case 'GoExpression':
+        return this.compileGoExpression(expr)
+
       default:
         throw new Error(`Unknown expression type: ${expr.type}`)
     }
@@ -874,6 +877,21 @@ class Compiler {
     }
 
     throw new Error(`Unsupported call target: ${expr.callee.type}`)
+  }
+
+  compileGoExpression(expr) {
+    const call = expr.call
+    const callableReg = this.compileExpression(call.callee)
+    const argRegs = call.arguments.map(arg => this.compileExpression(arg))
+    const dest = this.allocateRegister()
+    this.emit(OpCode.SPAWN_TASK, {
+      dest,
+      callable: callableReg,
+      argRegs,
+    })
+    this.releaseRegister(callableReg)
+    this.releaseRegisters(argRegs)
+    return dest
   }
 
   compileNewExpression(expr) {

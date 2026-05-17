@@ -10,7 +10,7 @@
   - module system v3 (relative/absolute resolution, optional `index.priyo`, clearer not-found diagnostics)
   - debug tooling (`monalisa -trace`, source-level Priyo stack traces, `prakritiThink(...)` debug hook)
   - diagnostics v2 (caret spans, typo suggestions, docs links per error code)
-  - structured concurrency runtime (`priyoConcurrency.group()`, `priyoConcurrency.queue()`, cooperative cancellation, deadlines, and task combinators)
+  - prakriti concurrency runtime (`prakritiGo`, `prakritiChannel()`, `prakritiConcurrency.group()`, `prakritiConcurrency.queue()`, cooperative cancellation, deadlines, and task combinators)
   - golden CLI/REPL tests and deep module-cycle stress tests
   - web docs app (Next.js + Fumadocs) with stable/canary docs structure
   - separate web versioning/changelog flow via Cliff-Jumper
@@ -106,62 +106,62 @@ tests/
 
 ### 4.0 Feature Completion Table (100% as of now)
 
-| Area         | Feature                                                                             | Status |
-| ------------ | ----------------------------------------------------------------------------------- | ------ |
-| Core         | Entry block (`monalisa { ... }`)                                                    | 100%   |
-| Core         | Comments (`//`, `/* ... */`)                                                        | 100%   |
-| Core         | Literals (number, string, boolean, null)                                            | 100%   |
-| Variables    | `priyoKeep`, `priyoChange`, `priyoPromise`                                          | 100%   |
-| Variables    | Variable and property assignment                                                    | 100%   |
-| Arrays       | Array literals and index read/write (`[]`)                                          | 100%   |
-| Arrays       | Array slicing (`arr[start:end]`)                                                    | 100%   |
-| Arrays       | Iteration-friendly foreach (`prakritiCount (item priyoInside arr)`)                 | 100%   |
-| Arrays       | Array destructuring declarations (`priyoChange [a, b] = arr`)                       | 100%   |
-| Arrays       | Higher-order helpers (`map/filter/reduce/find/some/every`)                          | 100%   |
-| Arrays       | Nested/default destructuring patterns (`[]`, `{}`)                                  | 100%   |
-| Expressions  | Arithmetic, comparison, logical, grouping                                           | 100%   |
-| Expressions  | Function call and member access (`.`)                                               | 100%   |
-| Control flow | `if / else if / else`                                                               | 100%   |
-| Control flow | `switch / case / default`                                                           | 100%   |
-| Control flow | `while`, `for`, `break`, `continue`                                                 | 100%   |
-| Control flow | `try / catch / finally / throw`                                                     | 100%   |
-| Functions    | Declaration, return, closures, recursion                                            | 100%   |
-| Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)     | 100%   |
-| Functions    | Generator-style yield (`prakritiGiveSome`) with `.next()` step objects              | 100%   |
-| Functions    | Structured concurrency (`priyoConcurrency` groups, queues, deadlines, combinators)  | 100%   |
-| OOP          | Classes, object creation, `priyoSelf`                                               | 100%   |
-| OOP          | Inheritance and parent access (`priyoParent`)                                       | 100%   |
-| OOP          | Static methods/fields and class fields                                              | 100%   |
-| OOP          | Interfaces (`lisaaAgreement`) and class contracts (`lisaaFollow`)                   | 100%   |
-| OOP          | Access modifiers (`lisaaOpen`, `lisaaPersonal`, `lisaaGuarded`)                     | 100%   |
-| OOP          | Constructor-chain validation + stricter declared-member assignment checks           | 100%   |
-| Builtins     | `priyoTell` and color variants                                                      | 100%   |
-| Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                           | 100%   |
-| Packages     | Built-in package import (`lisaaBring`)                                              | 100%   |
-| Packages     | Built-in package registry (`priyoPackage.*`)                                        | 100%   |
-| Packages     | `decorators` package (string formatting + date/time helpers)                        | 100%   |
-| Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                          | 100%   |
-| Modules      | Import alias + named imports + cycle guard                                          | 100%   |
-| Modules      | Relative/absolute path resolution + `index.priyo` fallback                          | 100%   |
-| Runtime      | Bytecode VM + lexical scope + call frames                                           | 100%   |
-| Runtime      | REPL module cache invalidation on reset                                             | 100%   |
-| Runtime      | Source-level Priyo stack traces on runtime errors                                   | 100%   |
-| Errors       | Typed staged errors + codes + humanized printer                                     | 100%   |
-| Errors       | Source-aware metadata (`file`, `line`, `column`, context excerpt, trimmed stack)    | 100%   |
-| Errors       | Caret span highlighting + keyword typo suggestions + docs links per code            | 100%   |
-| Errors       | Context lines + module import diagnostics (`triedPaths`, `importSource`)            | 100%   |
-| CLI          | Help, syntax help, error list, code explain (`-h`, `-s`, `-e`, `-x`)                | 100%   |
-| CLI          | Interactive REPL (`-repl` and no-arg launch)                                        | 100%   |
-| CLI          | REPL v2 commands (`.reload`, `.env`, `.type`, `.history`, `.save`, `.editor`)       | 100%   |
-| CLI          | REPL editor mode (`.editor`, `edit>` prompt, `.run`, `.cancel`)                     | 100%   |
-| CLI          | REPL persistence + smart UX (history file, autocomplete, smarter multiline parsing) | 100%   |
-| CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`prakritiThink`)               | 100%   |
-| CLI          | Trace filtering + JSON trace output (`-trace-*`, `-th`)                             | 100%   |
-| Distribution | npm global installation (`npm install -g priyoscript`)                              | 100%   |
-| Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                             | 100%   |
-| Web          | Browser-only PriyoScript playground for basic programs (`/playground`)              | 100%   |
-| Web          | Playground UX: syntax-highlighted editor + humanized error/tip output               | 100%   |
-| Release      | Separate web versioning/changelog flow (`web-v*` tags)                              | 100%   |
+| Area         | Feature                                                                               | Status |
+| ------------ | ------------------------------------------------------------------------------------- | ------ |
+| Core         | Entry block (`monalisa { ... }`)                                                      | 100%   |
+| Core         | Comments (`//`, `/* ... */`)                                                          | 100%   |
+| Core         | Literals (number, string, boolean, null)                                              | 100%   |
+| Variables    | `priyoKeep`, `priyoChange`, `priyoPromise`                                            | 100%   |
+| Variables    | Variable and property assignment                                                      | 100%   |
+| Arrays       | Array literals and index read/write (`[]`)                                            | 100%   |
+| Arrays       | Array slicing (`arr[start:end]`)                                                      | 100%   |
+| Arrays       | Iteration-friendly foreach (`prakritiCount (item priyoInside arr)`)                   | 100%   |
+| Arrays       | Array destructuring declarations (`priyoChange [a, b] = arr`)                         | 100%   |
+| Arrays       | Higher-order helpers (`map/filter/reduce/find/some/every`)                            | 100%   |
+| Arrays       | Nested/default destructuring patterns (`[]`, `{}`)                                    | 100%   |
+| Expressions  | Arithmetic, comparison, logical, grouping                                             | 100%   |
+| Expressions  | Function call and member access (`.`)                                                 | 100%   |
+| Control flow | `if / else if / else`                                                                 | 100%   |
+| Control flow | `switch / case / default`                                                             | 100%   |
+| Control flow | `while`, `for`, `break`, `continue`                                                   | 100%   |
+| Control flow | `try / catch / finally / throw`                                                       | 100%   |
+| Functions    | Declaration, return, closures, recursion                                              | 100%   |
+| Functions    | Async function declaration (`prakritiWait lisaaTask`) + await (`prakritiPause`)       | 100%   |
+| Functions    | Generator-style yield (`prakritiGiveSome`) with `.next()` step objects                | 100%   |
+| Functions    | Prakriti concurrency (`prakritiGo`, channels, groups, queues, deadlines, combinators) | 100%   |
+| OOP          | Classes, object creation, `priyoSelf`                                                 | 100%   |
+| OOP          | Inheritance and parent access (`priyoParent`)                                         | 100%   |
+| OOP          | Static methods/fields and class fields                                                | 100%   |
+| OOP          | Interfaces (`lisaaAgreement`) and class contracts (`lisaaFollow`)                     | 100%   |
+| OOP          | Access modifiers (`lisaaOpen`, `lisaaPersonal`, `lisaaGuarded`)                       | 100%   |
+| OOP          | Constructor-chain validation + stricter declared-member assignment checks             | 100%   |
+| Builtins     | `priyoTell` and color variants                                                        | 100%   |
+| Builtins     | `priyoListenSentence`, `priyoListenNumber`, `priyoListen`                             | 100%   |
+| Packages     | Built-in package import (`lisaaBring`)                                                | 100%   |
+| Packages     | Built-in package registry (`priyoPackage.*`)                                          | 100%   |
+| Packages     | `decorators` package (string formatting + date/time helpers)                          | 100%   |
+| Modules      | User modules (`lisaaBox`, `lisaaShare`, path `lisaaBring`)                            | 100%   |
+| Modules      | Import alias + named imports + cycle guard                                            | 100%   |
+| Modules      | Relative/absolute path resolution + `index.priyo` fallback                            | 100%   |
+| Runtime      | Bytecode VM + lexical scope + call frames                                             | 100%   |
+| Runtime      | REPL module cache invalidation on reset                                               | 100%   |
+| Runtime      | Source-level Priyo stack traces on runtime errors                                     | 100%   |
+| Errors       | Typed staged errors + codes + humanized printer                                       | 100%   |
+| Errors       | Source-aware metadata (`file`, `line`, `column`, context excerpt, trimmed stack)      | 100%   |
+| Errors       | Caret span highlighting + keyword typo suggestions + docs links per code              | 100%   |
+| Errors       | Context lines + module import diagnostics (`triedPaths`, `importSource`)              | 100%   |
+| CLI          | Help, syntax help, error list, code explain (`-h`, `-s`, `-e`, `-x`)                  | 100%   |
+| CLI          | Interactive REPL (`-repl` and no-arg launch)                                          | 100%   |
+| CLI          | REPL v2 commands (`.reload`, `.env`, `.type`, `.history`, `.save`, `.editor`)         | 100%   |
+| CLI          | REPL editor mode (`.editor`, `edit>` prompt, `.run`, `.cancel`)                       | 100%   |
+| CLI          | REPL persistence + smart UX (history file, autocomplete, smarter multiline parsing)   | 100%   |
+| CLI          | Trace mode (`-trace`) + breakpoint-style debug hook (`prakritiThink`)                 | 100%   |
+| CLI          | Trace filtering + JSON trace output (`-trace-*`, `-th`)                               | 100%   |
+| Distribution | npm global installation (`npm install -g priyoscript`)                                | 100%   |
+| Web Docs     | Next.js + Fumadocs docs app with stable/canary sections                               | 100%   |
+| Web          | Browser-only PriyoScript playground for basic programs (`/playground`)                | 100%   |
+| Web          | Playground UX: syntax-highlighted editor + humanized error/tip output                 | 100%   |
+| Release      | Separate web versioning/changelog flow (`web-v*` tags)                                | 100%   |
 
 ### 4.1 Core syntax
 
@@ -297,11 +297,17 @@ tests/
   - autocomplete across commands, keywords, and in-scope bindings
 - Debug helper:
   - `prakritiThink("label")` emits a traceable breakpoint marker while keeping execution flow
-- Structured concurrency helper:
-  - `priyoConcurrency.group(label?)` creates a task group
-  - `priyoConcurrency.queue(limit, label?)` creates a bounded task queue
-  - `priyoConcurrency.after(ms, value?)` resolves a value after a delay
-  - `priyoConcurrency.token(reason?)` creates a standalone cancellation token
+- Prakriti concurrency model:
+  - `prakritiGo task(args...)` starts a lightweight cooperative task and returns a task handle
+  - `prakritiChannel(capacity?, label?)` creates a channel for task communication
+  - channel methods:
+    - `channel.send(value)` sends a value, waiting when an unbuffered or full channel cannot accept it yet
+    - `channel.receive()` receives the next value, waiting when the channel is empty
+    - `channel.close()`, `channel.isClosed()`, `channel.size()`
+  - `prakritiConcurrency.group(label?)` creates a task group
+  - `prakritiConcurrency.queue(limit, label?)` creates a bounded task queue
+  - `prakritiConcurrency.after(ms, value?)` resolves a value after a delay
+  - `prakritiConcurrency.token(reason?)` creates a standalone cancellation token
   - task group methods:
     - `group.run(task, ...args)` starts a task immediately
     - `group.schedule(ms, task, ...args)` starts a task after a delay
@@ -333,6 +339,8 @@ tests/
   - await expressions resolve via VM await opcode (`AWAIT_VALUE`)
   - top-level await is allowed in entry/module blocks
 - Stage-2 concurrency runtime support:
+  - `prakritiGo` compiles to `SPAWN_TASK` and returns a normal Priyo task handle
+  - channels are cooperative host objects with async send/receive semantics
   - task groups execute user callables in isolated child VM instances
   - bounded task queues cap concurrent task execution while preserving task handles
   - cancellation is cooperative through shared tokens
@@ -396,7 +404,7 @@ Current language/runtime limitations that still need dedicated implementation:
   - no rest/spread destructuring syntax yet
 - Async support is currently staged:
   - implemented: `prakritiWait` + `prakritiPause` + `prakritiGiveSome`
-  - implemented: `priyoConcurrency` task groups, bounded queues, cancellation tokens, deadlines, combinators, delayed scheduling
+  - implemented: `prakritiGo`, `prakritiChannel`, `prakritiConcurrency` task groups, bounded queues, cancellation tokens, deadlines, combinators, delayed scheduling
   - remaining gap: no worker-thread or parallel CPU execution model
 - Type system remains fully dynamic:
   - no static type checker

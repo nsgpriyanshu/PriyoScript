@@ -432,7 +432,7 @@ monalisa {
 ### `PRUN-112` Task cancelled
 
 This runtime error is used for direct cancellation, queue cancellation, and deadline-triggered
-timeouts inside `priyoConcurrency`. In other words, deadlines are modeled as cancellation with a
+timeouts inside `prakritiConcurrency`. In other words, deadlines are modeled as cancellation with a
 reason rather than a separate timeout-only error code.
 
 <Callout title="Incorrect" type="error">
@@ -443,7 +443,7 @@ monalisa {
     priyoGiveBack "done"
   }
 
-priyoKeep group = priyoConcurrency.group("cancel")
+priyoKeep group = prakritiConcurrency.group("cancel")
 priyoKeep token = group.token()
 priyoKeep task = group.run(worker, token)
 group.cancel("Stopped by user")
@@ -460,7 +460,7 @@ monalisa {
     priyoGiveBack "done"
   }
 
-  priyoKeep group = priyoConcurrency.group("cancel")
+  priyoKeep group = prakritiConcurrency.group("cancel")
   priyoKeep token = group.token()
   priyoKeep task = group.run(worker, token)
   group.cancel("Stopped by user")

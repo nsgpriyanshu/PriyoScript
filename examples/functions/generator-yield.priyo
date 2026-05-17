@@ -1,7 +1,7 @@
 monalisa {
   lisaaTask sequence() {
     prakritiGiveSome "mona"
-    prakritiGiveSome "piue"
+    prakritiGiveSome "lisaa"
   }
 
   priyoKeep gen = sequence()

@@ -2,13 +2,13 @@ monalisa {
   lisaaBring decorators
 
   priyoTell("=== String Formatting ===")
-  priyoTell(decorators.upper("mona and piue"))
+  priyoTell(decorators.upper("mona and lisaa"))
   priyoTell(decorators.title("welcome to priyoscript"))
   priyoTell(decorators.capitalize("mona"))
   priyoTell(decorators.slug("Priyo Script Language"))
   priyoTell(decorators.snake("Priyo Script Language"))
   priyoTell(decorators.replaceAll("mona likes tea", "tea", "coffee"))
-  priyoTell(decorators.truncate("mona and piue are coding", 12))
+  priyoTell(decorators.truncate("mona and lisaa are coding", 12))
   priyoTell(decorators.formatNumber(1234.5678, 2))
 
   priyoTell("=== Date and Time ===")

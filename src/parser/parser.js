@@ -35,6 +35,7 @@ const {
   BinaryExpression,
   UnaryExpression,
   AwaitExpression,
+  GoExpression,
   ThisExpression,
   SuperExpression,
   MemberExpression,
@@ -1300,6 +1301,10 @@ class Parser {
       return this.parseAwaitExpression()
     }
 
+    if (this.curToken.type === TokenType.GO) {
+      return this.parseGoExpression()
+    }
+
     if (this.curToken.type === TokenType.BANG) {
       const operator = this.curToken.type
       this.nextToken()
@@ -1331,6 +1336,20 @@ class Parser {
       return null
     }
     return new AwaitExpression(argument)
+  }
+
+  parseGoExpression() {
+    this.nextToken()
+    const call = this.parsePostfixExpression()
+    if (!call) {
+      this.error('Expected task call after prakritiGo')
+      return null
+    }
+    if (call.type !== 'CallExpression') {
+      this.error('prakritiGo expects a function or method call')
+      return null
+    }
+    return new GoExpression(call)
   }
 
   parseNewExpression() {

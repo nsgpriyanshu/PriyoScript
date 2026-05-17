@@ -1,20 +1,20 @@
 monalisa {
   prakritiWait lisaaTask delayedValue(name, delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     priyoGiveBack name
   }
 
   prakritiWait lisaaTask delayedBoom(delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     prakritiThrow "boom"
   }
 
-  priyoKeep raceGroup = priyoConcurrency.group("race-demo")
+  priyoKeep raceGroup = prakritiConcurrency.group("race-demo")
   raceGroup.run(delayedValue, "slow", 15)
   raceGroup.run(delayedValue, "fast", 5)
   priyoTell(prakritiPause raceGroup.race())
 
-  priyoKeep anyGroup = priyoConcurrency.group("any-demo")
+  priyoKeep anyGroup = prakritiConcurrency.group("any-demo")
   anyGroup.run(delayedBoom, 1)
   anyGroup.run(delayedValue, "winner", 8)
   priyoTell(prakritiPause anyGroup.any())

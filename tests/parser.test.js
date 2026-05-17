@@ -105,6 +105,23 @@ describe('Parser', () => {
     expect(func.body.statements[0].argument.type).toBe('AwaitExpression')
   })
 
+  it('should parse prakritiGo task spawn expressions', () => {
+    const input = `
+      monalisa {
+        lisaaTask worker(name) {
+          priyoGiveBack name
+        }
+        priyoKeep task = prakritiGo worker("mona")
+      }
+    `
+    const { program, errors } = parse(input)
+
+    expect(errors).toHaveLength(0)
+    const declaration = program.entry.body[1]
+    expect(declaration.initializer.type).toBe('GoExpression')
+    expect(declaration.initializer.call.type).toBe('CallExpression')
+  })
+
   it('should reject await outside async functions', () => {
     const input = `
       monalisa {

@@ -84,17 +84,38 @@ describe('VM & Runtime', () => {
     expect(logSpy).toHaveBeenCalledWith(42)
   })
 
+  it('should spawn tasks with prakritiGo and exchange values through prakritiChannel', async () => {
+    const code = `
+      monalisa {
+        prakritiWait lisaaTask worker(outbox, name) {
+          prakritiPause prakritiConcurrency.after(5, priyoEmpty)
+          prakritiPause outbox.send(name + " ready")
+          priyoGiveBack name
+        }
+
+        priyoKeep outbox = prakritiChannel()
+        priyoKeep task = prakritiGo worker(outbox, "mona")
+        priyoTell(prakritiPause outbox.receive())
+        priyoTell(prakritiPause task.join())
+      }
+    `
+
+    await runSource(code)
+    expect(logSpy).toHaveBeenCalledWith('mona ready')
+    expect(logSpy).toHaveBeenCalledWith('mona')
+  })
+
   it('should execute task groups and wait for all task results', async () => {
     const code = `
       monalisa {
         prakritiWait lisaaTask fetchName(name) {
-          prakritiPause priyoConcurrency.after(5, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(5, priyoEmpty)
           priyoGiveBack name + " done"
         }
 
-        priyoKeep group = priyoConcurrency.group("names")
+        priyoKeep group = prakritiConcurrency.group("names")
         priyoKeep first = group.run(fetchName, "mona")
-        priyoKeep second = group.run(fetchName, "piue")
+        priyoKeep second = group.run(fetchName, "lisaa")
         priyoKeep results = prakritiPause group.all()
 
         priyoTell(priyoArray.length(results))
@@ -106,19 +127,19 @@ describe('VM & Runtime', () => {
     await runSource(code)
     expect(logSpy).toHaveBeenCalledWith(2)
     expect(logSpy).toHaveBeenCalledWith('mona done')
-    expect(logSpy).toHaveBeenCalledWith('piue done')
+    expect(logSpy).toHaveBeenCalledWith('lisaa done')
   })
 
   it('should support cooperative cancellation through task group tokens', async () => {
     const code = `
       monalisa {
         prakritiWait lisaaTask worker(name, token) {
-          prakritiPause priyoConcurrency.after(5, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(5, priyoEmpty)
           token.throwIfCancelled()
           priyoGiveBack name + " finished"
         }
 
-        priyoKeep group = priyoConcurrency.group("cancel")
+        priyoKeep group = prakritiConcurrency.group("cancel")
         priyoKeep token = group.token()
         priyoKeep task = group.run(worker, "mona", token)
         group.cancel("stop now")
@@ -142,8 +163,8 @@ describe('VM & Runtime', () => {
           priyoGiveBack "Hello " + name
         }
 
-        priyoKeep group = priyoConcurrency.group("scheduled")
-        priyoKeep task = group.schedule(5, greet, "piue")
+        priyoKeep group = prakritiConcurrency.group("scheduled")
+        priyoKeep task = group.schedule(5, greet, "lisaa")
         priyoTell(task.status())
         priyoTell(prakritiPause task.join())
         priyoTell(task.status())
@@ -152,7 +173,7 @@ describe('VM & Runtime', () => {
 
     await runSource(code)
     expect(logSpy).toHaveBeenCalledWith('scheduled')
-    expect(logSpy).toHaveBeenCalledWith('Hello piue')
+    expect(logSpy).toHaveBeenCalledWith('Hello lisaa')
     expect(logSpy).toHaveBeenCalledWith('fulfilled')
   })
 
@@ -160,26 +181,26 @@ describe('VM & Runtime', () => {
     const code = `
       monalisa {
         prakritiWait lisaaTask delayedValue(name, delay) {
-          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
           priyoGiveBack name
         }
 
         prakritiWait lisaaTask delayedBoom(delay) {
-          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
           prakritiThrow "boom"
         }
 
-        priyoKeep raceGroup = priyoConcurrency.group("race")
+        priyoKeep raceGroup = prakritiConcurrency.group("race")
         raceGroup.run(delayedValue, "slow", 10)
         raceGroup.run(delayedValue, "fast", 1)
         priyoTell(prakritiPause raceGroup.race())
 
-        priyoKeep anyGroup = priyoConcurrency.group("any")
+        priyoKeep anyGroup = prakritiConcurrency.group("any")
         anyGroup.run(delayedBoom, 1)
         anyGroup.run(delayedValue, "winner", 5)
         priyoTell(prakritiPause anyGroup.any())
 
-        priyoKeep settleGroup = priyoConcurrency.group("settled")
+        priyoKeep settleGroup = prakritiConcurrency.group("settled")
         settleGroup.run(delayedValue, "ok", 1)
         settleGroup.run(delayedBoom, 2)
         priyoKeep settled = prakritiPause settleGroup.allSettled()
@@ -201,16 +222,16 @@ describe('VM & Runtime', () => {
     const code = `
       monalisa {
         prakritiWait lisaaTask worker(token) {
-          prakritiPause priyoConcurrency.after(20, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(20, priyoEmpty)
           token.throwIfCancelled()
           priyoGiveBack "done"
         }
 
-        priyoKeep group = priyoConcurrency.group("deadline")
+        priyoKeep group = prakritiConcurrency.group("deadline")
         priyoKeep token = group.token()
         group.deadline(5, "deadline reached")
         priyoKeep task = group.schedule(20, worker, token)
-        prakritiPause priyoConcurrency.after(10, priyoEmpty)
+        prakritiPause prakritiConcurrency.after(10, priyoEmpty)
         priyoTell(task.status())
         priyoTell(group.reason())
 
@@ -232,11 +253,11 @@ describe('VM & Runtime', () => {
     const code = `
       monalisa {
         prakritiWait lisaaTask worker(name, delay) {
-          prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+          prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
           priyoGiveBack name
         }
 
-        priyoKeep queue = priyoConcurrency.queue(1, "serial")
+        priyoKeep queue = prakritiConcurrency.queue(1, "serial")
         queue.run(worker, "first", 5)
         queue.run(worker, "second", 5)
 

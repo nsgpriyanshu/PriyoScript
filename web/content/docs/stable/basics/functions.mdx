@@ -24,8 +24,8 @@ Functions are reusable blocks of logic that improve readability, reduce duplicat
 | Closure function           | returns inner function           | Inner function remembers outer variables.           |
 | Async function (stage-1)   | `prakritiWait lisaaTask ...`     | Enables `prakritiPause` inside the function body.   |
 | Generator-yield (stage-1)  | `prakritiGiveSome value`         | Produces step values consumable via `next()`.       |
-| Structured concurrency     | `priyoConcurrency.group(...)`    | Runs async tasks with group wait/cancel semantics.  |
-| Bounded concurrency queue  | `priyoConcurrency.queue(...)`    | Limits how many async tasks run at the same time.   |
+| Structured concurrency     | `prakritiConcurrency.group(...)` | Runs async tasks with group wait/cancel semantics.  |
+| Bounded concurrency queue  | `prakritiConcurrency.queue(...)` | Limits how many async tasks run at the same time.   |
 
 ## Syntax Quick Reference
 
@@ -79,26 +79,53 @@ Output:
 Hi mona
 ```
 
-## Structured Concurrency (Groups, Queues, Cancellation, Scheduling)
+## Prakriti Concurrency
 
-`priyoConcurrency` extends async flow with grouped tasks, bounded queues, cooperative
-cancellation, deadlines, combinators, and delayed task scheduling. A task group keeps related
-work together so you can wait for all tasks, cancel the whole unit, and inspect task state in one
-place. A queue adds the same task-handle model but caps active work with a fixed concurrency
-limit.
+PriyoScript concurrency uses `prakriti` names for async work, lightweight task spawning,
+channels, grouped task ownership, queues, cancellation, deadlines, combinators, and delayed task
+scheduling.
 
-### Example 1: Run tasks in a group
+Use `prakritiGo` when you want to start one cooperative task and keep its task handle. Use
+`prakritiChannel` when tasks need to exchange values. Use `prakritiConcurrency.group(...)` or
+`.queue(...)` when a parent scope should own, cancel, or inspect a set of tasks together.
+
+### Example 1: Spawn a task and receive from a channel
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask prepare(outbox, name) {
+    prakritiPause prakritiConcurrency.after(5, priyoEmpty)
+    prakritiPause outbox.send(name + " ready")
+    priyoGiveBack name
+  }
+
+  priyoKeep outbox = prakritiChannel()
+  priyoKeep task = prakritiGo prepare(outbox, "mona")
+
+  priyoTell(prakritiPause outbox.receive())
+  priyoTell(prakritiPause task.join())
+}
+```
+
+Output:
+
+```text
+mona ready
+mona
+```
+
+### Example 2: Run tasks in a group
 
 ```priyo
 monalisa {
   prakritiWait lisaaTask fetchName(name) {
-    prakritiPause priyoConcurrency.after(5, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(5, priyoEmpty)
     priyoGiveBack name + " done"
   }
 
-  priyoKeep group = priyoConcurrency.group("names")
+  priyoKeep group = prakritiConcurrency.group("names")
   priyoKeep first = group.run(fetchName, "mona")
-  priyoKeep second = group.run(fetchName, "piue")
+  priyoKeep second = group.run(fetchName, "lisaa")
 
   priyoTell(priyoArray.length(prakritiPause group.all()))
   priyoTell(prakritiPause first.join())
@@ -112,17 +139,17 @@ Output:
 mona done
 ```
 
-### Example 2: Cooperative cancellation
+### Example 3: Cooperative cancellation
 
 ```priyo
 monalisa {
   prakritiWait lisaaTask worker(name, token) {
-    prakritiPause priyoConcurrency.after(5, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(5, priyoEmpty)
     token.throwIfCancelled()
     priyoGiveBack name + " finished"
   }
 
-  priyoKeep group = priyoConcurrency.group("cancel")
+  priyoKeep group = prakritiConcurrency.group("cancel")
   priyoKeep token = group.token()
   priyoKeep task = group.run(worker, "mona", token)
   group.cancel("stop now")
@@ -141,7 +168,7 @@ Output:
 PRUN-112
 ```
 
-### Example 3: Delayed scheduling
+### Example 4: Delayed scheduling
 
 ```priyo
 monalisa {
@@ -149,8 +176,8 @@ monalisa {
     priyoGiveBack "Hello " + name
   }
 
-  priyoKeep group = priyoConcurrency.group("scheduled")
-  priyoKeep task = group.schedule(5, greet, "piue")
+  priyoKeep group = prakritiConcurrency.group("scheduled")
+  priyoKeep task = group.schedule(5, greet, "lisaa")
 
   priyoTell(task.status())
   priyoTell(prakritiPause task.join())
@@ -162,21 +189,21 @@ Output:
 
 ```text
 scheduled
-Hello piue
+Hello lisaa
 fulfilled
 ```
 
-### Example 4: Deadline-driven cancellation
+### Example 5: Deadline-driven cancellation
 
 ```priyo
 monalisa {
   prakritiWait lisaaTask worker(token) {
-    prakritiPause priyoConcurrency.after(20, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(20, priyoEmpty)
     token.throwIfCancelled()
     priyoGiveBack "done"
   }
 
-  priyoKeep group = priyoConcurrency.group("deadline")
+  priyoKeep group = prakritiConcurrency.group("deadline")
   priyoKeep token = group.token()
   group.deadline(5, "deadline reached")
   priyoKeep task = group.run(worker, token)
@@ -195,26 +222,26 @@ Output:
 PRUN-112
 ```
 
-### Example 5: Race, any, and allSettled
+### Example 6: Race, any, and allSettled
 
 ```priyo
 monalisa {
   prakritiWait lisaaTask delayedValue(name, delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     priyoGiveBack name
   }
 
   prakritiWait lisaaTask delayedBoom(delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     prakritiThrow "boom"
   }
 
-  priyoKeep raceGroup = priyoConcurrency.group("race")
+  priyoKeep raceGroup = prakritiConcurrency.group("race")
   raceGroup.run(delayedValue, "slow", 10)
   raceGroup.run(delayedValue, "fast", 1)
   priyoTell(prakritiPause raceGroup.race())
 
-  priyoKeep anyGroup = priyoConcurrency.group("any")
+  priyoKeep anyGroup = prakritiConcurrency.group("any")
   anyGroup.run(delayedBoom, 1)
   anyGroup.run(delayedValue, "winner", 5)
   priyoTell(prakritiPause anyGroup.any())
@@ -228,16 +255,16 @@ fast
 winner
 ```
 
-### Example 6: Bounded task queues
+### Example 7: Bounded task queues
 
 ```priyo
 monalisa {
   prakritiWait lisaaTask worker(name, delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     priyoGiveBack name
   }
 
-  priyoKeep queue = priyoConcurrency.queue(1, "serial")
+  priyoKeep queue = prakritiConcurrency.queue(1, "serial")
   queue.run(worker, "first", 5)
   queue.run(worker, "second", 5)
 
@@ -259,22 +286,25 @@ Output:
 
 ### Concurrency API quick reference
 
-| API                                                           | Purpose                                        |
-| ------------------------------------------------------------- | ---------------------------------------------- |
-| `priyoConcurrency.group(label?)`                              | Create a task group.                           |
-| `priyoConcurrency.queue(limit, label?)`                       | Create a bounded task queue.                   |
-| `priyoConcurrency.after(ms, value?)`                          | Resolve a value after a delay.                 |
-| `group.run(...)` / `queue.run(...)`                           | Start a task now.                              |
-| `group.schedule(...)` / `queue.schedule(...)`                 | Start or enqueue a task after a delay.         |
-| `group.all()` / `queue.all()`                                 | Wait for all started tasks.                    |
-| `group.allSettled()` / `queue.allSettled()`                   | Collect task outcomes without failing fast.    |
-| `group.race()` / `queue.race()`                               | Settle on the first completed task.            |
-| `group.any()` / `queue.any()`                                 | Resolve with the first fulfilled task.         |
-| `group.deadline(ms, reason?)` / `queue.deadline(ms, reason?)` | Auto-cancel after a timeout.                   |
-| `group.pending()` / `queue.pending()`                         | Count active pending tasks.                    |
-| `queue.active()` / `queue.queued()` / `queue.limit()`         | Inspect queue capacity and backlog.            |
-| `task.join()` / `task.status()` / `task.error()`              | Inspect and await a specific task handle.      |
-| `token.cancel()` / `token.throwIfCancelled()`                 | Cancel and cooperatively observe cancellation. |
+| API                                                           | Purpose                                         |
+| ------------------------------------------------------------- | ----------------------------------------------- |
+| `prakritiGo task(args...)`                                    | Start a cooperative task and return a handle.   |
+| `prakritiChannel(capacity?, label?)`                          | Create a task communication channel.            |
+| `channel.send(value)` / `channel.receive()`                   | Send and receive channel values asynchronously. |
+| `prakritiConcurrency.group(label?)`                           | Create a task group.                            |
+| `prakritiConcurrency.queue(limit, label?)`                    | Create a bounded task queue.                    |
+| `prakritiConcurrency.after(ms, value?)`                       | Resolve a value after a delay.                  |
+| `group.run(...)` / `queue.run(...)`                           | Start a task now.                               |
+| `group.schedule(...)` / `queue.schedule(...)`                 | Start or enqueue a task after a delay.          |
+| `group.all()` / `queue.all()`                                 | Wait for all started tasks.                     |
+| `group.allSettled()` / `queue.allSettled()`                   | Collect task outcomes without failing fast.     |
+| `group.race()` / `queue.race()`                               | Settle on the first completed task.             |
+| `group.any()` / `queue.any()`                                 | Resolve with the first fulfilled task.          |
+| `group.deadline(ms, reason?)` / `queue.deadline(ms, reason?)` | Auto-cancel after a timeout.                    |
+| `group.pending()` / `queue.pending()`                         | Count active pending tasks.                     |
+| `queue.active()` / `queue.queued()` / `queue.limit()`         | Inspect queue capacity and backlog.             |
+| `task.join()` / `task.status()` / `task.error()`              | Inspect and await a specific task handle.       |
+| `token.cancel()` / `token.throwIfCancelled()`                 | Cancel and cooperatively observe cancellation.  |
 
 ## 1. Function Without Return Value
 
@@ -493,7 +523,7 @@ priyoTrue
 monalisa {
   lisaaTask names() {
     prakritiGiveSome "mona"
-    prakritiGiveSome "piue"
+    prakritiGiveSome "lisaa"
   }
 
   priyoKeep g = names()

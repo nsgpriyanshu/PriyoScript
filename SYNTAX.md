@@ -440,7 +440,37 @@ Rule:
 - `prakritiPause` is rejected inside non-async functions.
 - Top-level `prakritiPause` is allowed in `monalisa`/`lisaaBox` blocks.
 
-Structured concurrency helpers:
+PriyoScript concurrency uses `prakriti` names for async, task spawning, scheduling, channels, and cancellation.
+
+Spawn a lightweight task with `prakritiGo`:
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask greet(name) {
+    prakritiPause prakritiConcurrency.after(10, priyoEmpty)
+    priyoGiveBack "Hello " + name
+  }
+
+  priyoKeep task = prakritiGo greet("mona")
+  priyoTell(prakritiPause task.join())
+}
+```
+
+Channels coordinate tasks:
+
+```priyo
+monalisa {
+  prakritiWait lisaaTask worker(outbox, name) {
+    prakritiPause outbox.send(name + " ready")
+  }
+
+  priyoKeep outbox = prakritiChannel()
+  prakritiGo worker(outbox, "lisaa")
+  priyoTell(prakritiPause outbox.receive())
+}
+```
+
+Structured task groups are available when a parent scope should own multiple tasks:
 
 ```priyo
 monalisa {
@@ -448,7 +478,7 @@ monalisa {
     priyoGiveBack "Hello " + name
   }
 
-  priyoKeep group = priyoConcurrency.group("welcome")
+  priyoKeep group = prakritiConcurrency.group("welcome")
   priyoKeep task = group.schedule(10, greet, "mona")
   priyoTell(prakritiPause task.join())
 }
@@ -456,10 +486,17 @@ monalisa {
 
 Available runtime primitives:
 
-- `priyoConcurrency.group(label?)`
-- `priyoConcurrency.queue(limit, label?)`
-- `priyoConcurrency.token(reason?)`
-- `priyoConcurrency.after(ms, value?)`
+- `prakritiGo task(args...)`
+- `prakritiConcurrency.group(label?)`
+- `prakritiConcurrency.queue(limit, label?)`
+- `prakritiConcurrency.token(reason?)`
+- `prakritiConcurrency.after(ms, value?)`
+- `prakritiChannel(capacity?, label?)`
+- `channel.send(value)`
+- `channel.receive()`
+- `channel.close()`
+- `channel.size()`
+- `channel.isClosed()`
 - `group.run(task, ...args)`
 - `group.schedule(ms, task, ...args)`
 - `group.all()`

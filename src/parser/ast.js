@@ -266,6 +266,13 @@ class AwaitExpression {
   }
 }
 
+class GoExpression {
+  constructor(call) {
+    this.type = 'GoExpression'
+    this.call = call
+  }
+}
+
 class ThisExpression {
   constructor() {
     this.type = 'ThisExpression'
@@ -420,6 +427,7 @@ module.exports = {
   BinaryExpression,
   UnaryExpression,
   AwaitExpression,
+  GoExpression,
   ThisExpression,
   SuperExpression,
   MemberExpression,

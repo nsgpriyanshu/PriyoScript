@@ -63,6 +63,7 @@ const TokenType = {
   DEBUGGER: 'DEBUGGER',
   ASYNC: 'ASYNC',
   AWAIT: 'AWAIT',
+  GO: 'GO',
   YIELD: 'YIELD',
 
   // Functions / classes

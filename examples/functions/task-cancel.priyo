@@ -1,11 +1,11 @@
 monalisa {
   prakritiWait lisaaTask longTask(name, token) {
-    prakritiPause priyoConcurrency.after(20, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(20, priyoEmpty)
     token.throwIfCancelled()
     priyoGiveBack name + " finished"
   }
 
-  priyoKeep group = priyoConcurrency.group("cancel-demo")
+  priyoKeep group = prakritiConcurrency.group("cancel-demo")
   priyoKeep token = group.token()
   priyoKeep task = group.run(longTask, "mona", token)
 

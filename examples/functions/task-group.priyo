@@ -1,12 +1,12 @@
 monalisa {
   prakritiWait lisaaTask fetchScore(name) {
-    prakritiPause priyoConcurrency.after(10, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(10, priyoEmpty)
     priyoGiveBack name + " ready"
   }
 
-  priyoKeep group = priyoConcurrency.group("scores")
+  priyoKeep group = prakritiConcurrency.group("scores")
   priyoKeep first = group.run(fetchScore, "mona")
-  priyoKeep second = group.run(fetchScore, "piue")
+  priyoKeep second = group.run(fetchScore, "lisaa")
 
   priyoTell(prakritiPause first.join())
   priyoTell(prakritiPause second.join())

@@ -73,21 +73,25 @@ Syntax is the formal grammar that tells PriyoScript how to read and execute your
 
 ### Concurrency Runtime
 
-| Syntax                                 | Description                                           |
-| -------------------------------------- | ----------------------------------------------------- |
-| `priyoConcurrency.group("label")`      | Create a structured task group.                       |
-| `priyoConcurrency.queue(2, "label")`   | Create a bounded task queue with a concurrency limit. |
-| `group.run(task, arg1, arg2)`          | Start a task immediately inside the group.            |
-| `group.schedule(25, task, arg1)`       | Start a task after a delay in milliseconds.           |
-| `group.deadline(250, "timeout")`       | Cancel the group if work runs past the deadline.      |
-| `prakritiPause group.all()`            | Wait for all tasks in the group.                      |
-| `prakritiPause group.allSettled()`     | Collect fulfilled/rejected/cancelled task outcomes.   |
-| `prakritiPause group.race()`           | Resolve or reject with the first completed task.      |
-| `prakritiPause group.any()`            | Resolve with the first fulfilled task.                |
-| `queue.active()` / `queue.queued()`    | Inspect active vs queued work inside a bounded queue. |
-| `group.token()` / `queue.token()`      | Get the shared cancellation token.                    |
-| `token.throwIfCancelled()`             | Stop cooperatively if the token was cancelled.        |
-| `prakritiPause priyoConcurrency.after` | Delay and resume later with a value or `null`.        |
+| Syntax                                    | Description                                            |
+| ----------------------------------------- | ------------------------------------------------------ |
+| `prakritiGo task(arg1, arg2)`             | Start a lightweight cooperative task and get a handle. |
+| `prakritiChannel()`                       | Create an unbuffered channel for task communication.   |
+| `channel.send(value)`                     | Send a value, waiting when the channel is not ready.   |
+| `prakritiPause channel.receive()`         | Receive the next value from a channel.                 |
+| `prakritiConcurrency.group("label")`      | Create a structured task group.                        |
+| `prakritiConcurrency.queue(2, "label")`   | Create a bounded task queue with a concurrency limit.  |
+| `group.run(task, arg1, arg2)`             | Start a task immediately inside the group.             |
+| `group.schedule(25, task, arg1)`          | Start a task after a delay in milliseconds.            |
+| `group.deadline(250, "timeout")`          | Cancel the group if work runs past the deadline.       |
+| `prakritiPause group.all()`               | Wait for all tasks in the group.                       |
+| `prakritiPause group.allSettled()`        | Collect fulfilled/rejected/cancelled task outcomes.    |
+| `prakritiPause group.race()`              | Resolve or reject with the first completed task.       |
+| `prakritiPause group.any()`               | Resolve with the first fulfilled task.                 |
+| `queue.active()` / `queue.queued()`       | Inspect active vs queued work inside a bounded queue.  |
+| `group.token()` / `queue.token()`         | Get the shared cancellation token.                     |
+| `token.throwIfCancelled()`                | Stop cooperatively if the token was cancelled.         |
+| `prakritiPause prakritiConcurrency.after` | Delay and resume later with a value or `null`.         |
 
 ### Arrays
 

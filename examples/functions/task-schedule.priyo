@@ -3,8 +3,8 @@ monalisa {
     priyoGiveBack "Hello " + name
   }
 
-  priyoKeep group = priyoConcurrency.group("scheduled")
-  priyoKeep task = group.schedule(15, greetLater, "piue")
+  priyoKeep group = prakritiConcurrency.group("scheduled")
+  priyoKeep task = group.schedule(15, greetLater, "lisaa")
 
   priyoTell(task.status())
   priyoTell(prakritiPause task.join())

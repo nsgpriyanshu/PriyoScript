@@ -200,6 +200,103 @@ function createPriyoConcurrencyHost() {
   }
 }
 
+function createPrakritiChannel(capacity = 0, label = '') {
+  if (!Number.isInteger(capacity) || capacity < 0) {
+    throw new Error('prakritiChannel expects a non-negative integer capacity')
+  }
+
+  const buffer = []
+  const waitingReceivers = []
+  const waitingSenders = []
+  let closed = false
+
+  const flush = () => {
+    while (waitingReceivers.length > 0 && buffer.length > 0) {
+      const receiver = waitingReceivers.shift()
+      receiver.resolve(buffer.shift())
+    }
+
+    while (waitingSenders.length > 0 && (waitingReceivers.length > 0 || buffer.length < capacity)) {
+      const sender = waitingSenders.shift()
+      if (waitingReceivers.length > 0) {
+        const receiver = waitingReceivers.shift()
+        receiver.resolve(sender.value)
+      } else {
+        buffer.push(sender.value)
+      }
+      sender.resolve(true)
+    }
+
+    if (closed && buffer.length === 0) {
+      while (waitingReceivers.length > 0) {
+        waitingReceivers.shift().resolve(null)
+      }
+      while (waitingSenders.length > 0) {
+        waitingSenders.shift().reject(new Error('Cannot send on a closed prakritiChannel'))
+      }
+    }
+  }
+
+  const channel = {
+    __priyoHostObject: true,
+    __priyoConcurrencyKind: 'channel',
+    label: label == null ? '' : String(label),
+    capacity,
+
+    send(value) {
+      if (closed) {
+        return Promise.reject(new Error('Cannot send on a closed prakritiChannel'))
+      }
+      if (waitingReceivers.length > 0) {
+        waitingReceivers.shift().resolve(value)
+        return Promise.resolve(true)
+      }
+      if (buffer.length < capacity) {
+        buffer.push(value)
+        return Promise.resolve(true)
+      }
+      return new Promise((resolve, reject) => {
+        waitingSenders.push({ value, resolve, reject })
+      })
+    },
+
+    receive() {
+      if (buffer.length > 0) {
+        const value = buffer.shift()
+        flush()
+        return Promise.resolve(value)
+      }
+      if (waitingSenders.length > 0) {
+        const sender = waitingSenders.shift()
+        sender.resolve(true)
+        return Promise.resolve(sender.value)
+      }
+      if (closed) {
+        return Promise.resolve(null)
+      }
+      return new Promise(resolve => {
+        waitingReceivers.push({ resolve })
+      })
+    },
+
+    close() {
+      closed = true
+      flush()
+      return null
+    },
+
+    isClosed() {
+      return closed
+    },
+
+    size() {
+      return buffer.length
+    },
+  }
+
+  return channel
+}
+
 function createBuiltins(io = {}) {
   const input = io.stdin || stdin
   const output = io.stdout || stdout
@@ -209,6 +306,7 @@ function createBuiltins(io = {}) {
   const priyoPackage = createPackageManager()
   const priyoArray = createPriyoArrayHelpers()
   const priyoConcurrency = createPriyoConcurrencyHost()
+  const prakritiConcurrency = priyoConcurrency
 
   async function askUser(prompt = '') {
     const message = prompt == null ? '' : String(prompt)
@@ -229,6 +327,8 @@ function createBuiltins(io = {}) {
     priyoPackage,
     priyoArray,
     priyoConcurrency,
+    prakritiConcurrency,
+    prakritiChannel: createPrakritiChannel,
 
     priyoListenSentence: async (prompt = '') => {
       return askUser(prompt)

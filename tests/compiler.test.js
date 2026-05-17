@@ -165,6 +165,19 @@ describe('Compiler', () => {
     expect(defineFn.operand.instructions.some(instr => instr.op === OpCode.AWAIT_VALUE)).toBe(true)
   })
 
+  it('should compile prakritiGo into a spawn opcode', () => {
+    const input = `
+      monalisa {
+        lisaaTask worker(name) {
+          priyoGiveBack name
+        }
+        priyoKeep task = prakritiGo worker("mona")
+      }
+    `
+    const instructions = compileInput(input)
+    expect(instructions.some(instr => instr.op === OpCode.SPAWN_TASK)).toBe(true)
+  })
+
   it('should enforce interface method contracts at compile time', () => {
     const input = `
       monalisa {

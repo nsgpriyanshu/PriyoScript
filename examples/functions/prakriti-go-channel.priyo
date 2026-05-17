@@ -1,0 +1,16 @@
+monalisa {
+  prakritiWait lisaaTask prepare(outbox, name) {
+    prakritiPause prakritiConcurrency.after(10, priyoEmpty)
+    prakritiPause outbox.send(name + " ready")
+    priyoGiveBack name
+  }
+
+  priyoKeep outbox = prakritiChannel()
+  priyoKeep first = prakritiGo prepare(outbox, "mona")
+  priyoKeep second = prakritiGo prepare(outbox, "lisaa")
+
+  priyoTell(prakritiPause outbox.receive())
+  priyoTell(prakritiPause outbox.receive())
+  priyoTell(prakritiPause first.join())
+  priyoTell(prakritiPause second.join())
+}

@@ -40,6 +40,7 @@
     "throw": "prakritiThrow",
     "async": "prakritiWait",
     "await": "prakritiPause",
+    "go": "prakritiGo",
     "yield": "prakritiGiveSome",
     "debugger": "prakritiThink",
 

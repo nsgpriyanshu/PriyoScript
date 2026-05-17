@@ -3,7 +3,7 @@ monalisa {
 
   files.ensureDir("workspace")
 
-  priyoKeep lines = ["mona", "piue", "priyo"]
+  priyoKeep lines = ["mona", "lisaa", "priyo"]
   files.writeLines("workspace/names.txt", lines)
   priyoTell(files.readLines("workspace/names.txt"))
 

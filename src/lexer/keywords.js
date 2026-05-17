@@ -64,6 +64,7 @@ const CONCEPT_TO_TOKEN = {
 
   async: TokenType.ASYNC,
   await: TokenType.AWAIT,
+  go: TokenType.GO,
   yield: TokenType.YIELD,
 
   in: TokenType.IN,

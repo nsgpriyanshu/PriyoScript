@@ -397,6 +397,13 @@ class VM {
               break
             }
 
+            case OpCode.SPAWN_TASK: {
+              const { dest, callable, argRegs } = instr.operand
+              const args = Array.isArray(argRegs) ? argRegs.map(reg => registers[reg]) : []
+              registers[dest] = this.spawnDetachedTask(registers[callable], args)
+              break
+            }
+
             case OpCode.YIELD_VALUE: {
               if (!yieldBuffer) {
                 throw new Error('prakritiGiveSome can only be used inside generator functions')
@@ -778,7 +785,7 @@ class VM {
         return this.createTaskQueue(concurrency, label)
       }
       case 'after': {
-        const delayMs = this.normalizeDelayMs(args[0], 'priyoConcurrency.after')
+        const delayMs = this.normalizeDelayMs(args[0], 'prakritiConcurrency.after')
         const value = args.length >= 2 ? args[1] : null
         return new Promise(resolve => {
           setTimeout(() => resolve(value), delayMs)
@@ -789,7 +796,7 @@ class VM {
         return this.createCancellationToken(reason)
       }
       default:
-        throw new Error(`Method "${methodName}" not found on priyoConcurrency`)
+        throw new Error(`Method "${methodName}" not found on prakritiConcurrency`)
     }
   }
 
@@ -1010,6 +1017,11 @@ class VM {
     return queue
   }
 
+  spawnDetachedTask(callable, args) {
+    const group = this.createTaskGroup('prakritiGo')
+    return this.startGroupTask(group, [callable, ...args], 0)
+  }
+
   createCancellationToken(defaultReason = 'Task cancelled', label = '') {
     return {
       __priyoHostObject: true,
@@ -1214,7 +1226,7 @@ class VM {
 
   normalizeQueueConcurrency(value) {
     if (!Number.isInteger(value) || value <= 0) {
-      throw new Error('priyoConcurrency.queue expects a positive integer concurrency limit')
+      throw new Error('prakritiConcurrency.queue expects a positive integer concurrency limit')
     }
     return value
   }

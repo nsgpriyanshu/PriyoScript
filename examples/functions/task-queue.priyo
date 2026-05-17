@@ -1,10 +1,10 @@
 monalisa {
   prakritiWait lisaaTask worker(name, delay) {
-    prakritiPause priyoConcurrency.after(delay, priyoEmpty)
+    prakritiPause prakritiConcurrency.after(delay, priyoEmpty)
     priyoGiveBack name
   }
 
-  priyoKeep queue = priyoConcurrency.queue(2, "downloads")
+  priyoKeep queue = prakritiConcurrency.queue(2, "downloads")
   queue.run(worker, "a", 10)
   queue.run(worker, "b", 10)
   queue.run(worker, "c", 10)
