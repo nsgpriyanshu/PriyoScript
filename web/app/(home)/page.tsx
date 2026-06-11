@@ -67,13 +67,13 @@ export default async function HomePage() {
               v {require('../../../package.json').version}
             </p>
             <h1 className="mt-4 text-3xl font-bold leading-tight sm:mt-5 sm:text-4xl lg:text-6xl">
-              An Emotional
+              Code that
               <br />
-              bytecode interpreted programming language
+              understands you.
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-7 text-fd-muted-foreground sm:mt-5 sm:text-base sm:leading-8 lg:text-lg">
               PriyoScript is a human-first interpreted language with readable keywords, first-class
-              arrays, OOP, modules, and production-focused diagnostics.
+              arrays, OOP, modules, and production-focused diagnostics. Its is built for making programming more intuitive and enjoyable, without sacrificing performance.  
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
