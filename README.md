@@ -146,7 +146,13 @@ For docs-site setup/versioning, see [`web/README.md`](web/README.md).
 This project is developed by:
 
 <div>
-  <a href="https://nsgpriyanshu.github.io">
+  <a href="https://nsgpriyanshu.vercel.app">
     <img src="https://img.shields.io/badge/Developer-nsgpriyanshu-author.svg?color=f10a0a" alt="nsgpriyanshu" />
+  </a>
+</div>
+
+<div>
+  <a href="https://github.com/shaddysm">
+    <img src="https://img.shields.io/badge/Jr_Developer-shaddysm-author.svg?color=5505a6" alt="shaddysm" />
   </a>
 </div>
