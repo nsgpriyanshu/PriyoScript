@@ -153,6 +153,6 @@ This project is developed by:
 
 <div>
   <a href="https://github.com/shaddysm">
-    <img src="https://img.shields.io/badge/Jr_Developer-shaddysm-author.svg?color=5505a6" alt="shaddysm" />
+    <img src="https://img.shields.io/badge/Jr_Developer-shaddysm-author.svg?color=008080" alt="shaddysm" />
   </a>
 </div>
